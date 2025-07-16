@@ -1,0 +1,365 @@
+/* 赛博论命 - 动画效果文件 */
+
+/* 全局动画变量 */
+:root {
+    --animation-speed: 0.3s;
+    --glow-animation: glow 2s ease-in-out infinite alternate;
+}
+
+/* 发光动画 */
+@keyframes glow {
+    from {
+        text-shadow: 0 0 10px var(--glow-color), 0 0 20px var(--glow-color), 0 0 30px var(--glow-color);
+    }
+    to {
+        text-shadow: 0 0 20px var(--glow-color), 0 0 30px var(--glow-color), 0 0 40px var(--glow-color);
+    }
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 滑入动画 */
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromRight {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromTop {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromBottom {
+    0% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 淡入动画 */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 缩放动画 */
+@keyframes scaleIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 旋转动画 */
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* 数据流动画 */
+@keyframes dataFlow {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100vw);
+    }
+}
+
+/* 矩阵雨效果 */
+@keyframes matrixRain {
+    0% {
+        transform: translateY(-100vh);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+}
+
+/* 霓虹灯效果 */
+@keyframes neonGlow {
+    0%, 100% {
+        text-shadow: 
+            0 0 5px var(--primary-color),
+            0 0 10px var(--primary-color),
+            0 0 15px var(--primary-color),
+            0 0 20px var(--primary-color);
+    }
+    50% {
+        text-shadow: 
+            0 0 2px var(--primary-color),
+            0 0 5px var(--primary-color),
+            0 0 8px var(--primary-color),
+            0 0 12px var(--primary-color);
+    }
+}
+
+/* 扫描线效果 */
+@keyframes scanLine {
+    0% {
+        transform: translateY(-100%);
+    }
+    100% {
+        transform: translateY(100vh);
+    }
+}
+
+/* 应用动画的类 */
+.animate-glow {
+    animation: var(--glow-animation);
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+.animate-slide-in-left {
+    animation: slideInFromLeft var(--animation-speed) ease-out;
+}
+
+.animate-slide-in-right {
+    animation: slideInFromRight var(--animation-speed) ease-out;
+}
+
+.animate-slide-in-top {
+    animation: slideInFromTop var(--animation-speed) ease-out;
+}
+
+.animate-slide-in-bottom {
+    animation: slideInFromBottom var(--animation-speed) ease-out;
+}
+
+.animate-fade-in {
+    animation: fadeIn var(--animation-speed) ease-out;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp var(--animation-speed) ease-out;
+}
+
+.animate-scale-in {
+    animation: scaleIn var(--animation-speed) ease-out;
+}
+
+.animate-neon {
+    animation: neonGlow 2s ease-in-out infinite;
+}
+
+/* 页面切换动画 */
+.section-enter {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.section-exit {
+    animation: fadeIn 0.3s ease-out reverse;
+}
+
+/* 表单元素动画 */
+.form-group {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+.form-group:nth-child(3) { animation-delay: 0.3s; }
+.form-group:nth-child(4) { animation-delay: 0.4s; }
+.form-group:nth-child(5) { animation-delay: 0.5s; }
+
+/* 特色卡片动画 */
+.feature-card {
+    opacity: 0;
+    animation: scaleIn 0.6s ease-out forwards;
+}
+
+.feature-card:nth-child(1) { animation-delay: 0.1s; }
+.feature-card:nth-child(2) { animation-delay: 0.2s; }
+.feature-card:nth-child(3) { animation-delay: 0.3s; }
+.feature-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* 导航项动画 */
+.nav-item {
+    opacity: 0;
+    animation: slideInFromTop 0.5s ease-out forwards;
+}
+
+.nav-item:nth-child(1) { animation-delay: 0.1s; }
+.nav-item:nth-child(2) { animation-delay: 0.2s; }
+.nav-item:nth-child(3) { animation-delay: 0.3s; }
+.nav-item:nth-child(4) { animation-delay: 0.4s; }
+.nav-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* 标题动画 */
+.hero-title {
+    opacity: 0;
+    animation: fadeInUp 1s ease-out forwards;
+}
+
+.title-main {
+    animation: neonGlow 3s ease-in-out infinite;
+}
+
+.hero-description {
+    opacity: 0;
+    animation: fadeInUp 1s ease-out 0.5s forwards;
+}
+
+/* 按钮悬停动画 */
+.cyber-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.cyber-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.cyber-button:hover::before {
+    left: 100%;
+}
+
+/* 加载动画增强 */
+.cyber-loader {
+    position: relative;
+}
+
+.cyber-loader::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    border: 2px solid transparent;
+    border-top: 2px solid var(--accent-color);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: rotate 0.8s linear infinite reverse;
+}
+
+/* 结果显示动画 */
+.result-panel {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease-out;
+}
+
+.result-panel.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 数据流效果 */
+.data-stream {
+    position: absolute;
+    width: 2px;
+    height: 20px;
+    background: linear-gradient(to bottom, transparent, var(--primary-color), transparent);
+    animation: dataFlow 3s linear infinite;
+}
+
+/* 扫描线效果 */
+.scan-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+    animation: scanLine 4s linear infinite;
+    opacity: 0.5;
+}
+
+/* 响应式动画调整 */
+@media (max-width: 768px) {
+    .animate-slide-in-left,
+    .animate-slide-in-right {
+        animation: fadeInUp var(--animation-speed) ease-out;
+    }
+    
+    .title-main {
+        animation: neonGlow 2s ease-in-out infinite;
+    }
+}
+
+/* 减少动画的媒体查询 */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

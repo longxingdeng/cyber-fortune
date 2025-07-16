@@ -1,0 +1,6 @@
+{
+    "workbench.editor.autoLockGroups": {
+        "rules.augment": true,
+        "workbench.input.interactive": true
+    }
+}

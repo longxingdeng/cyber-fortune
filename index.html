@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赛博论命 - Cyber Fortune</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 背景粒子效果 -->
+    <div id="particles-js"></div>
+    
+    <!-- 主导航 -->
+    <nav class="cyber-nav">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-text">CYBER</span>
+                <span class="logo-sub">FORTUNE</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#home" class="nav-item active" data-section="home">主页</a>
+                <a href="#zhiming" class="nav-item" data-section="zhiming">赛博知命</a>
+                <a href="#qiming" class="nav-item" data-section="qiming">赛博起名</a>
+                <a href="#ceming" class="nav-item" data-section="ceming">赛博测名</a>
+                <a href="#hehun" class="nav-item" data-section="hehun">赛博合婚</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主页面 -->
+    <main class="main-container">
+        <!-- 首页 -->
+        <section id="home" class="section active">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        <span class="title-main">赛博论命</span>
+                        <span class="title-sub">CYBER FORTUNE</span>
+                    </h1>
+                    <p class="hero-description">
+                        融合传统命理学与现代AI技术，为您提供精准的命运分析
+                    </p>
+                    <div class="hero-features">
+                        <div class="feature-card" data-target="zhiming">
+                            <div class="feature-icon">🔮</div>
+                            <h3>赛博知命</h3>
+                            <p>八字紫薇综合分析</p>
+                        </div>
+                        <div class="feature-card" data-target="qiming">
+                            <div class="feature-icon">✨</div>
+                            <h3>赛博起名</h3>
+                            <p>AI智能起名系统</p>
+                        </div>
+                        <div class="feature-card" data-target="ceming">
+                            <div class="feature-icon">📊</div>
+                            <h3>赛博测名</h3>
+                            <p>姓名综合评分</p>
+                        </div>
+                        <div class="feature-card" data-target="hehun">
+                            <div class="feature-icon">💕</div>
+                            <h3>赛博合婚</h3>
+                            <p>八字合婚匹配</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 赛博知命 -->
+        <section id="zhiming" class="section">
+            <div class="section-header">
+                <h2 class="section-title">赛博知命</h2>
+                <p class="section-subtitle">基于八字与紫薇斗数的综合命理分析</p>
+            </div>
+            <div class="content-container">
+                <div class="input-panel">
+                    <form id="zhiming-form" class="cyber-form">
+                        <div class="form-group">
+                            <label>性别</label>
+                            <div class="radio-group">
+                                <input type="radio" id="male" name="gender" value="男" checked>
+                                <label for="male">男</label>
+                                <input type="radio" id="female" name="gender" value="女">
+                                <label for="female">女</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>出生年份</label>
+                                <select name="birthYear" required>
+                                    <option value="">选择年份</option>
+                                    <!-- 动态生成年份选项 -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生月份</label>
+                                <select name="birthMonth" required>
+                                    <option value="">选择月份</option>
+                                    <!-- 动态生成月份选项 -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生日期</label>
+                                <select name="birthDay" required>
+                                    <option value="">选择日期</option>
+                                    <!-- 动态生成日期选项 -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生时辰</label>
+                                <select name="birthHour" required>
+                                    <option value="">选择时辰</option>
+                                    <option value="23">子时 (23:00-00:59)</option>
+                                    <option value="1">丑时 (01:00-02:59)</option>
+                                    <option value="3">寅时 (03:00-04:59)</option>
+                                    <option value="5">卯时 (05:00-06:59)</option>
+                                    <option value="7">辰时 (07:00-08:59)</option>
+                                    <option value="9">巳时 (09:00-10:59)</option>
+                                    <option value="11">午时 (11:00-12:59)</option>
+                                    <option value="13">未时 (13:00-14:59)</option>
+                                    <option value="15">申时 (15:00-16:59)</option>
+                                    <option value="17">酉时 (17:00-18:59)</option>
+                                    <option value="19">戌时 (19:00-20:59)</option>
+                                    <option value="21">亥时 (21:00-22:59)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>出生省份</label>
+                                <select name="birthProvince" required>
+                                    <option value="">选择省份</option>
+                                    <!-- 动态生成省份选项 -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生城市</label>
+                                <select name="birthCity" required>
+                                    <option value="">选择城市</option>
+                                    <!-- 动态生成城市选项 -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="cyber-button">
+                            <span>开始分析</span>
+                            <div class="button-glow"></div>
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="result-panel" id="zhiming-result" style="display: none;">
+                    <div class="result-content">
+                        <!-- 分析结果将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 赛博起名 -->
+        <section id="qiming" class="section">
+            <div class="section-header">
+                <h2 class="section-title">赛博起名</h2>
+                <p class="section-subtitle">基于八字五行的AI智能起名系统</p>
+            </div>
+            <div class="content-container">
+                <div class="input-panel">
+                    <form id="qiming-form" class="cyber-form">
+                        <div class="form-group">
+                            <label>姓氏</label>
+                            <input type="text" name="surname" placeholder="请输入姓氏" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>性别</label>
+                            <div class="radio-group">
+                                <input type="radio" id="qiming-male" name="gender" value="男" checked>
+                                <label for="qiming-male">男</label>
+                                <input type="radio" id="qiming-female" name="gender" value="女">
+                                <label for="qiming-female">女</label>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>出生年份</label>
+                                <select name="birthYear" required>
+                                    <option value="">选择年份</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生月份</label>
+                                <select name="birthMonth" required>
+                                    <option value="">选择月份</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生日期</label>
+                                <select name="birthDay" required>
+                                    <option value="">选择日期</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生时辰</label>
+                                <select name="birthHour" required>
+                                    <option value="">选择时辰</option>
+                                    <option value="23">子时 (23:00-00:59)</option>
+                                    <option value="1">丑时 (01:00-02:59)</option>
+                                    <option value="3">寅时 (03:00-04:59)</option>
+                                    <option value="5">卯时 (05:00-06:59)</option>
+                                    <option value="7">辰时 (07:00-08:59)</option>
+                                    <option value="9">巳时 (09:00-10:59)</option>
+                                    <option value="11">午时 (11:00-12:59)</option>
+                                    <option value="13">未时 (13:00-14:59)</option>
+                                    <option value="15">申时 (15:00-16:59)</option>
+                                    <option value="17">酉时 (17:00-18:59)</option>
+                                    <option value="19">戌时 (19:00-20:59)</option>
+                                    <option value="21">亥时 (21:00-22:59)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>自定义用字（可选）</label>
+                            <input type="text" name="customChars" placeholder="请输入希望使用的字，用逗号分隔">
+                            <small>例如：文,武,智,勇</small>
+                        </div>
+
+                        <button type="submit" class="cyber-button">
+                            <span>智能起名</span>
+                            <div class="button-glow"></div>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="result-panel" id="qiming-result" style="display: none;">
+                    <div class="result-content">
+                        <!-- 起名结果将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 赛博测名 -->
+        <section id="ceming" class="section">
+            <div class="section-header">
+                <h2 class="section-title">赛博测名</h2>
+                <p class="section-subtitle">姓名综合评分与详细分析</p>
+            </div>
+            <div class="content-container">
+                <div class="input-panel">
+                    <form id="ceming-form" class="cyber-form">
+                        <div class="form-group">
+                            <label>姓名</label>
+                            <input type="text" name="fullName" placeholder="请输入完整姓名" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>性别</label>
+                            <div class="radio-group">
+                                <input type="radio" id="ceming-male" name="gender" value="男" checked>
+                                <label for="ceming-male">男</label>
+                                <input type="radio" id="ceming-female" name="gender" value="女">
+                                <label for="ceming-female">女</label>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>出生年份</label>
+                                <select name="birthYear" required>
+                                    <option value="">选择年份</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生月份</label>
+                                <select name="birthMonth" required>
+                                    <option value="">选择月份</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生日期</label>
+                                <select name="birthDay" required>
+                                    <option value="">选择日期</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生时辰</label>
+                                <select name="birthHour" required>
+                                    <option value="">选择时辰</option>
+                                    <option value="23">子时 (23:00-00:59)</option>
+                                    <option value="1">丑时 (01:00-02:59)</option>
+                                    <option value="3">寅时 (03:00-04:59)</option>
+                                    <option value="5">卯时 (05:00-06:59)</option>
+                                    <option value="7">辰时 (07:00-08:59)</option>
+                                    <option value="9">巳时 (09:00-10:59)</option>
+                                    <option value="11">午时 (11:00-12:59)</option>
+                                    <option value="13">未时 (13:00-14:59)</option>
+                                    <option value="15">申时 (15:00-16:59)</option>
+                                    <option value="17">酉时 (17:00-18:59)</option>
+                                    <option value="19">戌时 (19:00-20:59)</option>
+                                    <option value="21">亥时 (21:00-22:59)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="cyber-button">
+                            <span>开始测名</span>
+                            <div class="button-glow"></div>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="result-panel" id="ceming-result" style="display: none;">
+                    <div class="result-content">
+                        <!-- 测名结果将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 赛博合婚 -->
+        <section id="hehun" class="section">
+            <div class="section-header">
+                <h2 class="section-title">赛博合婚</h2>
+                <p class="section-subtitle">八字合婚匹配度分析</p>
+            </div>
+            <div class="content-container">
+                <div class="input-panel">
+                    <form id="hehun-form" class="cyber-form">
+                        <div class="form-section">
+                            <h3 class="form-section-title">男方信息</h3>
+                            <div class="form-group">
+                                <label>姓名</label>
+                                <input type="text" name="maleName" placeholder="请输入男方姓名" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>出生年份</label>
+                                    <select name="maleBirthYear" required>
+                                        <option value="">选择年份</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>出生月份</label>
+                                    <select name="maleBirthMonth" required>
+                                        <option value="">选择月份</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>出生日期</label>
+                                    <select name="maleBirthDay" required>
+                                        <option value="">选择日期</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>出生时辰</label>
+                                    <select name="maleBirthHour" required>
+                                        <option value="">选择时辰</option>
+                                        <option value="23">子时 (23:00-00:59)</option>
+                                        <option value="1">丑时 (01:00-02:59)</option>
+                                        <option value="3">寅时 (03:00-04:59)</option>
+                                        <option value="5">卯时 (05:00-06:59)</option>
+                                        <option value="7">辰时 (07:00-08:59)</option>
+                                        <option value="9">巳时 (09:00-10:59)</option>
+                                        <option value="11">午时 (11:00-12:59)</option>
+                                        <option value="13">未时 (13:00-14:59)</option>
+                                        <option value="15">申时 (15:00-16:59)</option>
+                                        <option value="17">酉时 (17:00-18:59)</option>
+                                        <option value="19">戌时 (19:00-20:59)</option>
+                                        <option value="21">亥时 (21:00-22:59)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="form-section-title">女方信息</h3>
+                            <div class="form-group">
+                                <label>姓名</label>
+                                <input type="text" name="femaleName" placeholder="请输入女方姓名" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>出生年份</label>
+                                    <select name="femaleBirthYear" required>
+                                        <option value="">选择年份</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>出生月份</label>
+                                    <select name="femaleBirthMonth" required>
+                                        <option value="">选择月份</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>出生日期</label>
+                                    <select name="femaleBirthDay" required>
+                                        <option value="">选择日期</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>出生时辰</label>
+                                    <select name="femaleBirthHour" required>
+                                        <option value="">选择时辰</option>
+                                        <option value="23">子时 (23:00-00:59)</option>
+                                        <option value="1">丑时 (01:00-02:59)</option>
+                                        <option value="3">寅时 (03:00-04:59)</option>
+                                        <option value="5">卯时 (05:00-06:59)</option>
+                                        <option value="7">辰时 (07:00-08:59)</option>
+                                        <option value="9">巳时 (09:00-10:59)</option>
+                                        <option value="11">午时 (11:00-12:59)</option>
+                                        <option value="13">未时 (13:00-14:59)</option>
+                                        <option value="15">申时 (15:00-16:59)</option>
+                                        <option value="17">酉时 (17:00-18:59)</option>
+                                        <option value="19">戌时 (19:00-20:59)</option>
+                                        <option value="21">亥时 (21:00-22:59)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="cyber-button">
+                            <span>开始合婚</span>
+                            <div class="button-glow"></div>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="result-panel" id="hehun-result" style="display: none;">
+                    <div class="result-content">
+                        <!-- 合婚结果将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 加载动画 -->
+    <div id="loading" class="loading-overlay">
+        <div class="loading-content">
+            <div class="cyber-loader"></div>
+            <p>正在分析中...</p>
+        </div>
+    </div>
+
+    <!-- 脚本文件 -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="js/particles-config.js"></script>
+    <script src="js/bazi-calculator.js"></script>
+    <script src="js/ziwei-calculator.js"></script>
+    <script src="js/name-calculator.js"></script>
+    <script src="js/marriage-calculator.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
