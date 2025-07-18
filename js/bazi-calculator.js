@@ -429,7 +429,12 @@ class BaziCalculator {
             "澳门特别行政区": { "澳门": { longitude: 113.5 } },
             "台湾省": {
                 "台北市": { longitude: 121.5 },
-                "高雄市": { longitude: 120.3 }
+                "高雄市": { longitude: 120.3 },
+                "新北市": { longitude: 121.3 },
+                "基隆市": { longitude: 121.7 },
+                "新竹市": { longitude: 121.0 },
+                "台中市": { longitude: 120.7 },
+                "台南市": { longitude: 120.2 }
             }
         };
 
