@@ -262,6 +262,111 @@ body {
     gap: 1.5rem;
 }
 
+/* 时间输入组件样式 */
+.time-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.time-input-group select {
+    flex: 1;
+    min-width: 80px;
+}
+
+.time-hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: var(--primary-color);
+    opacity: 0.7;
+    font-style: italic;
+}
+
+/* 真太阳时修正信息样式 */
+.true-solar-time-section {
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.true-solar-time-section h4 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.time-correction-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.time-row:last-child {
+    border-bottom: none;
+}
+
+.time-label {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    min-width: 80px;
+}
+
+.time-value {
+    color: var(--primary-color);
+    font-family: 'Courier New', monospace;
+}
+
+.time-value.positive {
+    color: #00ff88;
+}
+
+.time-value.negative {
+    color: #ff6b6b;
+}
+
+.correction-details {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.correction-details small {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+}
+
+/* 计算方法提示样式 */
+.calculation-method-warning {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.calculation-method-info {
+    background: rgba(40, 167, 69, 0.1);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    color: #28a745;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
 .form-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));

@@ -177,8 +177,8 @@ class CyberFortune {
             '香港特别行政区', '澳门特别行政区', '台湾省'
         ];
 
-        const provinceSelects = document.querySelectorAll('select[name="birthProvince"]');
-        
+        const provinceSelects = document.querySelectorAll('select[name="birthProvince"], select[name="maleBirthProvince"], select[name="femaleBirthProvince"]');
+
         provinceSelects.forEach(select => {
             provinces.forEach(province => {
                 const option = document.createElement('option');
@@ -192,7 +192,7 @@ class CyberFortune {
     // 设置事件监听器
     setupEventListeners() {
         // 省份变化时更新城市
-        const provinceSelects = document.querySelectorAll('select[name="birthProvince"]');
+        const provinceSelects = document.querySelectorAll('select[name="birthProvince"], select[name="maleBirthProvince"], select[name="femaleBirthProvince"]');
         provinceSelects.forEach(select => {
             select.addEventListener('change', (e) => {
                 this.updateCities(e.target.value, e.target.closest('form'));
@@ -218,29 +218,55 @@ class CyberFortune {
 
     // 更新城市选择框
     updateCities(province, form) {
-        const citySelect = form.querySelector('select[name="birthCity"]');
+        // 查找对应的城市选择框
+        let citySelect = form.querySelector('select[name="birthCity"]');
+
+        // 如果没找到，可能是合婚表单中的男方或女方城市选择框
+        if (!citySelect) {
+            const provinceSelect = form.querySelector(`select[value="${province}"]`) ||
+                                 form.querySelector('select:focus') ||
+                                 event.target;
+
+            if (provinceSelect) {
+                const provinceName = provinceSelect.name;
+                if (provinceName === 'maleBirthProvince') {
+                    citySelect = form.querySelector('select[name="maleBirthCity"]');
+                } else if (provinceName === 'femaleBirthProvince') {
+                    citySelect = form.querySelector('select[name="femaleBirthCity"]');
+                }
+            }
+        }
+
         if (!citySelect) return;
 
         // 清空现有选项
         citySelect.innerHTML = '<option value="">选择城市</option>';
 
-        // 简化的城市数据
-        const cities = {
-            '北京市': ['东城区', '西城区', '朝阳区', '丰台区', '石景山区', '海淀区'],
-            '上海市': ['黄浦区', '徐汇区', '长宁区', '静安区', '普陀区', '虹口区'],
-            '广东省': ['广州市', '深圳市', '珠海市', '汕头市', '佛山市', '韶关市'],
-            '江苏省': ['南京市', '无锡市', '徐州市', '常州市', '苏州市', '南通市'],
-            '浙江省': ['杭州市', '宁波市', '温州市', '嘉兴市', '湖州市', '绍兴市']
-        };
+        // 从八字计算器获取城市数据
+        const cities = this.getCitiesForProvince(province);
 
-        const provinceCities = cities[province] || ['市区'];
-        
-        provinceCities.forEach(city => {
+        cities.forEach(city => {
             const option = document.createElement('option');
             option.value = city;
             option.textContent = city;
             citySelect.appendChild(option);
         });
+    }
+
+    // 获取指定省份的城市列表
+    getCitiesForProvince(province) {
+        // 使用八字计算器的经度数据库
+        if (!this.baziCalculator || !this.baziCalculator.locationData) {
+            return ['市区']; // 备用选项
+        }
+
+        const locationData = this.baziCalculator.locationData;
+
+        if (locationData[province]) {
+            return Object.keys(locationData[province]);
+        }
+
+        return ['市区']; // 备用选项
     }
 
     // 更新日期选择框
@@ -281,6 +307,7 @@ class CyberFortune {
             month: parseInt(formData.get('birthMonth')),
             day: parseInt(formData.get('birthDay')),
             hour: parseInt(formData.get('birthHour')),
+            minute: parseInt(formData.get('birthMinute')) || 0,
             birthProvince: formData.get('birthProvince'),
             birthCity: formData.get('birthCity')
         };
@@ -314,8 +341,8 @@ class CyberFortune {
 
     // 验证出生数据
     validateBirthData(data) {
-        return data.gender && data.year && data.month && data.day && 
-               data.hour !== null && data.birthProvince && data.birthCity;
+        return data.gender && data.year && data.month && data.day &&
+               data.hour !== null && data.minute !== null && data.birthProvince && data.birthCity;
     }
 
     // 显示加载动画
@@ -360,14 +387,18 @@ class CyberFortune {
 
     // 构建赛博知命结果HTML
     buildZhimingResultHTML(birthData, baziResult, prompt) {
-        const { gender, year, month, day, hour, birthProvince, birthCity } = birthData;
+        const { gender, year, month, day, hour, minute, birthProvince, birthCity } = birthData;
         const { yearPillar, monthPillar, dayPillar, hourPillar, yearTenGod, monthTenGod, hourTenGod, bigLuck, wuxingInfo, naYinInfo } = baziResult;
 
         return `
             <div class="result-header">
                 <h3 class="result-title">命理分析报告</h3>
                 <div class="result-info">
-                    <span>${gender} | ${year}年${month}月${day}日 | ${birthProvince} ${birthCity}</span>
+                    <span>${gender} | ${year}年${month}月${day}日 ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} | ${birthProvince} ${birthCity}</span>
+                    ${baziResult.calculationMethod === 'backup' ?
+                        '<div class="calculation-method-warning">⚠️ 当前使用简化计算方法，建议加载lunisolar库以获得更精确的结果</div>' :
+                        '<div class="calculation-method-info">✅ 使用lunisolar库精确计算</div>'
+                    }
                 </div>
             </div>
 
@@ -416,6 +447,42 @@ class CyberFortune {
                     </div>
                 </div>
             </div>
+
+            ${baziResult.trueSolarTimeInfo ? `
+            <div class="true-solar-time-section">
+                <h4>真太阳时修正</h4>
+                <div class="time-correction-info">
+                    <div class="time-row">
+                        <span class="time-label">原始时间：</span>
+                        <span class="time-value">${baziResult.trueSolarTimeInfo.originalTime}</span>
+                    </div>
+                    <div class="time-row">
+                        <span class="time-label">修正时间：</span>
+                        <span class="time-value">${baziResult.trueSolarTimeInfo.correctedTime}</span>
+                    </div>
+                    <div class="time-row">
+                        <span class="time-label">出生地点：</span>
+                        <span class="time-value">${baziResult.trueSolarTimeInfo.location}</span>
+                    </div>
+                    <div class="time-row">
+                        <span class="time-label">经度：</span>
+                        <span class="time-value">${baziResult.trueSolarTimeInfo.longitude.toFixed(1)}°E</span>
+                    </div>
+                    <div class="time-row">
+                        <span class="time-label">总修正：</span>
+                        <span class="time-value ${baziResult.trueSolarTimeInfo.correction >= 0 ? 'positive' : 'negative'}">
+                            ${baziResult.trueSolarTimeInfo.correction >= 0 ? '+' : ''}${baziResult.trueSolarTimeInfo.correction.toFixed(1)}分钟
+                        </span>
+                    </div>
+                    <div class="correction-details">
+                        <small>
+                            经度修正：${baziResult.trueSolarTimeInfo.longitudeCorrection >= 0 ? '+' : ''}${baziResult.trueSolarTimeInfo.longitudeCorrection.toFixed(1)}分钟 |
+                            时间方程：${baziResult.trueSolarTimeInfo.timeEquation >= 0 ? '+' : ''}${baziResult.trueSolarTimeInfo.timeEquation.toFixed(1)}分钟
+                        </small>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
 
             <div class="dayun-section">
                 <h4>大运信息</h4>
@@ -610,6 +677,9 @@ class CyberFortune {
                 month: parseInt(formData.get('maleBirthMonth')),
                 day: parseInt(formData.get('maleBirthDay')),
                 hour: parseInt(formData.get('maleBirthHour')),
+                minute: parseInt(formData.get('maleBirthMinute')) || 0,
+                birthProvince: formData.get('maleBirthProvince'),
+                birthCity: formData.get('maleBirthCity'),
                 gender: '男'
             },
             female: {
@@ -618,6 +688,9 @@ class CyberFortune {
                 month: parseInt(formData.get('femaleBirthMonth')),
                 day: parseInt(formData.get('femaleBirthDay')),
                 hour: parseInt(formData.get('femaleBirthHour')),
+                minute: parseInt(formData.get('femaleBirthMinute')) || 0,
+                birthProvince: formData.get('femaleBirthProvince'),
+                birthCity: formData.get('femaleBirthCity'),
                 gender: '女'
             }
         };
@@ -664,7 +737,9 @@ class CyberFortune {
     validateHehunData(data) {
         const { male, female } = data;
         return male.name && male.year && male.month && male.day && male.hour !== null &&
-               female.name && female.year && female.month && female.day && female.hour !== null;
+               male.minute !== null && male.birthProvince && male.birthCity &&
+               female.name && female.year && female.month && female.day && female.hour !== null &&
+               female.minute !== null && female.birthProvince && female.birthCity;
     }
 
     // 显示起名结果

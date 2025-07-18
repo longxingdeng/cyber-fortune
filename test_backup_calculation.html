@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>备用计算方法测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .test-section {
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-result {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        button {
+            background: #00ffff;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #00cccc;
+        }
+        .error {
+            color: #ff6b6b;
+        }
+        .success {
+            color: #00ff88;
+        }
+        .warning {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <h1>备用计算方法测试</h1>
+    
+    <div class="test-section">
+        <h2>测试说明</h2>
+        <p>此页面故意不加载lunisolar库，用于测试备用计算方法是否正常工作。</p>
+        <button onclick="testBackupCalculation()">测试备用计算</button>
+        <button onclick="testLibraryStatus()">检查库状态</button>
+    </div>
+
+    <div id="results"></div>
+
+    <!-- 故意不加载lunisolar库 -->
+    <script src="js/bazi-calculator.js"></script>
+    <script>
+        const resultsDiv = document.getElementById('results');
+
+        function addResult(title, content, type = 'success') {
+            const div = document.createElement('div');
+            div.className = 'test-result';
+            div.innerHTML = `
+                <h3 class="${type}">${title}</h3>
+                <pre>${content}</pre>
+            `;
+            resultsDiv.appendChild(div);
+        }
+
+        function testLibraryStatus() {
+            try {
+                const calculator = new BaziCalculator();
+                const status = calculator.checkLibraryStatus();
+                
+                const content = `
+lunisolar库状态: ${status.lunisolarAvailable ? '已加载' : '未加载'}
+版本: ${status.version || '无'}
+功能支持:
+- 精确计算: ${status.features.accurateCalculation ? '支持' : '不支持'}
+- 农历转换: ${status.features.lunarConversion ? '支持' : '不支持'}
+- 节气计算: ${status.features.solarTerms ? '支持' : '不支持'}
+- 地支藏干: ${status.features.hiddenStems ? '支持' : '不支持'}
+                `;
+                
+                addResult('库状态检查', content, status.lunisolarAvailable ? 'success' : 'warning');
+            } catch (error) {
+                addResult('库状态检查失败', error.message, 'error');
+            }
+        }
+
+        function testBackupCalculation() {
+            try {
+                const calculator = new BaziCalculator();
+                
+                const birthData = {
+                    year: 1990,
+                    month: 6,
+                    day: 15,
+                    hour: 12,
+                    minute: 30,
+                    gender: '男',
+                    birthProvince: '北京市',
+                    birthCity: '北京市'
+                };
+
+                const result = calculator.calculate(birthData);
+                
+                const content = `
+计算方法: ${result.calculationMethod}
+八字: ${result.fullBazi}
+年柱: ${result.yearPillar} (${result.yearTenGod})
+月柱: ${result.monthPillar} (${result.monthTenGod})
+日柱: ${result.dayPillar} (日元)
+时柱: ${result.hourPillar} (${result.hourTenGod})
+
+五行信息:
+年: ${result.wuxingInfo.year.tianGan}${result.wuxingInfo.year.diZhi}
+月: ${result.wuxingInfo.month.tianGan}${result.wuxingInfo.month.diZhi}
+日: ${result.wuxingInfo.day.tianGan}${result.wuxingInfo.day.diZhi}
+时: ${result.wuxingInfo.hour.tianGan}${result.wuxingInfo.hour.diZhi}
+
+纳音:
+年: ${result.naYinInfo.year}
+月: ${result.naYinInfo.month}
+日: ${result.naYinInfo.day}
+时: ${result.naYinInfo.hour}
+
+真太阳时修正:
+出生地: ${result.trueSolarTimeInfo.location}
+经度: ${result.trueSolarTimeInfo.longitude}°E
+修正: ${result.trueSolarTimeInfo.correction}分钟
+
+农历信息: ${result.lunarInfo.date}
+节气信息: ${result.solarTerm}
+                `;
+                
+                addResult('备用计算测试成功', content, result.calculationMethod === 'backup' ? 'warning' : 'success');
+            } catch (error) {
+                addResult('备用计算测试失败', error.message, 'error');
+            }
+        }
+
+        // 页面加载时自动检查状态
+        window.onload = function() {
+            addResult('系统初始化', '备用计算方法测试页面已加载');
+            testLibraryStatus();
+        };
+    </script>
+</body>
+</html>

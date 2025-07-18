@@ -110,22 +110,52 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>出生时辰</label>
-                                <select name="birthHour" required>
-                                    <option value="">选择时辰</option>
-                                    <option value="23">子时 (23:00-00:59)</option>
-                                    <option value="1">丑时 (01:00-02:59)</option>
-                                    <option value="3">寅时 (03:00-04:59)</option>
-                                    <option value="5">卯时 (05:00-06:59)</option>
-                                    <option value="7">辰时 (07:00-08:59)</option>
-                                    <option value="9">巳时 (09:00-10:59)</option>
-                                    <option value="11">午时 (11:00-12:59)</option>
-                                    <option value="13">未时 (13:00-14:59)</option>
-                                    <option value="15">申时 (15:00-16:59)</option>
-                                    <option value="17">酉时 (17:00-18:59)</option>
-                                    <option value="19">戌时 (19:00-20:59)</option>
-                                    <option value="21">亥时 (21:00-22:59)</option>
-                                </select>
+                                <label>出生时间</label>
+                                <div class="time-input-group">
+                                    <select name="birthHour" required>
+                                        <option value="">时</option>
+                                        <option value="0">00时</option>
+                                        <option value="1">01时</option>
+                                        <option value="2">02时</option>
+                                        <option value="3">03时</option>
+                                        <option value="4">04时</option>
+                                        <option value="5">05时</option>
+                                        <option value="6">06时</option>
+                                        <option value="7">07时</option>
+                                        <option value="8">08时</option>
+                                        <option value="9">09时</option>
+                                        <option value="10">10时</option>
+                                        <option value="11">11时</option>
+                                        <option value="12">12时</option>
+                                        <option value="13">13时</option>
+                                        <option value="14">14时</option>
+                                        <option value="15">15时</option>
+                                        <option value="16">16时</option>
+                                        <option value="17">17时</option>
+                                        <option value="18">18时</option>
+                                        <option value="19">19时</option>
+                                        <option value="20">20时</option>
+                                        <option value="21">21时</option>
+                                        <option value="22">22时</option>
+                                        <option value="23">23时</option>
+                                    </select>
+                                    <select name="birthMinute" required>
+                                        <option value="">分</option>
+                                        <option value="0">00分</option>
+                                        <option value="5">05分</option>
+                                        <option value="10">10分</option>
+                                        <option value="15">15分</option>
+                                        <option value="20">20分</option>
+                                        <option value="25">25分</option>
+                                        <option value="30">30分</option>
+                                        <option value="35">35分</option>
+                                        <option value="40">40分</option>
+                                        <option value="45">45分</option>
+                                        <option value="50">50分</option>
+                                        <option value="55">55分</option>
+                                    </select>
+                                </div>
+                                <small class="time-hint">请选择准确的出生时间，用于真太阳时修正</small>
                             </div>
                         </div>
                         
@@ -205,22 +235,52 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>出生时辰</label>
-                                <select name="birthHour" required>
-                                    <option value="">选择时辰</option>
-                                    <option value="23">子时 (23:00-00:59)</option>
-                                    <option value="1">丑时 (01:00-02:59)</option>
-                                    <option value="3">寅时 (03:00-04:59)</option>
-                                    <option value="5">卯时 (05:00-06:59)</option>
-                                    <option value="7">辰时 (07:00-08:59)</option>
-                                    <option value="9">巳时 (09:00-10:59)</option>
-                                    <option value="11">午时 (11:00-12:59)</option>
-                                    <option value="13">未时 (13:00-14:59)</option>
-                                    <option value="15">申时 (15:00-16:59)</option>
-                                    <option value="17">酉时 (17:00-18:59)</option>
-                                    <option value="19">戌时 (19:00-20:59)</option>
-                                    <option value="21">亥时 (21:00-22:59)</option>
-                                </select>
+                                <label>出生时间</label>
+                                <div class="time-input-group">
+                                    <select name="birthHour" required>
+                                        <option value="">时</option>
+                                        <option value="0">00时</option>
+                                        <option value="1">01时</option>
+                                        <option value="2">02时</option>
+                                        <option value="3">03时</option>
+                                        <option value="4">04时</option>
+                                        <option value="5">05时</option>
+                                        <option value="6">06时</option>
+                                        <option value="7">07时</option>
+                                        <option value="8">08时</option>
+                                        <option value="9">09时</option>
+                                        <option value="10">10时</option>
+                                        <option value="11">11时</option>
+                                        <option value="12">12时</option>
+                                        <option value="13">13时</option>
+                                        <option value="14">14时</option>
+                                        <option value="15">15时</option>
+                                        <option value="16">16时</option>
+                                        <option value="17">17时</option>
+                                        <option value="18">18时</option>
+                                        <option value="19">19时</option>
+                                        <option value="20">20时</option>
+                                        <option value="21">21时</option>
+                                        <option value="22">22时</option>
+                                        <option value="23">23时</option>
+                                    </select>
+                                    <select name="birthMinute" required>
+                                        <option value="">分</option>
+                                        <option value="0">00分</option>
+                                        <option value="5">05分</option>
+                                        <option value="10">10分</option>
+                                        <option value="15">15分</option>
+                                        <option value="20">20分</option>
+                                        <option value="25">25分</option>
+                                        <option value="30">30分</option>
+                                        <option value="35">35分</option>
+                                        <option value="40">40分</option>
+                                        <option value="45">45分</option>
+                                        <option value="50">50分</option>
+                                        <option value="55">55分</option>
+                                    </select>
+                                </div>
+                                <small class="time-hint">请选择准确的出生时间，用于真太阳时修正</small>
                             </div>
                         </div>
 
@@ -289,22 +349,52 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>出生时辰</label>
-                                <select name="birthHour" required>
-                                    <option value="">选择时辰</option>
-                                    <option value="23">子时 (23:00-00:59)</option>
-                                    <option value="1">丑时 (01:00-02:59)</option>
-                                    <option value="3">寅时 (03:00-04:59)</option>
-                                    <option value="5">卯时 (05:00-06:59)</option>
-                                    <option value="7">辰时 (07:00-08:59)</option>
-                                    <option value="9">巳时 (09:00-10:59)</option>
-                                    <option value="11">午时 (11:00-12:59)</option>
-                                    <option value="13">未时 (13:00-14:59)</option>
-                                    <option value="15">申时 (15:00-16:59)</option>
-                                    <option value="17">酉时 (17:00-18:59)</option>
-                                    <option value="19">戌时 (19:00-20:59)</option>
-                                    <option value="21">亥时 (21:00-22:59)</option>
-                                </select>
+                                <label>出生时间</label>
+                                <div class="time-input-group">
+                                    <select name="birthHour" required>
+                                        <option value="">时</option>
+                                        <option value="0">00时</option>
+                                        <option value="1">01时</option>
+                                        <option value="2">02时</option>
+                                        <option value="3">03时</option>
+                                        <option value="4">04时</option>
+                                        <option value="5">05时</option>
+                                        <option value="6">06时</option>
+                                        <option value="7">07时</option>
+                                        <option value="8">08时</option>
+                                        <option value="9">09时</option>
+                                        <option value="10">10时</option>
+                                        <option value="11">11时</option>
+                                        <option value="12">12时</option>
+                                        <option value="13">13时</option>
+                                        <option value="14">14时</option>
+                                        <option value="15">15时</option>
+                                        <option value="16">16时</option>
+                                        <option value="17">17时</option>
+                                        <option value="18">18时</option>
+                                        <option value="19">19时</option>
+                                        <option value="20">20时</option>
+                                        <option value="21">21时</option>
+                                        <option value="22">22时</option>
+                                        <option value="23">23时</option>
+                                    </select>
+                                    <select name="birthMinute" required>
+                                        <option value="">分</option>
+                                        <option value="0">00分</option>
+                                        <option value="5">05分</option>
+                                        <option value="10">10分</option>
+                                        <option value="15">15分</option>
+                                        <option value="20">20分</option>
+                                        <option value="25">25分</option>
+                                        <option value="30">30分</option>
+                                        <option value="35">35分</option>
+                                        <option value="40">40分</option>
+                                        <option value="45">45分</option>
+                                        <option value="50">50分</option>
+                                        <option value="55">55分</option>
+                                    </select>
+                                </div>
+                                <small class="time-hint">请选择准确的出生时间，用于真太阳时修正</small>
                             </div>
                         </div>
 
@@ -359,21 +449,68 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>出生时辰</label>
-                                    <select name="maleBirthHour" required>
-                                        <option value="">选择时辰</option>
-                                        <option value="23">子时 (23:00-00:59)</option>
-                                        <option value="1">丑时 (01:00-02:59)</option>
-                                        <option value="3">寅时 (03:00-04:59)</option>
-                                        <option value="5">卯时 (05:00-06:59)</option>
-                                        <option value="7">辰时 (07:00-08:59)</option>
-                                        <option value="9">巳时 (09:00-10:59)</option>
-                                        <option value="11">午时 (11:00-12:59)</option>
-                                        <option value="13">未时 (13:00-14:59)</option>
-                                        <option value="15">申时 (15:00-16:59)</option>
-                                        <option value="17">酉时 (17:00-18:59)</option>
-                                        <option value="19">戌时 (19:00-20:59)</option>
-                                        <option value="21">亥时 (21:00-22:59)</option>
+                                    <label>出生时间</label>
+                                    <div class="time-input-group">
+                                        <select name="maleBirthHour" required>
+                                            <option value="">时</option>
+                                            <option value="0">00时</option>
+                                            <option value="1">01时</option>
+                                            <option value="2">02时</option>
+                                            <option value="3">03时</option>
+                                            <option value="4">04时</option>
+                                            <option value="5">05时</option>
+                                            <option value="6">06时</option>
+                                            <option value="7">07时</option>
+                                            <option value="8">08时</option>
+                                            <option value="9">09时</option>
+                                            <option value="10">10时</option>
+                                            <option value="11">11时</option>
+                                            <option value="12">12时</option>
+                                            <option value="13">13时</option>
+                                            <option value="14">14时</option>
+                                            <option value="15">15时</option>
+                                            <option value="16">16时</option>
+                                            <option value="17">17时</option>
+                                            <option value="18">18时</option>
+                                            <option value="19">19时</option>
+                                            <option value="20">20时</option>
+                                            <option value="21">21时</option>
+                                            <option value="22">22时</option>
+                                            <option value="23">23时</option>
+                                        </select>
+                                        <select name="maleBirthMinute" required>
+                                            <option value="">分</option>
+                                            <option value="0">00分</option>
+                                            <option value="5">05分</option>
+                                            <option value="10">10分</option>
+                                            <option value="15">15分</option>
+                                            <option value="20">20分</option>
+                                            <option value="25">25分</option>
+                                            <option value="30">30分</option>
+                                            <option value="35">35分</option>
+                                            <option value="40">40分</option>
+                                            <option value="45">45分</option>
+                                            <option value="50">50分</option>
+                                            <option value="55">55分</option>
+                                        </select>
+                                    </div>
+                                    <small class="time-hint">请选择准确的出生时间，用于真太阳时修正</small>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>出生省份</label>
+                                    <select name="maleBirthProvince" required>
+                                        <option value="">选择省份</option>
+                                        <!-- 动态生成省份选项 -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>出生城市</label>
+                                    <select name="maleBirthCity" required>
+                                        <option value="">选择城市</option>
+                                        <!-- 动态生成城市选项 -->
                                     </select>
                                 </div>
                             </div>
@@ -406,21 +543,68 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>出生时辰</label>
-                                    <select name="femaleBirthHour" required>
-                                        <option value="">选择时辰</option>
-                                        <option value="23">子时 (23:00-00:59)</option>
-                                        <option value="1">丑时 (01:00-02:59)</option>
-                                        <option value="3">寅时 (03:00-04:59)</option>
-                                        <option value="5">卯时 (05:00-06:59)</option>
-                                        <option value="7">辰时 (07:00-08:59)</option>
-                                        <option value="9">巳时 (09:00-10:59)</option>
-                                        <option value="11">午时 (11:00-12:59)</option>
-                                        <option value="13">未时 (13:00-14:59)</option>
-                                        <option value="15">申时 (15:00-16:59)</option>
-                                        <option value="17">酉时 (17:00-18:59)</option>
-                                        <option value="19">戌时 (19:00-20:59)</option>
-                                        <option value="21">亥时 (21:00-22:59)</option>
+                                    <label>出生时间</label>
+                                    <div class="time-input-group">
+                                        <select name="femaleBirthHour" required>
+                                            <option value="">时</option>
+                                            <option value="0">00时</option>
+                                            <option value="1">01时</option>
+                                            <option value="2">02时</option>
+                                            <option value="3">03时</option>
+                                            <option value="4">04时</option>
+                                            <option value="5">05时</option>
+                                            <option value="6">06时</option>
+                                            <option value="7">07时</option>
+                                            <option value="8">08时</option>
+                                            <option value="9">09时</option>
+                                            <option value="10">10时</option>
+                                            <option value="11">11时</option>
+                                            <option value="12">12时</option>
+                                            <option value="13">13时</option>
+                                            <option value="14">14时</option>
+                                            <option value="15">15时</option>
+                                            <option value="16">16时</option>
+                                            <option value="17">17时</option>
+                                            <option value="18">18时</option>
+                                            <option value="19">19时</option>
+                                            <option value="20">20时</option>
+                                            <option value="21">21时</option>
+                                            <option value="22">22时</option>
+                                            <option value="23">23时</option>
+                                        </select>
+                                        <select name="femaleBirthMinute" required>
+                                            <option value="">分</option>
+                                            <option value="0">00分</option>
+                                            <option value="5">05分</option>
+                                            <option value="10">10分</option>
+                                            <option value="15">15分</option>
+                                            <option value="20">20分</option>
+                                            <option value="25">25分</option>
+                                            <option value="30">30分</option>
+                                            <option value="35">35分</option>
+                                            <option value="40">40分</option>
+                                            <option value="45">45分</option>
+                                            <option value="50">50分</option>
+                                            <option value="55">55分</option>
+                                        </select>
+                                    </div>
+                                    <small class="time-hint">请选择准确的出生时间，用于真太阳时修正</small>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>出生省份</label>
+                                    <select name="femaleBirthProvince" required>
+                                        <option value="">选择省份</option>
+                                        <!-- 动态生成省份选项 -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>出生城市</label>
+                                    <select name="femaleBirthCity" required>
+                                        <option value="">选择城市</option>
+                                        <!-- 动态生成城市选项 -->
                                     </select>
                                 </div>
                             </div>

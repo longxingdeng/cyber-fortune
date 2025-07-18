@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>城市数据测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .test-section {
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .province-section {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .cities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .city-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        select {
+            background: #2a2a4a;
+            color: white;
+            border: 1px solid #00ffff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        button {
+            background: #00ffff;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #00cccc;
+        }
+        .stats {
+            background: rgba(0, 255, 0, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>城市数据完整性测试</h1>
+    
+    <div class="test-section">
+        <h2>测试控制</h2>
+        <button onclick="showAllCities()">显示所有城市数据</button>
+        <button onclick="testProvinceSelection()">测试省份选择</button>
+        <button onclick="showStatistics()">显示统计信息</button>
+    </div>
+
+    <div class="test-section">
+        <h2>省份选择测试</h2>
+        <select id="provinceSelect" onchange="updateCitiesTest()">
+            <option value="">选择省份</option>
+        </select>
+        <select id="citySelect">
+            <option value="">选择城市</option>
+        </select>
+    </div>
+
+    <div id="results"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/lunisolar@2.5.1/dist/lunisolar.min.js"></script>
+    <script src="js/bazi-calculator.js"></script>
+    <script>
+        const resultsDiv = document.getElementById('results');
+        let calculator;
+
+        function addResult(title, content) {
+            const div = document.createElement('div');
+            div.className = 'test-section';
+            div.innerHTML = `
+                <h3>${title}</h3>
+                <div>${content}</div>
+            `;
+            resultsDiv.appendChild(div);
+        }
+
+        function showAllCities() {
+            resultsDiv.innerHTML = '';
+            
+            if (!calculator) {
+                calculator = new BaziCalculator();
+            }
+
+            const locationData = calculator.locationData;
+            let totalCities = 0;
+            let content = '';
+
+            Object.keys(locationData).forEach(province => {
+                const cities = Object.keys(locationData[province]);
+                totalCities += cities.length;
+                
+                content += `
+                    <div class="province-section">
+                        <h4>${province} (${cities.length}个城市)</h4>
+                        <div class="cities-grid">
+                            ${cities.map(city => `
+                                <div class="city-item">${city}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            addResult(`所有城市数据 (共${Object.keys(locationData).length}个省份，${totalCities}个城市)`, content);
+        }
+
+        function showStatistics() {
+            if (!calculator) {
+                calculator = new BaziCalculator();
+            }
+
+            const locationData = calculator.locationData;
+            let stats = {};
+            let totalCities = 0;
+
+            Object.keys(locationData).forEach(province => {
+                const cityCount = Object.keys(locationData[province]).length;
+                stats[province] = cityCount;
+                totalCities += cityCount;
+            });
+
+            // 按城市数量排序
+            const sortedStats = Object.entries(stats).sort((a, b) => b[1] - a[1]);
+
+            const content = `
+                <div class="stats">
+                    <h4>统计概览</h4>
+                    <p>总省份数：${Object.keys(locationData).length}</p>
+                    <p>总城市数：${totalCities}</p>
+                    <p>平均每省城市数：${(totalCities / Object.keys(locationData).length).toFixed(1)}</p>
+                </div>
+                <h4>各省城市数量排行</h4>
+                <div class="cities-grid">
+                    ${sortedStats.map(([province, count]) => `
+                        <div class="city-item">${province}: ${count}个</div>
+                    `).join('')}
+                </div>
+            `;
+
+            addResult('统计信息', content);
+        }
+
+        function testProvinceSelection() {
+            const provinceSelect = document.getElementById('provinceSelect');
+            provinceSelect.innerHTML = '<option value="">选择省份</option>';
+
+            if (!calculator) {
+                calculator = new BaziCalculator();
+            }
+
+            const provinces = Object.keys(calculator.locationData);
+            provinces.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province;
+                option.textContent = province;
+                provinceSelect.appendChild(option);
+            });
+
+            addResult('省份选择测试', `已加载${provinces.length}个省份到选择框中`);
+        }
+
+        function updateCitiesTest() {
+            const provinceSelect = document.getElementById('provinceSelect');
+            const citySelect = document.getElementById('citySelect');
+            const selectedProvince = provinceSelect.value;
+
+            citySelect.innerHTML = '<option value="">选择城市</option>';
+
+            if (!selectedProvince || !calculator) return;
+
+            const cities = Object.keys(calculator.locationData[selectedProvince] || {});
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+
+            console.log(`${selectedProvince} 有 ${cities.length} 个城市`);
+        }
+
+        // 页面加载时初始化
+        window.onload = function() {
+            calculator = new BaziCalculator();
+            addResult('系统初始化', '城市数据测试页面已加载，可以开始测试');
+            testProvinceSelection();
+        };
+    </script>
+</body>
+</html>

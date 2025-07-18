@@ -8,6 +8,431 @@ class BaziCalculator {
         // 地支
         this.diZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 
+        // 中国各省市经度数据 - 用于真太阳时修正
+        this.locationData = {
+            "北京市": { "北京市": { longitude: 116.4 } },
+            "天津市": { "天津市": { longitude: 117.2 } },
+            "河北省": {
+                "石家庄市": { longitude: 114.5 },
+                "唐山市": { longitude: 118.2 },
+                "秦皇岛市": { longitude: 119.6 },
+                "邯郸市": { longitude: 114.5 },
+                "邢台市": { longitude: 114.5 },
+                "保定市": { longitude: 115.5 },
+                "张家口市": { longitude: 114.9 },
+                "承德市": { longitude: 117.9 },
+                "沧州市": { longitude: 116.8 },
+                "廊坊市": { longitude: 116.7 },
+                "衡水市": { longitude: 115.7 }
+            },
+            "山西省": {
+                "太原市": { longitude: 112.5 },
+                "大同市": { longitude: 113.3 },
+                "阳泉市": { longitude: 113.6 },
+                "长治市": { longitude: 113.1 },
+                "晋城市": { longitude: 112.8 },
+                "朔州市": { longitude: 112.4 },
+                "晋中市": { longitude: 112.7 },
+                "运城市": { longitude: 111.0 },
+                "忻州市": { longitude: 112.7 },
+                "临汾市": { longitude: 111.5 },
+                "吕梁市": { longitude: 111.1 }
+            },
+            "内蒙古自治区": {
+                "呼和浩特市": { longitude: 111.7 },
+                "包头市": { longitude: 110.0 },
+                "乌海市": { longitude: 118.3 },
+                "赤峰市": { longitude: 118.9 },
+                "通辽市": { longitude: 122.2 },
+                "鄂尔多斯市": { longitude: 109.8 },
+                "呼伦贝尔市": { longitude: 119.7 },
+                "巴彦淖尔市": { longitude: 107.4 },
+                "乌兰察布市": { longitude: 113.2 },
+                "兴安盟": { longitude: 122.1 },
+                "锡林郭勒盟": { longitude: 116.0 },
+                "阿拉善盟": { longitude: 105.7 }
+            },
+            "辽宁省": {
+                "沈阳市": { longitude: 123.4 },
+                "大连市": { longitude: 121.6 },
+                "鞍山市": { longitude: 122.9 },
+                "抚顺市": { longitude: 123.9 },
+                "本溪市": { longitude: 123.7 },
+                "丹东市": { longitude: 124.3 },
+                "锦州市": { longitude: 121.1 },
+                "营口市": { longitude: 122.2 },
+                "阜新市": { longitude: 121.6 },
+                "辽阳市": { longitude: 123.2 },
+                "盘锦市": { longitude: 122.0 },
+                "铁岭市": { longitude: 123.8 },
+                "朝阳市": { longitude: 120.4 },
+                "葫芦岛市": { longitude: 120.8 }
+            },
+            "吉林省": {
+                "长春市": { longitude: 125.3 },
+                "吉林市": { longitude: 126.5 },
+                "四平市": { longitude: 124.3 },
+                "辽源市": { longitude: 125.1 },
+                "通化市": { longitude: 125.9 },
+                "白山市": { longitude: 126.4 },
+                "松原市": { longitude: 124.8 },
+                "白城市": { longitude: 122.8 },
+                "延边朝鲜族自治州": { longitude: 129.5 }
+            },
+            "黑龙江省": {
+                "哈尔滨市": { longitude: 126.6 },
+                "齐齐哈尔市": { longitude: 123.9 },
+                "鸡西市": { longitude: 130.9 },
+                "鹤岗市": { longitude: 130.3 },
+                "双鸭山市": { longitude: 131.1 },
+                "大庆市": { longitude: 125.1 },
+                "伊春市": { longitude: 129.0 },
+                "佳木斯市": { longitude: 130.3 },
+                "七台河市": { longitude: 130.9 },
+                "牡丹江市": { longitude: 129.6 },
+                "黑河市": { longitude: 127.5 },
+                "绥化市": { longitude: 126.9 },
+                "大兴安岭地区": { longitude: 124.7 }
+            },
+            "上海市": { "上海市": { longitude: 121.4 } },
+            "江苏省": {
+                "南京市": { longitude: 118.8 },
+                "无锡市": { longitude: 120.3 },
+                "徐州市": { longitude: 117.2 },
+                "常州市": { longitude: 119.9 },
+                "苏州市": { longitude: 120.6 },
+                "南通市": { longitude: 120.8 },
+                "连云港市": { longitude: 119.2 },
+                "淮安市": { longitude: 119.0 },
+                "盐城市": { longitude: 120.1 },
+                "扬州市": { longitude: 119.4 },
+                "镇江市": { longitude: 119.4 },
+                "泰州市": { longitude: 119.9 },
+                "宿迁市": { longitude: 118.3 }
+            },
+            "浙江省": {
+                "杭州市": { longitude: 120.2 },
+                "宁波市": { longitude: 121.5 },
+                "温州市": { longitude: 120.6 },
+                "嘉兴市": { longitude: 120.7 },
+                "湖州市": { longitude: 120.1 },
+                "绍兴市": { longitude: 120.5 },
+                "金华市": { longitude: 119.6 },
+                "衢州市": { longitude: 118.8 },
+                "舟山市": { longitude: 122.3 },
+                "台州市": { longitude: 121.4 },
+                "丽水市": { longitude: 119.9 }
+            },
+            "安徽省": {
+                "合肥市": { longitude: 117.3 },
+                "芜湖市": { longitude: 118.3 },
+                "蚌埠市": { longitude: 117.3 },
+                "淮南市": { longitude: 116.7 },
+                "马鞍山市": { longitude: 118.5 },
+                "淮北市": { longitude: 116.8 },
+                "铜陵市": { longitude: 117.8 },
+                "安庆市": { longitude: 117.0 },
+                "黄山市": { longitude: 118.3 },
+                "滁州市": { longitude: 118.3 },
+                "阜阳市": { longitude: 115.8 },
+                "宿州市": { longitude: 116.9 },
+                "六安市": { longitude: 116.5 },
+                "亳州市": { longitude: 115.7 },
+                "池州市": { longitude: 117.4 },
+                "宣城市": { longitude: 118.7 }
+            },
+            "福建省": {
+                "福州市": { longitude: 119.3 },
+                "厦门市": { longitude: 118.1 },
+                "莆田市": { longitude: 119.0 },
+                "三明市": { longitude: 117.6 },
+                "泉州市": { longitude: 118.6 },
+                "漳州市": { longitude: 117.6 },
+                "南平市": { longitude: 118.0 },
+                "龙岩市": { longitude: 117.0 },
+                "宁德市": { longitude: 119.5 }
+            },
+            "江西省": {
+                "南昌市": { longitude: 115.9 },
+                "景德镇市": { longitude: 117.2 },
+                "萍乡市": { longitude: 113.8 },
+                "九江市": { longitude: 116.0 },
+                "新余市": { longitude: 114.9 },
+                "鹰潭市": { longitude: 117.0 },
+                "赣州市": { longitude: 114.9 },
+                "宜春市": { longitude: 114.4 },
+                "上饶市": { longitude: 117.9 },
+                "吉安市": { longitude: 114.9 },
+                "抚州市": { longitude: 116.3 }
+            },
+            "山东省": {
+                "济南市": { longitude: 117.0 },
+                "青岛市": { longitude: 120.3 },
+                "淄博市": { longitude: 118.0 },
+                "枣庄市": { longitude: 117.5 },
+                "东营市": { longitude: 118.5 },
+                "烟台市": { longitude: 121.4 },
+                "潍坊市": { longitude: 119.1 },
+                "济宁市": { longitude: 116.5 },
+                "泰安市": { longitude: 117.1 },
+                "威海市": { longitude: 122.1 },
+                "日照市": { longitude: 119.5 },
+                "滨州市": { longitude: 118.0 },
+                "德州市": { longitude: 116.3 },
+                "聊城市": { longitude: 115.9 },
+                "临沂市": { longitude: 118.3 },
+                "菏泽市": { longitude: 115.4 }
+            },
+            "河南省": {
+                "郑州市": { longitude: 113.6 },
+                "开封市": { longitude: 114.3 },
+                "洛阳市": { longitude: 112.4 },
+                "平顶山市": { longitude: 113.3 },
+                "安阳市": { longitude: 114.3 },
+                "鹤壁市": { longitude: 114.3 },
+                "新乡市": { longitude: 113.9 },
+                "焦作市": { longitude: 113.2 },
+                "濮阳市": { longitude: 115.0 },
+                "许昌市": { longitude: 113.8 },
+                "漯河市": { longitude: 114.0 },
+                "三门峡市": { longitude: 111.9 },
+                "南阳市": { longitude: 112.5 },
+                "商丘市": { longitude: 115.6 },
+                "信阳市": { longitude: 114.0 },
+                "周口市": { longitude: 114.6 },
+                "驻马店市": { longitude: 114.0 },
+                "济源市": { longitude: 112.6 }
+            },
+            "湖北省": {
+                "武汉市": { longitude: 114.3 },
+                "黄石市": { longitude: 114.9 },
+                "十堰市": { longitude: 110.7 },
+                "宜昌市": { longitude: 111.3 },
+                "襄阳市": { longitude: 112.1 },
+                "鄂州市": { longitude: 114.8 },
+                "荆门市": { longitude: 112.2 },
+                "孝感市": { longitude: 113.9 },
+                "荆州市": { longitude: 112.2 },
+                "黄冈市": { longitude: 114.8 },
+                "咸宁市": { longitude: 114.3 },
+                "随州市": { longitude: 113.3 },
+                "恩施土家族苗族自治州": { longitude: 109.4 },
+                "仙桃市": { longitude: 113.4 },
+                "潜江市": { longitude: 112.9 },
+                "天门市": { longitude: 113.1 },
+                "神农架林区": { longitude: 110.3 }
+            },
+            "湖南省": {
+                "长沙市": { longitude: 113.0 },
+                "株洲市": { longitude: 113.1 },
+                "湘潭市": { longitude: 112.9 },
+                "衡阳市": { longitude: 112.6 },
+                "邵阳市": { longitude: 111.4 },
+                "岳阳市": { longitude: 113.1 },
+                "常德市": { longitude: 111.6 },
+                "张家界市": { longitude: 110.4 },
+                "益阳市": { longitude: 112.3 },
+                "郴州市": { longitude: 113.0 },
+                "永州市": { longitude: 111.6 },
+                "怀化市": { longitude: 110.0 },
+                "娄底市": { longitude: 112.0 },
+                "湘西土家族苗族自治州": { longitude: 109.7 }
+            },
+            "广东省": {
+                "广州市": { longitude: 113.2 },
+                "韶关市": { longitude: 113.6 },
+                "深圳市": { longitude: 114.0 },
+                "珠海市": { longitude: 113.5 },
+                "汕头市": { longitude: 116.6 },
+                "佛山市": { longitude: 113.1 },
+                "江门市": { longitude: 113.0 },
+                "湛江市": { longitude: 110.3 },
+                "茂名市": { longitude: 110.8 },
+                "肇庆市": { longitude: 112.4 },
+                "惠州市": { longitude: 114.4 },
+                "梅州市": { longitude: 116.1 },
+                "汕尾市": { longitude: 115.3 },
+                "河源市": { longitude: 114.6 },
+                "阳江市": { longitude: 111.9 },
+                "清远市": { longitude: 113.0 },
+                "东莞市": { longitude: 113.7 },
+                "中山市": { longitude: 113.3 },
+                "潮州市": { longitude: 116.6 },
+                "揭阳市": { longitude: 116.3 },
+                "云浮市": { longitude: 112.0 }
+            },
+            "广西壮族自治区": {
+                "南宁市": { longitude: 108.3 },
+                "柳州市": { longitude: 109.4 },
+                "桂林市": { longitude: 110.2 },
+                "梧州市": { longitude: 111.3 },
+                "北海市": { longitude: 109.1 },
+                "防城港市": { longitude: 108.3 },
+                "钦州市": { longitude: 108.6 },
+                "贵港市": { longitude: 109.5 },
+                "玉林市": { longitude: 110.1 },
+                "百色市": { longitude: 106.6 },
+                "贺州市": { longitude: 111.5 },
+                "河池市": { longitude: 107.9 },
+                "来宾市": { longitude: 109.2 },
+                "崇左市": { longitude: 107.3 }
+            },
+            "海南省": {
+                "海口市": { longitude: 110.3 },
+                "三亚市": { longitude: 109.5 },
+                "三沙市": { longitude: 112.3 },
+                "儋州市": { longitude: 109.5 },
+                "文昌市": { longitude: 110.7 },
+                "琼海市": { longitude: 110.4 },
+                "万宁市": { longitude: 110.4 },
+                "五指山市": { longitude: 109.5 },
+                "东方市": { longitude: 108.6 },
+                "定安县": { longitude: 110.3 },
+                "屯昌县": { longitude: 109.9 },
+                "澄迈县": { longitude: 110.0 },
+                "临高县": { longitude: 109.7 },
+                "白沙黎族自治县": { longitude: 109.4 },
+                "昌江黎族自治县": { longitude: 109.0 },
+                "乐东黎族自治县": { longitude: 109.1 },
+                "陵水黎族自治县": { longitude: 110.0 },
+                "保亭黎族苗族自治县": { longitude: 109.7 },
+                "琼中黎族苗族自治县": { longitude: 109.8 }
+            },
+            "重庆市": { "重庆市": { longitude: 106.5 } },
+            "四川省": {
+                "成都市": { longitude: 104.0 },
+                "自贡市": { longitude: 104.7 },
+                "攀枝花市": { longitude: 101.7 },
+                "泸州市": { longitude: 105.4 },
+                "德阳市": { longitude: 104.3 },
+                "绵阳市": { longitude: 104.7 },
+                "广元市": { longitude: 105.8 },
+                "遂宁市": { longitude: 105.5 },
+                "内江市": { longitude: 105.0 },
+                "乐山市": { longitude: 103.7 },
+                "南充市": { longitude: 106.1 },
+                "眉山市": { longitude: 103.8 },
+                "宜宾市": { longitude: 104.5 },
+                "广安市": { longitude: 106.6 },
+                "达州市": { longitude: 107.5 },
+                "雅安市": { longitude: 103.0 },
+                "巴中市": { longitude: 106.7 },
+                "资阳市": { longitude: 104.9 },
+                "阿坝藏族羌族自治州": { longitude: 102.2 },
+                "甘孜藏族自治州": { longitude: 101.9 },
+                "凉山彝族自治州": { longitude: 102.2 }
+            },
+            "贵州省": {
+                "贵阳市": { longitude: 106.7 },
+                "六盘水市": { longitude: 104.8 },
+                "遵义市": { longitude: 106.9 },
+                "安顺市": { longitude: 105.9 },
+                "毕节市": { longitude: 105.2 },
+                "铜仁市": { longitude: 109.1 },
+                "黔东南苗族侗族自治州": { longitude: 107.9 },
+                "黔南布依族苗族自治州": { longitude: 107.5 },
+                "黔西南布依族苗族自治州": { longitude: 104.9 }
+            },
+            "云南省": {
+                "昆明市": { longitude: 102.7 },
+                "曲靖市": { longitude: 103.8 },
+                "玉溪市": { longitude: 102.5 },
+                "保山市": { longitude: 99.1 },
+                "昭通市": { longitude: 103.7 },
+                "丽江市": { longitude: 100.2 },
+                "普洱市": { longitude: 101.0 },
+                "临沧市": { longitude: 99.9 },
+                "楚雄彝族自治州": { longitude: 101.5 },
+                "红河哈尼族彝族自治州": { longitude: 103.4 },
+                "文山壮族苗族自治州": { longitude: 104.2 },
+                "西双版纳傣族自治州": { longitude: 100.8 },
+                "大理白族自治州": { longitude: 100.2 },
+                "德宏傣族景颇族自治州": { longitude: 98.6 },
+                "怒江傈僳族自治州": { longitude: 98.8 },
+                "迪庆藏族自治州": { longitude: 99.7 }
+            },
+            "西藏自治区": {
+                "拉萨市": { longitude: 91.1 },
+                "日喀则市": { longitude: 88.8 },
+                "昌都市": { longitude: 97.1 },
+                "林芝市": { longitude: 94.3 },
+                "山南市": { longitude: 91.7 },
+                "那曲市": { longitude: 92.0 },
+                "阿里地区": { longitude: 80.1 }
+            },
+            "陕西省": {
+                "西安市": { longitude: 108.9 },
+                "铜川市": { longitude: 109.1 },
+                "宝鸡市": { longitude: 107.1 },
+                "咸阳市": { longitude: 108.7 },
+                "渭南市": { longitude: 109.5 },
+                "延安市": { longitude: 109.4 },
+                "汉中市": { longitude: 107.0 },
+                "榆林市": { longitude: 109.7 },
+                "安康市": { longitude: 109.0 },
+                "商洛市": { longitude: 110.0 }
+            },
+            "甘肃省": {
+                "兰州市": { longitude: 103.7 },
+                "嘉峪关市": { longitude: 98.2 },
+                "金昌市": { longitude: 102.2 },
+                "白银市": { longitude: 104.1 },
+                "天水市": { longitude: 105.7 },
+                "武威市": { longitude: 102.6 },
+                "张掖市": { longitude: 100.4 },
+                "平凉市": { longitude: 106.6 },
+                "酒泉市": { longitude: 98.5 },
+                "庆阳市": { longitude: 107.6 },
+                "定西市": { longitude: 104.6 },
+                "陇南市": { longitude: 104.9 },
+                "临夏回族自治州": { longitude: 103.2 },
+                "甘南藏族自治州": { longitude: 102.9 }
+            },
+            "青海省": {
+                "西宁市": { longitude: 101.7 },
+                "海东市": { longitude: 102.1 },
+                "海北藏族自治州": { longitude: 100.9 },
+                "黄南藏族自治州": { longitude: 102.0 },
+                "海南藏族自治州": { longitude: 100.6 },
+                "果洛藏族自治州": { longitude: 100.2 },
+                "玉树藏族自治州": { longitude: 97.0 },
+                "海西蒙古族藏族自治州": { longitude: 97.0 }
+            },
+            "宁夏回族自治区": {
+                "银川市": { longitude: 106.2 },
+                "石嘴山市": { longitude: 106.3 },
+                "吴忠市": { longitude: 106.1 },
+                "固原市": { longitude: 106.2 },
+                "中卫市": { longitude: 105.1 }
+            },
+            "新疆维吾尔自治区": {
+                "乌鲁木齐市": { longitude: 87.6 },
+                "克拉玛依市": { longitude: 84.7 },
+                "吐鲁番市": { longitude: 89.2 },
+                "哈密市": { longitude: 93.5 },
+                "昌吉回族自治州": { longitude: 87.3 },
+                "博尔塔拉蒙古自治州": { longitude: 82.0 },
+                "巴音郭楞蒙古自治州": { longitude: 86.1 },
+                "阿克苏地区": { longitude: 80.3 },
+                "克孜勒苏柯尔克孜自治州": { longitude: 76.2 },
+                "喀什地区": { longitude: 75.9 },
+                "和田地区": { longitude: 79.9 },
+                "伊犁哈萨克自治州": { longitude: 81.3 },
+                "塔城地区": { longitude: 82.9 },
+                "阿勒泰地区": { longitude: 88.1 },
+                "石河子市": { longitude: 86.0 },
+                "阿拉尔市": { longitude: 81.2 },
+                "图木舒克市": { longitude: 79.0 },
+                "五家渠市": { longitude: 87.2 }
+            },
+            "香港特别行政区": { "香港": { longitude: 114.1 } },
+            "澳门特别行政区": { "澳门": { longitude: 113.5 } },
+            "台湾省": {
+                "台北市": { longitude: 121.5 },
+                "高雄市": { longitude: 120.3 }
+            }
+        };
+
         // 五行
         this.wuXing = {
             '甲': '木', '乙': '木', '丙': '火', '丁': '火', '戊': '土',
@@ -63,9 +488,141 @@ class BaziCalculator {
         if (this.lunisolarAvailable) {
             console.log('✅ lunisolar库已加载，将使用精确计算');
         } else {
-            console.error('❌ lunisolar库未加载，无法进行八字计算');
-            throw new Error('lunisolar库是必需的，请确保已正确加载');
+            console.warn('⚠️ lunisolar库未加载，将使用简化计算方法');
         }
+    }
+
+    // 获取城市经度
+    getCityLongitude(province, city) {
+        try {
+            // 处理直辖市的情况
+            if (this.locationData[province] && this.locationData[province][province]) {
+                return this.locationData[province][province].longitude;
+            }
+
+            // 处理省份下的城市
+            if (this.locationData[province] && this.locationData[province][city]) {
+                return this.locationData[province][city].longitude;
+            }
+
+            // 如果找不到精确匹配，尝试模糊匹配
+            if (this.locationData[province]) {
+                const cities = Object.keys(this.locationData[province]);
+                for (const cityName of cities) {
+                    if (cityName.includes(city) || city.includes(cityName.replace('市', ''))) {
+                        return this.locationData[province][cityName].longitude;
+                    }
+                }
+            }
+
+            // 默认使用北京时间（东经120度）
+            console.warn(`未找到 ${province} ${city} 的经度数据，使用默认值120度`);
+            return 120.0;
+        } catch (error) {
+            console.error('获取城市经度失败:', error);
+            return 120.0;
+        }
+    }
+
+    // 真太阳时修正
+    calculateTrueSolarTime(year, month, day, hour, minute, longitude) {
+        try {
+            // 中国标准时间使用东经120度
+            const standardLongitude = 120.0;
+
+            // 经度时差修正（每度4分钟）
+            const longitudeCorrection = (longitude - standardLongitude) * 4;
+
+            // 计算儒略日
+            const julianDay = this.calculateJulianDay(year, month, day);
+
+            // 计算时间方程（太阳时与平均太阳时的差值）
+            const timeEquation = this.calculateTimeEquation(julianDay);
+
+            // 总修正时间（分钟）
+            const totalCorrection = longitudeCorrection + timeEquation;
+
+            // 修正后的时间
+            const totalMinutes = hour * 60 + minute + totalCorrection;
+            const correctedHour = Math.floor(totalMinutes / 60);
+            const correctedMinute = Math.round(totalMinutes % 60);
+
+            // 处理跨日情况
+            let correctedDay = day;
+            let correctedMonth = month;
+            let correctedYear = year;
+            let finalHour = correctedHour;
+
+            if (finalHour >= 24) {
+                finalHour -= 24;
+                correctedDay += 1;
+                // 简化处理，不考虑月份跨越
+            } else if (finalHour < 0) {
+                finalHour += 24;
+                correctedDay -= 1;
+                // 简化处理，不考虑月份跨越
+            }
+
+            return {
+                year: correctedYear,
+                month: correctedMonth,
+                day: correctedDay,
+                hour: finalHour,
+                minute: correctedMinute,
+                correction: totalCorrection,
+                longitudeCorrection: longitudeCorrection,
+                timeEquation: timeEquation
+            };
+        } catch (error) {
+            console.error('真太阳时修正失败:', error);
+            return {
+                year: year,
+                month: month,
+                day: day,
+                hour: hour,
+                minute: minute,
+                correction: 0,
+                longitudeCorrection: 0,
+                timeEquation: 0
+            };
+        }
+    }
+
+    // 计算儒略日
+    calculateJulianDay(year, month, day) {
+        if (month <= 2) {
+            year -= 1;
+            month += 12;
+        }
+
+        const a = Math.floor(year / 100);
+        const b = 2 - a + Math.floor(a / 4);
+
+        return Math.floor(365.25 * (year + 4716)) +
+               Math.floor(30.6001 * (month + 1)) +
+               day + b - 1524.5;
+    }
+
+    // 计算时间方程（简化版本）
+    calculateTimeEquation(julianDay) {
+        // 计算自2000年1月1日以来的天数
+        const n = julianDay - 2451545.0;
+
+        // 平均近点角（度）
+        const M = (357.5291 + 0.98560028 * n) % 360;
+
+        // 转换为弧度
+        const MRad = M * Math.PI / 180;
+
+        // 简化的时间方程计算（分钟）
+        const E = 4 * (
+            1.914 * Math.sin(MRad) +
+            0.020 * Math.sin(2 * MRad) -
+            2.466 * Math.sin(2 * (23.44 * Math.PI / 180)) -
+            0.053 * Math.sin(4 * (23.44 * Math.PI / 180))
+        );
+
+        return E;
     }
 
     // 计算纳音
@@ -84,19 +641,38 @@ class BaziCalculator {
         };
     }
 
-    // 使用lunisolar库进行精确八字计算
+    // 八字计算（支持lunisolar库和备用方法）
     calculate(birthData) {
-        if (!this.lunisolarAvailable) {
-            throw new Error('lunisolar库未加载，无法进行八字计算');
+        if (this.lunisolarAvailable) {
+            return this.calculateWithLunisolar(birthData);
+        } else {
+            return this.calculateWithBackup(birthData);
         }
+    }
+
+    // 使用lunisolar库进行精确八字计算
+    calculateWithLunisolar(birthData) {
 
         try {
-            const { year, month, day, hour, minute = 0, gender } = birthData;
+            const { year, month, day, hour, minute = 0, gender, birthProvince, birthCity } = birthData;
 
-            // 构建日期时间字符串
-            const datetime = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+            // 获取出生地经度
+            const longitude = this.getCityLongitude(birthProvince, birthCity);
 
-            console.log('使用lunisolar计算:', datetime);
+            // 进行真太阳时修正
+            const trueSolarTime = this.calculateTrueSolarTime(year, month, day, hour, minute, longitude);
+
+            // 构建修正后的日期时间字符串
+            const datetime = `${trueSolarTime.year}-${trueSolarTime.month.toString().padStart(2, '0')}-${trueSolarTime.day.toString().padStart(2, '0')} ${trueSolarTime.hour.toString().padStart(2, '0')}:${trueSolarTime.minute.toString().padStart(2, '0')}`;
+
+            console.log('原始时间:', `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
+            console.log('真太阳时修正:', datetime);
+            console.log('修正详情:', {
+                longitude: longitude,
+                correction: trueSolarTime.correction,
+                longitudeCorrection: trueSolarTime.longitudeCorrection,
+                timeEquation: trueSolarTime.timeEquation
+            });
 
             // 创建lunisolar对象
             const d = lunisolar(datetime);
@@ -156,6 +732,26 @@ class BaziCalculator {
                 hiddenStemsAnalysis,
                 calculationMethod: 'lunisolar',
                 fullBazi: `${yearPillar} ${monthPillar} ${dayPillar} ${hourPillar}`,
+                // 添加真太阳时修正信息
+                trueSolarTimeInfo: {
+                    originalTime: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+                    correctedTime: datetime,
+                    longitude: longitude,
+                    correction: trueSolarTime.correction,
+                    longitudeCorrection: trueSolarTime.longitudeCorrection,
+                    timeEquation: trueSolarTime.timeEquation,
+                    location: `${birthProvince} ${birthCity}`
+                },
+                // 添加真太阳时修正信息
+                trueSolarTimeInfo: {
+                    originalTime: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+                    correctedTime: datetime,
+                    longitude: longitude,
+                    correction: trueSolarTime.correction,
+                    longitudeCorrection: trueSolarTime.longitudeCorrection,
+                    timeEquation: trueSolarTime.timeEquation,
+                    location: `${birthProvince} ${birthCity}`
+                },
                 // 添加五行信息
                 wuxingInfo: {
                     year: {
@@ -201,12 +797,122 @@ class BaziCalculator {
         }
     }
 
+    // 备用计算方法（不依赖lunisolar库）
+    calculateWithBackup(birthData) {
+        try {
+            const { year, month, day, hour, minute = 0, gender, birthProvince, birthCity } = birthData;
 
+            console.log('使用备用计算方法:', `${year}-${month}-${day} ${hour}:${minute}`);
+
+            // 简化的八字计算
+            const yearPillar = this.getYearPillar(year);
+            const monthPillar = this.getMonthPillar(year, month);
+            const dayPillar = this.getDayPillar(year, month, day);
+            const hourPillar = this.getHourPillar(dayPillar[0], hour);
+
+            // 计算十神
+            const dayTianGan = dayPillar[0];
+            const yearTenGod = this.calculateTenGods(dayTianGan, yearPillar[0]);
+            const monthTenGod = this.calculateTenGods(dayTianGan, monthPillar[0]);
+            const hourTenGod = this.calculateTenGods(dayTianGan, hourPillar[0]);
+
+            // 简化的大运计算
+            const bigLuck = this.calculateDaYun(gender, yearPillar, monthPillar, year);
+
+            return {
+                yearPillar,
+                monthPillar,
+                dayPillar,
+                hourPillar,
+                yearTenGod,
+                monthTenGod,
+                hourTenGod,
+                bigLuck,
+                dayTianGan,
+                lunarInfo: {
+                    date: '农历信息需要lunisolar库支持',
+                    year: year,
+                    month: month,
+                    day: day,
+                    hour: hour,
+                    isLeapMonth: false
+                },
+                solarTerm: '节气信息需要lunisolar库支持',
+                hiddenStems: {
+                    year: [yearPillar[0]],
+                    month: [monthPillar[0]],
+                    day: [dayPillar[0]],
+                    hour: [hourPillar[0]]
+                },
+                hiddenStemsAnalysis: {},
+                calculationMethod: 'backup',
+                fullBazi: `${yearPillar} ${monthPillar} ${dayPillar} ${hourPillar}`,
+                // 简化的真太阳时修正信息
+                trueSolarTimeInfo: {
+                    originalTime: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+                    correctedTime: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+                    longitude: this.getCityLongitude(birthProvince, birthCity),
+                    correction: 0,
+                    longitudeCorrection: 0,
+                    timeEquation: 0,
+                    location: `${birthProvince} ${birthCity}`
+                },
+                // 添加五行信息
+                wuxingInfo: {
+                    year: {
+                        tianGan: this.wuXing[yearPillar[0]],
+                        diZhi: this.wuXing[yearPillar[1]],
+                        combined: this.wuXing[yearPillar[0]] + this.wuXing[yearPillar[1]]
+                    },
+                    month: {
+                        tianGan: this.wuXing[monthPillar[0]],
+                        diZhi: this.wuXing[monthPillar[1]],
+                        combined: this.wuXing[monthPillar[0]] + this.wuXing[monthPillar[1]]
+                    },
+                    day: {
+                        tianGan: this.wuXing[dayPillar[0]],
+                        diZhi: this.wuXing[dayPillar[1]],
+                        combined: this.wuXing[dayPillar[0]] + this.wuXing[dayPillar[1]]
+                    },
+                    hour: {
+                        tianGan: this.wuXing[hourPillar[0]],
+                        diZhi: this.wuXing[hourPillar[1]],
+                        combined: this.wuXing[hourPillar[0]] + this.wuXing[hourPillar[1]]
+                    }
+                },
+                // 添加纳音信息
+                naYinInfo: {
+                    year: this.calculateNaYin(yearPillar),
+                    month: this.calculateNaYin(monthPillar),
+                    day: this.calculateNaYin(dayPillar),
+                    hour: this.calculateNaYin(hourPillar)
+                },
+                // 添加十神详细分析
+                tenGodsAnalysis: {
+                    year: { tianGan: yearPillar[0], tenGod: yearTenGod, wuxing: this.wuXing[yearPillar[0]] },
+                    month: { tianGan: monthPillar[0], tenGod: monthTenGod, wuxing: this.wuXing[monthPillar[0]] },
+                    day: { tianGan: dayPillar[0], tenGod: '日元', wuxing: this.wuXing[dayPillar[0]] },
+                    hour: { tianGan: hourPillar[0], tenGod: hourTenGod, wuxing: this.wuXing[hourPillar[0]] }
+                }
+            };
+
+        } catch (error) {
+            console.error('备用计算失败:', error);
+            throw new Error(`八字计算失败: ${error.message}`);
+        }
+    }
 
     // 农历转公历功能
     lunarToSolar(lunarData) {
         if (!this.lunisolarAvailable) {
-            throw new Error('需要lunisolar库支持农历转换功能');
+            return {
+                error: true,
+                message: '农历转换功能需要lunisolar库支持，请加载lunisolar库后重试',
+                solarDate: null,
+                lunarDate: null,
+                bazi: null,
+                solarTerm: null
+            };
         }
 
         try {
@@ -658,6 +1364,68 @@ class BaziCalculator {
             pattern,
             analysisTime: new Date().toISOString()
         };
+    }
+
+    // 简化的年柱计算
+    getYearPillar(year) {
+        // 简化算法：以甲子年为基准（1984年）
+        const baseYear = 1984;
+        const yearOffset = (year - baseYear) % 60;
+        const tianGanIndex = yearOffset % 10;
+        const diZhiIndex = yearOffset % 12;
+
+        return this.tianGan[tianGanIndex < 0 ? tianGanIndex + 10 : tianGanIndex] +
+               this.diZhi[diZhiIndex < 0 ? diZhiIndex + 12 : diZhiIndex];
+    }
+
+    // 简化的月柱计算
+    getMonthPillar(year, month) {
+        // 简化算法：基于年干推月干
+        const yearTianGan = this.getYearPillar(year)[0];
+        const yearTianGanIndex = this.tianGan.indexOf(yearTianGan);
+
+        // 月干计算公式（简化）
+        const monthTianGanIndex = (yearTianGanIndex * 2 + month + 1) % 10;
+        const monthDiZhiIndex = (month + 1) % 12;
+
+        return this.tianGan[monthTianGanIndex] + this.diZhi[monthDiZhiIndex];
+    }
+
+    // 简化的日柱计算
+    getDayPillar(year, month, day) {
+        // 简化算法：基于公历日期计算
+        const date = new Date(year, month - 1, day);
+        const daysSince1900 = Math.floor((date.getTime() - new Date(1900, 0, 1).getTime()) / (1000 * 60 * 60 * 24));
+
+        const tianGanIndex = daysSince1900 % 10;
+        const diZhiIndex = daysSince1900 % 12;
+
+        return this.tianGan[tianGanIndex] + this.diZhi[diZhiIndex];
+    }
+
+    // 简化的时柱计算
+    getHourPillar(dayTianGan, hour) {
+        const dayTianGanIndex = this.tianGan.indexOf(dayTianGan);
+
+        // 时辰地支
+        let hourDiZhiIndex;
+        if (hour >= 23 || hour < 1) hourDiZhiIndex = 0; // 子时
+        else if (hour >= 1 && hour < 3) hourDiZhiIndex = 1; // 丑时
+        else if (hour >= 3 && hour < 5) hourDiZhiIndex = 2; // 寅时
+        else if (hour >= 5 && hour < 7) hourDiZhiIndex = 3; // 卯时
+        else if (hour >= 7 && hour < 9) hourDiZhiIndex = 4; // 辰时
+        else if (hour >= 9 && hour < 11) hourDiZhiIndex = 5; // 巳时
+        else if (hour >= 11 && hour < 13) hourDiZhiIndex = 6; // 午时
+        else if (hour >= 13 && hour < 15) hourDiZhiIndex = 7; // 未时
+        else if (hour >= 15 && hour < 17) hourDiZhiIndex = 8; // 申时
+        else if (hour >= 17 && hour < 19) hourDiZhiIndex = 9; // 酉时
+        else if (hour >= 19 && hour < 21) hourDiZhiIndex = 10; // 戌时
+        else hourDiZhiIndex = 11; // 亥时
+
+        // 时干计算公式
+        const hourTianGanIndex = (dayTianGanIndex * 2 + hourDiZhiIndex) % 10;
+
+        return this.tianGan[hourTianGanIndex] + this.diZhi[hourDiZhiIndex];
     }
 }
 
