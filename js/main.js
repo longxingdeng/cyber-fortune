@@ -60,7 +60,7 @@ class CyberFortune {
         if (targetElement) {
             targetElement.classList.add('active');
             targetElement.classList.add('section-enter');
-            
+
             setTimeout(() => {
                 targetElement.classList.remove('section-enter');
             }, 500);
@@ -361,7 +361,7 @@ class CyberFortune {
     // 构建赛博知命结果HTML
     buildZhimingResultHTML(birthData, baziResult, prompt) {
         const { gender, year, month, day, hour, birthProvince, birthCity } = birthData;
-        const { yearPillar, monthPillar, dayPillar, hourPillar, yearTenGod, monthTenGod, hourTenGod, bigLuck } = baziResult;
+        const { yearPillar, monthPillar, dayPillar, hourPillar, yearTenGod, monthTenGod, hourTenGod, bigLuck, wuxingInfo, naYinInfo } = baziResult;
 
         return `
             <div class="result-header">
@@ -378,21 +378,41 @@ class CyberFortune {
                         <div class="pillar-label">年柱</div>
                         <div class="pillar-chars">${yearPillar}</div>
                         <div class="pillar-god">${yearTenGod}</div>
+                        <div class="pillar-wuxing">
+                            <span class="wuxing-tiangan">${yearPillar[0]}(${wuxingInfo?.year?.tianGan || ''})</span>
+                            <span class="wuxing-dizhi">${yearPillar[1]}(${wuxingInfo?.year?.diZhi || ''})</span>
+                        </div>
+                        <div class="pillar-nayin">${naYinInfo?.year || '未知'}</div>
                     </div>
                     <div class="pillar">
                         <div class="pillar-label">月柱</div>
                         <div class="pillar-chars">${monthPillar}</div>
                         <div class="pillar-god">${monthTenGod}</div>
+                        <div class="pillar-wuxing">
+                            <span class="wuxing-tiangan">${monthPillar[0]}(${wuxingInfo?.month?.tianGan || ''})</span>
+                            <span class="wuxing-dizhi">${monthPillar[1]}(${wuxingInfo?.month?.diZhi || ''})</span>
+                        </div>
+                        <div class="pillar-nayin">${naYinInfo?.month || '未知'}</div>
                     </div>
                     <div class="pillar">
                         <div class="pillar-label">日柱</div>
                         <div class="pillar-chars">${dayPillar}</div>
                         <div class="pillar-god">日元</div>
+                        <div class="pillar-wuxing">
+                            <span class="wuxing-tiangan">${dayPillar[0]}(${wuxingInfo?.day?.tianGan || ''})</span>
+                            <span class="wuxing-dizhi">${dayPillar[1]}(${wuxingInfo?.day?.diZhi || ''})</span>
+                        </div>
+                        <div class="pillar-nayin">${naYinInfo?.day || '未知'}</div>
                     </div>
                     <div class="pillar">
                         <div class="pillar-label">时柱</div>
                         <div class="pillar-chars">${hourPillar}</div>
                         <div class="pillar-god">${hourTenGod}</div>
+                        <div class="pillar-wuxing">
+                            <span class="wuxing-tiangan">${hourPillar[0]}(${wuxingInfo?.hour?.tianGan || ''})</span>
+                            <span class="wuxing-dizhi">${hourPillar[1]}(${wuxingInfo?.hour?.diZhi || ''})</span>
+                        </div>
+                        <div class="pillar-nayin">${naYinInfo?.hour || '未知'}</div>
                     </div>
                 </div>
             </div>
@@ -863,5 +883,11 @@ class CyberFortune {
 
 // 初始化应用
 document.addEventListener('DOMContentLoaded', function() {
-    window.cyberFortune = new CyberFortune();
+    console.log('DOM loaded, initializing CyberFortune...');
+    try {
+        window.cyberFortune = new CyberFortune();
+        console.log('CyberFortune initialized successfully');
+    } catch (error) {
+        console.error('Error initializing CyberFortune:', error);
+    }
 });

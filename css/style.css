@@ -405,35 +405,86 @@ body {
 .pillar {
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 1rem;
     text-align: center;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
 }
 
 .pillar:hover {
     border-color: var(--primary-color);
-    box-shadow: 0 0 10px var(--glow-color);
+    box-shadow: 0 0 15px var(--glow-color);
+    transform: translateY(-2px);
 }
 
 .pillar-label {
     color: var(--text-secondary);
     font-size: 0.8rem;
-    margin-bottom: 0.5rem;
+    font-weight: bold;
 }
 
 .pillar-chars {
     font-family: var(--font-primary);
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     color: var(--primary-color);
-    margin-bottom: 0.5rem;
-    text-shadow: 0 0 5px var(--glow-color);
+    font-weight: bold;
+    text-shadow: 0 0 8px var(--glow-color);
+    letter-spacing: 1px;
+    line-height: 1.2;
 }
 
 .pillar-god {
     color: var(--text-accent);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 0.15rem 0.4rem;
+    background: rgba(255, 0, 128, 0.1);
+    border-radius: 3px;
+    border: 1px solid rgba(255, 0, 128, 0.2);
 }
+
+.pillar-wuxing {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-top: 0.2rem;
+}
+
+.wuxing-tiangan, .wuxing-dizhi {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 2px;
+    font-weight: normal;
+}
+
+.wuxing-tiangan {
+    background: rgba(0, 212, 255, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.wuxing-dizhi {
+    background: rgba(255, 0, 128, 0.1);
+    color: var(--accent-color);
+    border: 1px solid rgba(255, 0, 128, 0.2);
+}
+
+.pillar-nayin {
+    font-size: 0.7rem;
+    color: #00ff88;
+    font-weight: bold;
+    padding: 0.15rem 0.4rem;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 3px;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    text-shadow: 0 0 3px rgba(0, 255, 136, 0.5);
+    margin-top: 0.15rem;
+}
+
+
 
 /* 大运信息样式 */
 .dayun-section {
@@ -921,5 +972,46 @@ body {
     .hero-features {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 1rem;
+    }
+
+    .pillars-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+
+    .pillar {
+        padding: 0.8rem;
+    }
+
+    .pillar-chars {
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .pillar-god {
+        font-size: 0.75rem;
+        padding: 0.1rem 0.3rem;
+    }
+
+    .wuxing-tiangan, .wuxing-dizhi {
+        font-size: 0.6rem;
+        padding: 0.08rem 0.25rem;
+    }
+
+    .pillar-nayin {
+        font-size: 0.65rem;
+        padding: 0.1rem 0.3rem;
+    }
+
+    .dayun-pillars {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .names-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wuge-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
