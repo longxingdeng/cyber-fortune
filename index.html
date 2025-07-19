@@ -750,13 +750,79 @@
     <script src="https://cdn.jsdelivr.net/npm/lunisolar@2.5.1/dist/lunisolar.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/iztro@2.5.3/dist/iztro.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="js/particles-config.js?v=20250119"></script>
-    <script src="js/bazi-calculator.js?v=20250119"></script>
-    <script src="js/ziwei-calculator.js?v=20250119"></script>
-    <script src="js/name-calculator.js?v=20250119"></script>
-    <script src="js/marriage-calculator.js?v=20250119"></script>
-    <script src="js/main.js?v=20250119"></script>
+    <!-- PDF和图片生成库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+            onerror="this.onerror=null; this.src='https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js'"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+            onerror="this.onerror=null; this.src='https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js'"></script>
+
+    <!-- 库加载检测和备用加载 -->
+    <script>
+        // 检测并加载html2canvas
+        function ensureHtml2Canvas() {
+            return new Promise((resolve, reject) => {
+                if (typeof html2canvas !== 'undefined') {
+                    console.log('html2canvas已加载');
+                    resolve();
+                    return;
+                }
+
+                console.log('html2canvas未加载，尝试备用CDN...');
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+                script.onload = () => {
+                    console.log('html2canvas备用CDN加载成功');
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.error('html2canvas所有CDN都加载失败');
+                    reject(new Error('html2canvas库加载失败'));
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // 检测并加载jsPDF
+        function ensureJsPDF() {
+            return new Promise((resolve, reject) => {
+                if (typeof window.jsPDF !== 'undefined' || typeof jsPDF !== 'undefined') {
+                    console.log('jsPDF已加载');
+                    resolve();
+                    return;
+                }
+
+                console.log('jsPDF未加载，尝试备用CDN...');
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+                script.onload = () => {
+                    console.log('jsPDF备用CDN加载成功');
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.error('jsPDF所有CDN都加载失败');
+                    reject(new Error('jsPDF库加载失败'));
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // 全局库检测函数
+        window.ensureLibrariesLoaded = async function() {
+            try {
+                await Promise.all([ensureHtml2Canvas(), ensureJsPDF()]);
+                console.log('所有必需的库都已加载');
+                return true;
+            } catch (error) {
+                console.error('库加载失败:', error);
+                return false;
+            }
+        };
+    </script>
+    <script src="js/particles-config.js?v=20250119b"></script>
+    <script src="js/bazi-calculator.js?v=20250119b"></script>
+    <script src="js/ziwei-calculator.js?v=20250119b"></script>
+    <script src="js/name-calculator.js?v=20250119b"></script>
+    <script src="js/marriage-calculator.js?v=20250119b"></script>
+    <script src="js/main.js?v=20250119b"></script>
 </body>
 </html>
