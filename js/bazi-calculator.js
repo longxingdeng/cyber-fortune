@@ -646,6 +646,8 @@ class BaziCalculator {
         };
     }
 
+
+
     // 八字计算（支持lunisolar库和备用方法）
     calculate(birthData) {
         if (this.lunisolarAvailable) {
@@ -747,16 +749,6 @@ class BaziCalculator {
                     timeEquation: trueSolarTime.timeEquation,
                     location: `${birthProvince} ${birthCity}`
                 },
-                // 添加真太阳时修正信息
-                trueSolarTimeInfo: {
-                    originalTime: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
-                    correctedTime: datetime,
-                    longitude: longitude,
-                    correction: trueSolarTime.correction,
-                    longitudeCorrection: trueSolarTime.longitudeCorrection,
-                    timeEquation: trueSolarTime.timeEquation,
-                    location: `${birthProvince} ${birthCity}`
-                },
                 // 添加五行信息
                 wuxingInfo: {
                     year: {
@@ -807,13 +799,21 @@ class BaziCalculator {
         try {
             const { year, month, day, hour, minute = 0, gender, birthProvince, birthCity } = birthData;
 
-            console.log('使用备用计算方法:', `${year}-${month}-${day} ${hour}:${minute}`);
+            // 获取出生地经度
+            const longitude = this.getCityLongitude(birthProvince, birthCity);
 
-            // 简化的八字计算
-            const yearPillar = this.getYearPillar(year);
-            const monthPillar = this.getMonthPillar(year, month);
-            const dayPillar = this.getDayPillar(year, month, day);
-            const hourPillar = this.getHourPillar(dayPillar[0], hour);
+            // 进行真太阳时修正
+            const trueSolarTime = this.calculateTrueSolarTime(year, month, day, hour, minute, longitude);
+
+            console.log('原始时间:', `${year}-${month}-${day} ${hour}:${minute}`);
+            console.log('真太阳时修正:', `${trueSolarTime.year}-${trueSolarTime.month}-${trueSolarTime.day} ${trueSolarTime.hour}:${trueSolarTime.minute}`);
+            console.log('使用备用计算方法');
+
+            // 简化的八字计算（使用真太阳时修正后的时间）
+            const yearPillar = this.getYearPillar(trueSolarTime.year);
+            const monthPillar = this.getMonthPillar(trueSolarTime.year, trueSolarTime.month);
+            const dayPillar = this.getDayPillar(trueSolarTime.year, trueSolarTime.month, trueSolarTime.day);
+            const hourPillar = this.getHourPillar(dayPillar[0], trueSolarTime.hour);
 
             // 计算十神
             const dayTianGan = dayPillar[0];
@@ -822,7 +822,7 @@ class BaziCalculator {
             const hourTenGod = this.calculateTenGods(dayTianGan, hourPillar[0]);
 
             // 简化的大运计算
-            const bigLuck = this.calculateDaYun(gender, yearPillar, monthPillar, year);
+            const bigLuck = this.calculateDaYun(gender, yearPillar, monthPillar, trueSolarTime.year);
 
             return {
                 yearPillar,
@@ -852,14 +852,14 @@ class BaziCalculator {
                 hiddenStemsAnalysis: {},
                 calculationMethod: 'backup',
                 fullBazi: `${yearPillar} ${monthPillar} ${dayPillar} ${hourPillar}`,
-                // 简化的真太阳时修正信息
+                // 添加真太阳时修正信息
                 trueSolarTimeInfo: {
                     originalTime: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
-                    correctedTime: `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
-                    longitude: this.getCityLongitude(birthProvince, birthCity),
-                    correction: 0,
-                    longitudeCorrection: 0,
-                    timeEquation: 0,
+                    correctedTime: `${trueSolarTime.year}-${trueSolarTime.month.toString().padStart(2, '0')}-${trueSolarTime.day.toString().padStart(2, '0')} ${trueSolarTime.hour.toString().padStart(2, '0')}:${trueSolarTime.minute.toString().padStart(2, '0')}`,
+                    longitude: longitude,
+                    correction: trueSolarTime.correction,
+                    longitudeCorrection: trueSolarTime.longitudeCorrection,
+                    timeEquation: trueSolarTime.timeEquation,
                     location: `${birthProvince} ${birthCity}`
                 },
                 // 添加五行信息
