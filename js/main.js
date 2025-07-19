@@ -710,10 +710,6 @@ class CyberFortune {
                         <span>📄 生成PDF报告</span>
                         <div class="button-glow"></div>
                     </button>
-                    <button class="cyber-button" id="download-image-btn">
-                        <span>🖼️ 下载长图报告</span>
-                        <div class="button-glow"></div>
-                    </button>
                     <button class="cyber-button secondary" id="download-text-btn">
                         <span>📝 下载文本报告</span>
                         <div class="button-glow"></div>
@@ -735,7 +731,6 @@ class CyberFortune {
         // AI分析现在自动开始，无需手动按钮
         const copyBtn = document.getElementById('copy-ai-result');
         const downloadPdfBtn = document.getElementById('download-pdf-btn');
-        const downloadImageBtn = document.getElementById('download-image-btn');
         const downloadTextBtn = document.getElementById('download-text-btn');
 
         if (copyBtn) {
@@ -747,12 +742,6 @@ class CyberFortune {
         if (downloadPdfBtn) {
             downloadPdfBtn.addEventListener('click', () => {
                 this.downloadPDFReport();
-            });
-        }
-
-        if (downloadImageBtn) {
-            downloadImageBtn.addEventListener('click', () => {
-                this.downloadImageReport();
             });
         }
 
@@ -914,56 +903,7 @@ class CyberFortune {
         }, 500);
     }
 
-    // 下载长图报告
-    async downloadImageReport() {
-        const resultContent = document.querySelector('#zhiming-result .result-content');
-        if (!resultContent) {
-            this.showError('没有可下载的报告内容');
-            return;
-        }
-
-        try {
-            this.showProcessing('正在生成长图报告...');
-
-            // 检查html2canvas是否可用
-            if (typeof html2canvas === 'undefined') {
-                this.hideProcessing();
-                this.showError('图片生成库未加载，请刷新页面重试');
-                return;
-            }
-
-            // 尝试多种方法生成长图
-            console.log('开始生成长图...');
-            let canvas;
-
-            try {
-                // 方法1: 使用html2canvas截取现有内容
-                canvas = await this.createCanvasFromExistingContent();
-            } catch (error) {
-                console.warn('html2canvas方法失败，尝试备用方法:', error);
-                // 方法2: 使用Canvas API直接绘制
-                canvas = await this.createCanvasManually();
-            }
-
-            console.log('Canvas生成完成:', canvas.width, 'x', canvas.height);
-
-            // 检查Canvas是否为空
-            if (canvas.width === 0 || canvas.height === 0) {
-                throw new Error('生成的图片尺寸为空');
-            }
-
-            // 下载图片
-            const fileName = `赛博论命长图报告_${new Date().toISOString().split('T')[0]}.png`;
-            this.downloadCanvasAsImage(canvas, fileName);
-
-            this.hideProcessing();
-            this.showSuccess('长图报告已下载');
-        } catch (error) {
-            this.hideProcessing();
-            console.error('长图生成错误:', error);
-            this.showError(`长图生成失败: ${error.message}`);
-        }
-    }
+    // 长图下载功能已移除，简化界面
 
     // 下载文本报告
     downloadTextReport() {
@@ -1485,10 +1425,6 @@ class CyberFortune {
                 <div class="download-options">
                     <button class="cyber-button" id="download-naming-pdf-btn">
                         <span>📄 生成PDF报告</span>
-                        <div class="button-glow"></div>
-                    </button>
-                    <button class="cyber-button" id="download-naming-image-btn">
-                        <span>🖼️ 下载长图报告</span>
                         <div class="button-glow"></div>
                     </button>
                     <button class="cyber-button secondary" id="download-naming-text-btn">
@@ -2056,10 +1992,6 @@ class CyberFortune {
                 <div class="download-options">
                     <button class="cyber-button" id="download-ceming-pdf-btn">
                         <span>📄 生成PDF报告</span>
-                        <div class="button-glow"></div>
-                    </button>
-                    <button class="cyber-button" id="download-ceming-image-btn">
-                        <span>🖼️ 下载长图报告</span>
                         <div class="button-glow"></div>
                     </button>
                     <button class="cyber-button secondary" id="download-ceming-text-btn">
@@ -2645,10 +2577,6 @@ class CyberFortune {
                     <div class="download-options">
                         <button class="cyber-button" id="download-marriage-pdf-btn">
                             <span>📄 生成PDF报告</span>
-                            <div class="button-glow"></div>
-                        </button>
-                        <button class="cyber-button" id="download-marriage-image-btn">
-                            <span>🖼️ 下载长图报告</span>
                             <div class="button-glow"></div>
                         </button>
                         <button class="cyber-button secondary" id="download-marriage-text-btn">
@@ -5098,18 +5026,11 @@ class CyberFortune {
     // 绑定起名模块下载事件
     bindNamingDownloadEvents(birthData, baziResult, nameSuggestions) {
         const downloadPdfBtn = document.getElementById('download-naming-pdf-btn');
-        const downloadImageBtn = document.getElementById('download-naming-image-btn');
         const downloadTextBtn = document.getElementById('download-naming-text-btn');
 
         if (downloadPdfBtn) {
             downloadPdfBtn.addEventListener('click', () => {
                 this.downloadNamingPDFReport(birthData, baziResult, nameSuggestions);
-            });
-        }
-
-        if (downloadImageBtn) {
-            downloadImageBtn.addEventListener('click', () => {
-                this.downloadNamingImageReport(birthData, baziResult, nameSuggestions);
             });
         }
 
@@ -5123,18 +5044,11 @@ class CyberFortune {
     // 绑定测名模块下载事件
     bindCemingDownloadEvents(testData, nameAnalysis, baziResult) {
         const downloadPdfBtn = document.getElementById('download-ceming-pdf-btn');
-        const downloadImageBtn = document.getElementById('download-ceming-image-btn');
         const downloadTextBtn = document.getElementById('download-ceming-text-btn');
 
         if (downloadPdfBtn) {
             downloadPdfBtn.addEventListener('click', () => {
                 this.downloadCemingPDFReport(testData, nameAnalysis, baziResult);
-            });
-        }
-
-        if (downloadImageBtn) {
-            downloadImageBtn.addEventListener('click', () => {
-                this.downloadCemingImageReport(testData, nameAnalysis, baziResult);
             });
         }
 
@@ -5148,18 +5062,11 @@ class CyberFortune {
     // 绑定合婚模块下载事件
     bindMarriageDownloadEvents(marriageData, marriageResult) {
         const downloadPdfBtn = document.getElementById('download-marriage-pdf-btn');
-        const downloadImageBtn = document.getElementById('download-marriage-image-btn');
         const downloadTextBtn = document.getElementById('download-marriage-text-btn');
 
         if (downloadPdfBtn) {
             downloadPdfBtn.addEventListener('click', () => {
                 this.downloadMarriagePDFReport(marriageData, marriageResult);
-            });
-        }
-
-        if (downloadImageBtn) {
-            downloadImageBtn.addEventListener('click', () => {
-                this.downloadMarriageImageReport(marriageData, marriageResult);
             });
         }
 
@@ -5286,33 +5193,7 @@ class CyberFortune {
         }, 500);
     }
 
-    // 下载起名长图报告
-    async downloadNamingImageReport(birthData, baziResult, nameSuggestions) {
-        const resultContent = document.querySelector('#qiming-result .result-content');
-        if (!resultContent) {
-            this.showError('没有可下载的报告内容');
-            return;
-        }
-
-        this.showProcessing('正在生成长图报告...');
-
-        try {
-            // 直接截取网页的实际显示效果
-            const canvas = await this.captureWebPageContent(resultContent);
-
-            const link = document.createElement('a');
-            link.download = `赛博起名报告_${birthData.name}_${new Date().toISOString().split('T')[0]}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-
-            this.showSuccess('长图报告已下载');
-        } catch (error) {
-            console.error('生成长图失败:', error);
-            this.showError('生成长图失败: ' + error.message);
-        } finally {
-            this.hideProcessing();
-        }
-    }
+    // 长图下载功能已移除，简化界面
 
     // 下载起名文本报告
     downloadNamingTextReport(birthData, baziResult, nameSuggestions) {
@@ -5705,33 +5586,7 @@ class CyberFortune {
         }, 500);
     }
 
-    // 下载测名长图报告
-    async downloadCemingImageReport(testData, nameAnalysis, baziResult) {
-        const resultContent = document.querySelector('#ceming-result .result-content');
-        if (!resultContent) {
-            this.showError('没有可下载的报告内容');
-            return;
-        }
-
-        this.showProcessing('正在生成长图报告...');
-
-        try {
-            // 直接截取网页的实际显示效果
-            const canvas = await this.captureWebPageContent(resultContent);
-
-            const link = document.createElement('a');
-            link.download = `赛博测名报告_${testData.fullName}_${new Date().toISOString().split('T')[0]}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-
-            this.showSuccess('长图报告已下载');
-        } catch (error) {
-            console.error('生成长图失败:', error);
-            this.showError('生成长图失败: ' + error.message);
-        } finally {
-            this.hideProcessing();
-        }
-    }
+    // 长图下载功能已移除，简化界面
 
     // 下载测名文本报告
     downloadCemingTextReport(testData, nameAnalysis, baziResult) {
@@ -6122,33 +5977,7 @@ class CyberFortune {
         }, 500);
     }
 
-    // 下载合婚长图报告
-    async downloadMarriageImageReport(marriageData, marriageResult) {
-        const resultContent = document.querySelector('#hehun-result .result-content');
-        if (!resultContent) {
-            this.showError('没有可下载的报告内容');
-            return;
-        }
-
-        this.showProcessing('正在生成长图报告...');
-
-        try {
-            // 直接截取网页的实际显示效果
-            const canvas = await this.captureWebPageContent(resultContent);
-
-            const link = document.createElement('a');
-            link.download = `赛博合婚报告_${marriageData.male.name}_${marriageData.female.name}_${new Date().toISOString().split('T')[0]}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-
-            this.showSuccess('长图报告已下载');
-        } catch (error) {
-            console.error('生成长图失败:', error);
-            this.showError('生成长图失败: ' + error.message);
-        } finally {
-            this.hideProcessing();
-        }
-    }
+    // 长图下载功能已移除，简化界面
 
     // 下载合婚文本报告
     downloadMarriageTextReport(marriageData, marriageResult) {
@@ -6356,106 +6185,7 @@ class CyberFortune {
         return animals[(year - 4) % 12];
     }
 
-    // 直接截取网页内容生成长图（保留原始视觉效果）
-    async captureWebPageContent(element) {
-        // 确保库已加载
-        if (typeof html2canvas === 'undefined') {
-            console.log('html2canvas未加载，尝试动态加载...');
-
-            if (typeof window.ensureLibrariesLoaded === 'function') {
-                const loaded = await window.ensureLibrariesLoaded();
-                if (!loaded) {
-                    throw new Error('html2canvas库加载失败，请检查网络连接或尝试刷新页面');
-                }
-            } else {
-                throw new Error('html2canvas库未加载，请刷新页面重试');
-            }
-        }
-
-        console.log('开始截取网页内容...');
-
-        // 临时修改样式以便截图
-        const originalStyle = element.style.cssText;
-
-        // 确保AI分析结果区域完全展开
-        const aiOutputs = element.querySelectorAll('.ai-output, #naming-ai-output, #ceming-ai-output, #ai-marriage-output');
-        const aiOriginalStyles = [];
-
-        aiOutputs.forEach((aiOutput, index) => {
-            aiOriginalStyles[index] = aiOutput.style.cssText;
-            aiOutput.style.cssText = `
-                ${aiOriginalStyles[index]}
-                max-height: none !important;
-                overflow: visible !important;
-                height: auto !important;
-            `;
-        });
-
-        // 设置元素样式以便截图
-        element.style.cssText = `
-            ${originalStyle}
-            position: relative;
-            width: 800px;
-            max-height: none !important;
-            overflow: visible !important;
-            height: auto !important;
-            background: transparent;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        `;
-
-        try {
-            // 等待样式应用
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            // 强制重新计算高度
-            const actualHeight = Math.max(
-                element.scrollHeight,
-                element.offsetHeight,
-                element.clientHeight
-            );
-
-            console.log('截图元素尺寸:', {
-                width: element.offsetWidth,
-                height: actualHeight,
-                scrollHeight: element.scrollHeight
-            });
-
-            // 使用html2canvas截图
-            const canvas = await html2canvas(element, {
-                width: 800,
-                height: actualHeight,
-                scale: 2, // 高清截图
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: null, // 保持透明背景
-                scrollX: 0,
-                scrollY: 0,
-                logging: true, // 启用调试日志
-                onclone: (clonedDoc) => {
-                    // 在克隆的文档中确保样式正确
-                    const clonedElement = clonedDoc.querySelector(`#${element.id} .result-content`) ||
-                                        clonedDoc.querySelector('.result-content');
-                    if (clonedElement) {
-                        clonedElement.style.maxHeight = 'none';
-                        clonedElement.style.overflow = 'visible';
-                        clonedElement.style.height = 'auto';
-                    }
-                }
-            });
-
-            console.log('截图完成，canvas尺寸:', canvas.width, 'x', canvas.height);
-            return canvas;
-
-        } finally {
-            // 恢复原始样式
-            element.style.cssText = originalStyle;
-            aiOutputs.forEach((aiOutput, index) => {
-                aiOutput.style.cssText = aiOriginalStyles[index];
-            });
-        }
-    }
+    // 长图截取功能已移除，简化代码
 }
 
 // 初始化应用
