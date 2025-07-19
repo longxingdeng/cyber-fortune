@@ -83,7 +83,7 @@ Cyberpunk Fortune/
 
 1. **克隆项目**
    ```bash
-   git clone https://github.com/longxingdeng/cyberpunk-fortune.git
+   git clone https://github.com/longxingdeng/cyber-fortune.git
    cd Cyberpunk Fortune
    ```
 
@@ -125,10 +125,10 @@ Cyberpunk Fortune/
 4. **连接GitHub仓库**
    - 选择 "GitHub"
    - 授权Cloudflare访问您的GitHub账户
-   - 选择仓库：`longxingdeng/cyberpunk-fortune-`
+   - 选择仓库：`longxingdeng/cyber-fortune`
 
 5. **配置构建设置**
-   - **项目名称**：`cyberpunk-fortune`（或自定义名称）
+   - **项目名称**：`cyber-fortune`（或自定义名称）
    - **生产分支**：`main`
    - **构建命令**：留空（纯静态网站）
    - **构建输出目录**：`/`（根目录）
