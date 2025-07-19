@@ -5430,6 +5430,101 @@ class CyberFortune {
         this.showSuccess('已打开打印预览，您可以选择"另存为PDF"保存');
     }
 
+    // 生成起名报告HTML（用于长图生成）
+    generateNamingReportHTML(birthData, baziResult, nameSuggestions) {
+        const aiOutput = document.getElementById('naming-ai-output');
+        const aiAnalysis = aiOutput ? aiOutput.innerHTML : '';
+
+        return `
+            <div style="width: 800px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 60%, #1a1a2e 100%); color: white; padding: 40px; box-sizing: border-box; font-family: 'Microsoft YaHei', Arial, sans-serif;">
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <h1 style="font-size: 2.5rem; color: #00d4ff; margin-bottom: 10px; text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);">赛博起名</h1>
+                    <h2 style="font-size: 1.2rem; color: #00ff88; margin: 0;">完整起名分析报告</h2>
+                </div>
+
+                <div style="background: rgba(0, 212, 255, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(0, 212, 255, 0.3);">
+                    <h3 style="color: #00d4ff; margin-bottom: 15px; font-size: 1.3rem;">基本信息</h3>
+                    <div style="line-height: 1.8; font-size: 1.1rem;">
+                        <div><strong style="color: #00ff88;">姓名：</strong>${birthData.name}</div>
+                        <div><strong style="color: #00ff88;">性别：</strong>${birthData.gender}</div>
+                        <div><strong style="color: #00ff88;">出生时间：</strong>${birthData.year}年${birthData.month}月${birthData.day}日 ${birthData.hour.toString().padStart(2, '0')}:${(birthData.minute || 0).toString().padStart(2, '0')}</div>
+                        <div><strong style="color: #00ff88;">出生地区：</strong>${birthData.birthProvince} ${birthData.birthCity}</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0, 255, 136, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(0, 255, 136, 0.3);">
+                    <h3 style="color: #00ff88; margin-bottom: 20px; font-size: 1.3rem;">生辰八字</h3>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 8px;">年柱</div>
+                            <div style="font-size: 1.3rem; font-weight: bold; margin: 8px 0;">${baziResult.yearPillar}</div>
+                            <div style="color: #00ff88; font-size: 0.9rem;">${baziResult.yearTenGod}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 8px;">月柱</div>
+                            <div style="font-size: 1.3rem; font-weight: bold; margin: 8px 0;">${baziResult.monthPillar}</div>
+                            <div style="color: #00ff88; font-size: 0.9rem;">${baziResult.monthTenGod}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 8px;">日柱</div>
+                            <div style="font-size: 1.3rem; font-weight: bold; margin: 8px 0;">${baziResult.dayPillar}</div>
+                            <div style="color: #00ff88; font-size: 0.9rem;">日主${baziResult.dayTianGan}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 8px;">时柱</div>
+                            <div style="font-size: 1.3rem; font-weight: bold; margin: 8px 0;">${baziResult.hourPillar}</div>
+                            <div style="color: #00ff88; font-size: 0.9rem;">${baziResult.hourTenGod}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255, 0, 128, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(255, 0, 128, 0.3);">
+                    <h3 style="color: #ff0080; margin-bottom: 20px; font-size: 1.3rem;">五行分析</h3>
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+                        ${this.generateWuXingStatsHTMLForReport(baziResult)}
+                    </div>
+                </div>
+
+                <div style="background: rgba(0, 212, 255, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(0, 212, 255, 0.3);">
+                    <h3 style="color: #00d4ff; margin-bottom: 20px; font-size: 1.3rem;">起名建议</h3>
+                    ${nameSuggestions.map((suggestion, index) => `
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #00ff88;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: #00ff88; margin-bottom: 10px;">${index + 1}. ${suggestion.name} <span style="color: #00d4ff;">(${suggestion.score}分)</span></div>
+                            <div style="margin: 8px 0;"><strong style="color: #00ff88;">五行：</strong>${suggestion.wuxing}</div>
+                            <div style="margin: 8px 0;"><strong style="color: #00ff88;">寓意：</strong>${suggestion.meaning}</div>
+                            <div style="margin: 8px 0;"><strong style="color: #00ff88;">分析：</strong>${suggestion.analysis}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${aiAnalysis ? `
+                    <div style="background: rgba(0, 255, 136, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(0, 255, 136, 0.3);">
+                        <h3 style="color: #00ff88; margin-bottom: 20px; font-size: 1.3rem;">AI智能分析</h3>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 8px; line-height: 1.8;">
+                            ${aiAnalysis}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div style="text-align: center; margin-top: 40px; padding: 25px; background: rgba(0, 0, 0, 0.3); border-radius: 12px; border-top: 2px solid #00d4ff; color: #ccc;">
+                    报告生成时间：${new Date().toLocaleString('zh-CN')}<br>
+                    本报告由赛博起名系统生成
+                </div>
+            </div>
+        `;
+    }
+
+    // 生成五行统计HTML（用于报告）
+    generateWuXingStatsHTMLForReport(baziResult) {
+        const wuxingStats = this.getWuXingStats(baziResult);
+        return Object.entries(wuxingStats).map(([element, count]) => `
+            <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                <div style="font-weight: bold; color: #00d4ff; margin-bottom: 5px;">${element}</div>
+                <div style="font-size: 1.2rem; color: #00ff88;">${count}个</div>
+            </div>
+        `).join('');
+    }
+
     // 生成起名可打印HTML
     generateNamingPrintableHTML(birthData, baziResult, nameSuggestions) {
         const aiOutput = document.getElementById('naming-ai-output');
@@ -5755,6 +5850,121 @@ class CyberFortune {
         this.showSuccess('已打开打印预览，您可以选择"另存为PDF"保存');
     }
 
+    // 生成测名报告HTML（用于长图生成）
+    generateCemingReportHTML(testData, nameAnalysis, baziResult) {
+        const aiOutput = document.getElementById('ceming-ai-output');
+        const aiAnalysis = aiOutput ? aiOutput.innerHTML : '';
+
+        return `
+            <div style="width: 800px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 60%, #1a1a2e 100%); color: white; padding: 40px; box-sizing: border-box; font-family: 'Microsoft YaHei', Arial, sans-serif;">
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <h1 style="font-size: 2.5rem; color: #00d4ff; margin-bottom: 10px; text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);">赛博测名</h1>
+                    <h2 style="font-size: 1.2rem; color: #00ff88; margin: 0;">完整姓名分析报告</h2>
+                </div>
+
+                <div style="background: rgba(0, 212, 255, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(0, 212, 255, 0.3);">
+                    <h3 style="color: #00d4ff; margin-bottom: 15px; font-size: 1.3rem;">基本信息</h3>
+                    <div style="line-height: 1.8; font-size: 1.1rem;">
+                        <div><strong style="color: #00ff88;">姓名：</strong>${testData.fullName}</div>
+                        <div><strong style="color: #00ff88;">性别：</strong>${testData.gender}</div>
+                        <div><strong style="color: #00ff88;">出生时间：</strong>${testData.year}年${testData.month}月${testData.day}日 ${testData.hour.toString().padStart(2, '0')}:${(testData.minute || 0).toString().padStart(2, '0')}</div>
+                        <div><strong style="color: #00ff88;">出生地区：</strong>${testData.birthProvince} ${testData.birthCity}</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <div style="display: inline-block; width: 150px; height: 150px; border: 4px solid #00d4ff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 212, 255, 0.1);">
+                        <div style="font-size: 3rem; font-weight: bold; color: #00d4ff;">${nameAnalysis.score}</div>
+                        <div style="font-size: 1.2rem; color: #00ff88;">分</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0, 255, 136, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(0, 255, 136, 0.3);">
+                    <h3 style="color: #00ff88; margin-bottom: 20px; font-size: 1.3rem;">生辰八字</h3>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 8px;">年柱</div>
+                            <div style="font-size: 1.3rem; font-weight: bold; margin: 8px 0;">${baziResult.yearPillar}</div>
+                            <div style="color: #00ff88; font-size: 0.9rem;">${baziResult.yearTenGod}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 8px;">月柱</div>
+                            <div style="font-size: 1.3rem; font-weight: bold; margin: 8px 0;">${baziResult.monthPillar}</div>
+                            <div style="color: #00ff88; font-size: 0.9rem;">${baziResult.monthTenGod}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 8px;">日柱</div>
+                            <div style="font-size: 1.3rem; font-weight: bold; margin: 8px 0;">${baziResult.dayPillar}</div>
+                            <div style="color: #00ff88; font-size: 0.9rem;">日主${baziResult.dayTianGan}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 8px;">时柱</div>
+                            <div style="font-size: 1.3rem; font-weight: bold; margin: 8px 0;">${baziResult.hourPillar}</div>
+                            <div style="color: #00ff88; font-size: 0.9rem;">${baziResult.hourTenGod}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255, 0, 128, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(255, 0, 128, 0.3);">
+                    <h3 style="color: #ff0080; margin-bottom: 20px; font-size: 1.3rem;">五格数理</h3>
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px;">
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(255, 0, 128, 0.3);">
+                            <div style="color: #ff0080; font-weight: bold; margin-bottom: 8px;">天格</div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #00d4ff;">${nameAnalysis.wuGe.tianGe}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(255, 0, 128, 0.3);">
+                            <div style="color: #ff0080; font-weight: bold; margin-bottom: 8px;">人格</div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #00d4ff;">${nameAnalysis.wuGe.renGe}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(255, 0, 128, 0.3);">
+                            <div style="color: #ff0080; font-weight: bold; margin-bottom: 8px;">地格</div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #00d4ff;">${nameAnalysis.wuGe.diGe}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(255, 0, 128, 0.3);">
+                            <div style="color: #ff0080; font-weight: bold; margin-bottom: 8px;">外格</div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #00d4ff;">${nameAnalysis.wuGe.waiGe}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border: 1px solid rgba(255, 0, 128, 0.3);">
+                            <div style="color: #ff0080; font-weight: bold; margin-bottom: 8px;">总格</div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #00d4ff;">${nameAnalysis.wuGe.zongGe}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0, 212, 255, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(0, 212, 255, 0.3);">
+                    <h3 style="color: #00d4ff; margin-bottom: 15px; font-size: 1.3rem;">三才配置</h3>
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #00ff88; margin-bottom: 10px;">
+                            ${nameAnalysis.sanCai.tianWuXing}${nameAnalysis.sanCai.renWuXing}${nameAnalysis.sanCai.diWuXing}
+                        </div>
+                        <div style="color: #00d4ff; font-size: 1.1rem;">(${nameAnalysis.sanCai.jiXiong})</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0, 255, 136, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(0, 255, 136, 0.3);">
+                    <h3 style="color: #00ff88; margin-bottom: 20px; font-size: 1.3rem;">基础分析</h3>
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 8px; line-height: 1.8; white-space: pre-wrap;">
+                        ${nameAnalysis.analysis}
+                    </div>
+                </div>
+
+                ${aiAnalysis ? `
+                    <div style="background: rgba(255, 0, 128, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(255, 0, 128, 0.3);">
+                        <h3 style="color: #ff0080; margin-bottom: 20px; font-size: 1.3rem;">AI智能分析</h3>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 8px; line-height: 1.8;">
+                            ${aiAnalysis}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div style="text-align: center; margin-top: 40px; padding: 25px; background: rgba(0, 0, 0, 0.3); border-radius: 12px; border-top: 2px solid #00d4ff; color: #ccc;">
+                    报告生成时间：${new Date().toLocaleString('zh-CN')}<br>
+                    本报告由赛博测名系统生成
+                </div>
+            </div>
+        `;
+    }
+
     // 生成测名可打印HTML
     generateCemingPrintableHTML(testData, nameAnalysis, baziResult) {
         const aiOutput = document.getElementById('ceming-ai-output');
@@ -6056,6 +6266,111 @@ class CyberFortune {
         };
 
         this.showSuccess('已打开打印预览，您可以选择"另存为PDF"保存');
+    }
+
+    // 生成合婚报告HTML（用于长图生成）
+    generateMarriageReportHTML(marriageData, marriageResult) {
+        const aiOutput = document.getElementById('ai-marriage-output');
+        const aiAnalysis = aiOutput ? aiOutput.innerHTML : '';
+
+        return `
+            <div style="width: 800px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 60%, #1a1a2e 100%); color: white; padding: 40px; box-sizing: border-box; font-family: 'Microsoft YaHei', Arial, sans-serif;">
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <h1 style="font-size: 2.5rem; color: #00d4ff; margin-bottom: 10px; text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);">赛博合婚</h1>
+                    <h2 style="font-size: 1.2rem; color: #00ff88; margin: 0;">完整合婚分析报告</h2>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0;">
+                    <div style="background: rgba(0, 212, 255, 0.1); padding: 25px; border-radius: 12px; border: 1px solid rgba(0, 212, 255, 0.3);">
+                        <h3 style="color: #00d4ff; margin-bottom: 15px; font-size: 1.3rem; text-align: center;">👨 男方信息</h3>
+                        <div style="line-height: 1.8; font-size: 1rem;">
+                            <div><strong style="color: #00ff88;">姓名：</strong>${marriageData.male.name}</div>
+                            <div><strong style="color: #00ff88;">出生：</strong>${marriageData.male.year}年${marriageData.male.month}月${marriageData.male.day}日</div>
+                            <div><strong style="color: #00ff88;">时间：</strong>${marriageData.male.hour.toString().padStart(2, '0')}:${(marriageData.male.minute || 0).toString().padStart(2, '0')}</div>
+                            <div><strong style="color: #00ff88;">地区：</strong>${marriageData.male.birthProvince || '未知'} ${marriageData.male.birthCity || '未知'}</div>
+                            <div><strong style="color: #00ff88;">生肖：</strong>${this.getZodiacAnimal(marriageData.male.year)}</div>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255, 0, 128, 0.1); padding: 25px; border-radius: 12px; border: 1px solid rgba(255, 0, 128, 0.3);">
+                        <h3 style="color: #ff0080; margin-bottom: 15px; font-size: 1.3rem; text-align: center;">👩 女方信息</h3>
+                        <div style="line-height: 1.8; font-size: 1rem;">
+                            <div><strong style="color: #00ff88;">姓名：</strong>${marriageData.female.name}</div>
+                            <div><strong style="color: #00ff88;">出生：</strong>${marriageData.female.year}年${marriageData.female.month}月${marriageData.female.day}日</div>
+                            <div><strong style="color: #00ff88;">时间：</strong>${marriageData.female.hour.toString().padStart(2, '0')}:${(marriageData.female.minute || 0).toString().padStart(2, '0')}</div>
+                            <div><strong style="color: #00ff88;">地区：</strong>${marriageData.female.birthProvince || '未知'} ${marriageData.female.birthCity || '未知'}</div>
+                            <div><strong style="color: #00ff88;">生肖：</strong>${this.getZodiacAnimal(marriageData.female.year)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <div style="display: inline-block; width: 150px; height: 150px; border: 4px solid #00d4ff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 212, 255, 0.1);">
+                        <div style="font-size: 2.5rem; font-weight: bold; color: #00d4ff;">${marriageResult.totalScore}</div>
+                        <div style="font-size: 1rem; color: #00ff88;">分</div>
+                        <div style="font-size: 0.9rem; color: #ff0080; margin-top: 5px;">${marriageResult.level}</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0, 255, 136, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(0, 255, 136, 0.3);">
+                    <h3 style="color: #00ff88; margin-bottom: 20px; font-size: 1.3rem;">合婚分析详情</h3>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; border-left: 4px solid #00d4ff;">
+                            <div style="color: #00d4ff; font-weight: bold; margin-bottom: 8px;">生肖配对</div>
+                            <div style="color: #00ff88; font-size: 1.2rem; margin-bottom: 5px;">${marriageResult.shengXiaoMatch.score}分</div>
+                            <div style="font-size: 0.9rem; line-height: 1.5;">${marriageResult.shengXiaoMatch.analysis}</div>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; border-left: 4px solid #ff0080;">
+                            <div style="color: #ff0080; font-weight: bold; margin-bottom: 8px;">五行配对</div>
+                            <div style="color: #00ff88; font-size: 1.2rem; margin-bottom: 5px;">${marriageResult.wuXingMatch.score}分</div>
+                            <div style="font-size: 0.9rem; line-height: 1.5;">${marriageResult.wuXingMatch.analysis}</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; border-left: 4px solid #00ff88;">
+                            <div style="color: #00ff88; font-weight: bold; margin-bottom: 8px;">十神配对</div>
+                            <div style="color: #00ff88; font-size: 1.2rem; margin-bottom: 5px;">${marriageResult.shiShenMatch.score}分</div>
+                            <div style="font-size: 0.9rem; line-height: 1.5;">${marriageResult.shiShenMatch.analysis}</div>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; border-left: 4px solid #ffa500;">
+                            <div style="color: #ffa500; font-weight: bold; margin-bottom: 8px;">年龄配对</div>
+                            <div style="color: #00ff88; font-size: 1.2rem; margin-bottom: 5px;">${marriageResult.ageMatch.score}分</div>
+                            <div style="font-size: 0.9rem; line-height: 1.5;">${marriageResult.ageMatch.analysis}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255, 0, 128, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(255, 0, 128, 0.3);">
+                    <h3 style="color: #ff0080; margin-bottom: 20px; font-size: 1.3rem;">改进建议</h3>
+                    ${marriageResult.suggestions.map((suggestion, index) => `
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #00ff88;">
+                            <div style="color: #00ff88; font-weight: bold;">${index + 1}. ${suggestion}</div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${aiAnalysis ? `
+                    <div style="background: rgba(0, 212, 255, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(0, 212, 255, 0.3);">
+                        <h3 style="color: #00d4ff; margin-bottom: 20px; font-size: 1.3rem;">AI智能分析</h3>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 8px; line-height: 1.8;">
+                            ${aiAnalysis}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div style="text-align: center; margin-top: 40px; padding: 25px; background: rgba(0, 0, 0, 0.3); border-radius: 12px; border-top: 2px solid #00d4ff; color: #ccc;">
+                    报告生成时间：${new Date().toLocaleString('zh-CN')}<br>
+                    本报告由赛博合婚系统生成
+                </div>
+            </div>
+        `;
+    }
+
+    // 获取生肖动物
+    getZodiacAnimal(year) {
+        const animals = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+        return animals[(year - 4) % 12];
     }
 }
 
