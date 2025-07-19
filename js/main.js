@@ -565,10 +565,7 @@ class CyberFortune {
                         <span>🤖 生成AI分析</span>
                         <div class="button-glow"></div>
                     </button>
-                    <button class="cyber-button secondary" onclick="cyberFortune.copyPrompt()">
-                        <span>📋 复制提示词</span>
-                        <div class="button-glow"></div>
-                    </button>
+                    <!-- 复制提示词按钮已隐藏，保护商业机密 -->
                 </div>
 
                 <!-- 处理状态显示 -->
@@ -592,15 +589,7 @@ class CyberFortune {
                 <!-- 错误信息显示 -->
                 <div class="api-error-message" id="ai-error-message" style="display: none;"></div>
 
-                <!-- 提示词预览（折叠） -->
-                <div class="analysis-prompt">
-                    <h5 onclick="cyberFortune.togglePrompt()" style="cursor: pointer;">
-                        📝 分析提示词 <span id="prompt-toggle">▼</span>
-                    </h5>
-                    <div class="prompt-content" id="prompt-content" style="display: none;">
-                        <pre>${prompt}</pre>
-                    </div>
-                </div>
+                <!-- 提示词已隐藏，保护商业机密 -->
             </div>
 
             <div class="result-actions">
@@ -794,25 +783,7 @@ class CyberFortune {
         `;
     }
 
-    // 复制提示词到剪贴板
-    async copyPrompt() {
-        const promptElement = document.querySelector('.prompt-content pre');
-        if (!promptElement) return;
-
-        try {
-            await navigator.clipboard.writeText(promptElement.textContent);
-            this.showSuccess('提示词已复制到剪贴板');
-        } catch (err) {
-            // 降级方案
-            const textArea = document.createElement('textarea');
-            textArea.value = promptElement.textContent;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            this.showSuccess('提示词已复制到剪贴板');
-        }
-    }
+    // 复制提示词功能已移除，保护商业机密
 
     // 生成PDF报告（使用打印预览）
     downloadPDFReport() {
@@ -1314,7 +1285,7 @@ class CyberFortune {
                         <div class="pillar-label">日柱</div>
                         <div class="pillar-chars">${baziResult.dayPillar}</div>
                         <div class="pillar-wuxing">${this.getPillarWuXing(baziResult.dayPillar)}</div>
-                        <div class="pillar-god">日主：${baziResult.dayTianGan}</div>
+                        <div class="pillar-god">日主${baziResult.dayTianGan}</div>
                     </div>
                     <div class="pillar">
                         <div class="pillar-label">时柱</div>
@@ -1419,16 +1390,7 @@ class CyberFortune {
                     </div>
                 </div>
 
-                <!-- 提示词预览 -->
-                <div class="prompt-preview">
-                    <div class="prompt-header" onclick="this.parentElement.classList.toggle('expanded')">
-                        <h5>📋 AI分析提示词预览</h5>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="prompt-content">
-                        <pre>${aiPrompt}</pre>
-                    </div>
-                </div>
+                <!-- 提示词已隐藏，保护商业机密 -->
             </div>
         `;
 
@@ -2234,6 +2196,8 @@ class CyberFortune {
         const errorMessage = document.getElementById('ai-error-message');
         errorMessage.textContent = `❌ ${message}`;
         errorMessage.style.display = 'block';
+
+        // 不再显示复制提示词按钮，保护商业机密
     }
 
     // 复制AI分析结果
@@ -2260,19 +2224,7 @@ class CyberFortune {
         document.body.removeChild(textArea);
     }
 
-    // 切换提示词显示
-    togglePrompt() {
-        const promptContent = document.getElementById('prompt-content');
-        const toggle = document.getElementById('prompt-toggle');
-
-        if (promptContent.style.display === 'none') {
-            promptContent.style.display = 'block';
-            toggle.textContent = '▲';
-        } else {
-            promptContent.style.display = 'none';
-            toggle.textContent = '▼';
-        }
-    }
+    // 提示词切换功能已移除，保护商业机密
 
     // 生成用于PDF/图片的HTML报告
     generateReportHTML() {
