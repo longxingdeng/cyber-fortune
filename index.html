@@ -27,8 +27,73 @@
                 <a href="javascript:void(0)" class="nav-item" data-section="ceming">赛博测名</a>
                 <a href="javascript:void(0)" class="nav-item" data-section="hehun">赛博合婚</a>
             </div>
+            <div class="nav-config">
+                <button class="config-toggle" id="config-toggle">
+                    <span>⚙️</span>
+                    <span class="config-text">AI配置</span>
+                </button>
+            </div>
         </div>
     </nav>
+
+    <!-- 全局AI配置面板 -->
+    <div class="global-config-panel" id="global-config-panel" style="display: none;">
+        <div class="config-overlay" id="config-overlay"></div>
+        <div class="config-content">
+            <div class="config-header">
+                <h3>🤖 全局AI配置</h3>
+                <p>配置一次，所有模块共用</p>
+                <button class="config-close" id="config-close">✕</button>
+            </div>
+
+            <div class="config-form">
+                <div class="config-row">
+                    <div class="config-item">
+                        <label for="global-api-url">API地址:</label>
+                        <input type="text" id="global-api-url" placeholder="https://api.deepseek.com/v1/chat/completions"
+                               value="https://api.deepseek.com/v1/chat/completions">
+                    </div>
+                    <div class="config-item">
+                        <label for="global-api-key">API密钥:</label>
+                        <input type="password" id="global-api-key" placeholder="请输入您的API密钥">
+                    </div>
+                </div>
+                <div class="config-row">
+                    <div class="config-item">
+                        <label for="global-model">模型:</label>
+                        <select id="global-model">
+                            <option value="deepseek-r1" selected>DeepSeek-R1 (推荐)</option>
+                            <option value="deepseek-chat">DeepSeek-Chat</option>
+                            <option value="gpt-4">GPT-4</option>
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="claude-3-sonnet">Claude-3 Sonnet</option>
+                            <option value="claude-3-haiku">Claude-3 Haiku</option>
+                            <option value="qwen-max">通义千问-Max</option>
+                            <option value="glm-4">智谱GLM-4</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label>状态:</label>
+                        <div class="config-status" id="config-status">
+                            <span class="status-indicator">⚪</span>
+                            <span class="status-text">未配置</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-actions">
+                <button class="cyber-button" id="save-global-config">
+                    <span>💾 保存配置</span>
+                    <div class="button-glow"></div>
+                </button>
+                <button class="cyber-button secondary" id="test-global-config">
+                    <span>🔍 测试连接</span>
+                    <div class="button-glow"></div>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- 主页面 -->
     <main class="main-container">
@@ -426,6 +491,21 @@
                                     </select>
                                 </div>
                                 <small class="time-hint">请选择准确的出生时间，用于真太阳时修正</small>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>出生省份</label>
+                                <select name="birthProvince" required>
+                                    <option value="">选择省份</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生城市</label>
+                                <select name="birthCity" required>
+                                    <option value="">选择城市</option>
+                                </select>
                             </div>
                         </div>
 

@@ -23,6 +23,7 @@ class CyberFortune {
         this.setupForms();
         this.populateSelects();
         this.setupEventListeners();
+        this.initGlobalConfig();
     }
 
     // 设置导航
@@ -526,37 +527,13 @@ class CyberFortune {
             <div class="ai-analysis">
                 <h4>AI命理分析</h4>
 
-                <!-- AI分析配置区域 -->
-                <div class="ai-config-section">
-                    <div class="config-row">
-                        <div class="config-item">
-                            <label for="llm-api-url">API地址：</label>
-                            <input type="text" id="llm-api-url" placeholder="https://api.deepseek.com/v1/chat/completions"
-                                   value="https://api.deepseek.com/v1/chat/completions">
-                        </div>
-                        <div class="config-item">
-                            <label for="llm-api-key">API密钥：</label>
-                            <input type="password" id="llm-api-key" placeholder="请输入您的API密钥">
-                        </div>
-                    </div>
-                    <div class="config-row">
-                        <div class="config-item">
-                            <label for="llm-model">模型选择：</label>
-                            <select id="llm-model">
-                                <option value="deepseek-r1">DeepSeek-R1</option>
-                                <option value="deepseek-chat">DeepSeek-Chat</option>
-                                <option value="gpt-4">GPT-4</option>
-                                <option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
-                                <option value="claude-3-sonnet">Claude-3-Sonnet</option>
-                            </select>
-                        </div>
-                        <div class="config-item">
-                            <label>
-                                <input type="checkbox" id="add-ziwei-analysis" checked>
-                                包含紫薇斗数分析
-                            </label>
-                        </div>
-                    </div>
+                <!-- 分析选项 -->
+                <div class="analysis-options">
+                    <label class="option-checkbox">
+                        <input type="checkbox" id="add-ziwei-analysis" checked>
+                        <span class="checkmark"></span>
+                        包含紫薇斗数分析
+                    </label>
                 </div>
 
                 <!-- 分析按钮 -->
@@ -666,9 +643,16 @@ class CyberFortune {
 
     // 生成AI分析
     async generateAIAnalysis(birthData, baziResult, prompt, ziweiResult) {
-        const apiUrl = document.getElementById('llm-api-url').value.trim();
-        const apiKey = document.getElementById('llm-api-key').value.trim();
-        const modelName = document.getElementById('llm-model').value;
+        // 使用全局配置
+        const globalConfig = this.getGlobalConfig();
+        if (!globalConfig) {
+            this.showAIError('请先在右上角配置AI设置');
+            return;
+        }
+
+        const apiUrl = globalConfig.apiUrl;
+        const apiKey = globalConfig.apiKey;
+        const modelName = globalConfig.model;
         const includeZiwei = document.getElementById('add-ziwei-analysis').checked;
 
         // 验证输入
@@ -1145,7 +1129,10 @@ class CyberFortune {
             year: parseInt(formData.get('birthYear')),
             month: parseInt(formData.get('birthMonth')),
             day: parseInt(formData.get('birthDay')),
-            hour: parseInt(formData.get('birthHour'))
+            hour: parseInt(formData.get('birthHour')),
+            minute: parseInt(formData.get('birthMinute')) || 0,
+            birthProvince: formData.get('birthProvince'),
+            birthCity: formData.get('birthCity')
         };
 
         if (!this.validateCemingData(testData)) {
@@ -1162,7 +1149,7 @@ class CyberFortune {
             // 分析姓名
             const nameAnalysis = this.nameCalculator.analyzeName(testData.fullName, baziResult);
 
-            this.displayCemingResult(testData, nameAnalysis);
+            this.displayCemingResult(testData, nameAnalysis, baziResult);
 
         } catch (error) {
             console.error('测名错误:', error);
@@ -1238,7 +1225,8 @@ class CyberFortune {
 
     // 验证测名数据
     validateCemingData(data) {
-        return data.fullName && data.gender && data.year && data.month && data.day && data.hour !== null;
+        return data.fullName && data.gender && data.year && data.month && data.day &&
+               data.hour !== null && data.birthProvince && data.birthCity;
     }
 
     // 验证合婚数据
@@ -1342,30 +1330,6 @@ class CyberFortune {
 
                 <!-- AI分析控制 -->
                 <div class="ai-naming-controls">
-                    <div class="ai-config">
-                        <div class="config-row">
-                            <label for="naming-api-url">API地址:</label>
-                            <input type="text" id="naming-api-url" placeholder="https://api.deepseek.com/v1/chat/completions"
-                                   value="https://api.deepseek.com/v1/chat/completions">
-                        </div>
-                        <div class="config-row">
-                            <label for="naming-api-key">API密钥:</label>
-                            <input type="password" id="naming-api-key" placeholder="请输入您的API密钥">
-                        </div>
-                        <div class="config-row">
-                            <label for="naming-model">模型:</label>
-                            <select id="naming-model">
-                                <option value="deepseek-r1" selected>DeepSeek-R1 (推荐)</option>
-                                <option value="deepseek-chat">DeepSeek-Chat</option>
-                                <option value="gpt-4">GPT-4</option>
-                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                                <option value="claude-3-sonnet">Claude-3 Sonnet</option>
-                                <option value="claude-3-haiku">Claude-3 Haiku</option>
-                                <option value="qwen-max">通义千问-Max</option>
-                                <option value="glm-4">智谱GLM-4</option>
-                            </select>
-                        </div>
-                    </div>
                     <button class="cyber-button" id="generate-ai-naming">
                         <span>🤖 生成AI起名分析</span>
                         <div class="button-glow"></div>
@@ -1398,9 +1362,6 @@ class CyberFortune {
 
         // 绑定AI起名分析事件
         this.bindAINamingEvents(birthData, baziResult, nameSuggestions, aiPrompt);
-
-        // 绑定模型切换事件
-        this.bindModelSwitchEvents();
 
         // 显示结果面板
         resultPanel.style.display = 'block';
@@ -1541,9 +1502,16 @@ class CyberFortune {
 
     // 生成AI起名分析
     async generateAINamingAnalysis(birthData, baziResult, nameSuggestions, aiPrompt) {
-        const apiUrl = document.getElementById('naming-api-url').value.trim();
-        const apiKey = document.getElementById('naming-api-key').value.trim();
-        const modelName = document.getElementById('naming-model').value;
+        // 使用全局配置
+        const globalConfig = this.getGlobalConfig();
+        if (!globalConfig) {
+            this.showAINamingError('请先在右上角配置AI设置');
+            return;
+        }
+
+        const apiUrl = globalConfig.apiUrl;
+        const apiKey = globalConfig.apiKey;
+        const modelName = globalConfig.model;
 
         // 验证输入
         if (!apiKey) {
@@ -1794,17 +1762,59 @@ class CyberFortune {
     }
 
     // 显示测名结果
-    displayCemingResult(testData, nameAnalysis) {
+    displayCemingResult(testData, nameAnalysis, baziResult) {
         const resultPanel = document.getElementById('ceming-result');
         const resultContent = resultPanel.querySelector('.result-content');
 
         if (!resultPanel || !resultContent) return;
 
+        // 生成AI分析提示词
+        const aiPrompt = this.generateCemingAIPrompt(testData, nameAnalysis, baziResult);
+
         const resultHTML = `
             <div class="result-header">
                 <h3 class="result-title">姓名分析报告</h3>
                 <div class="result-info">
-                    <span>${testData.fullName} | ${testData.gender}</span>
+                    <span>${testData.fullName} | ${testData.gender} | ${testData.year}年${testData.month}月${testData.day}日 ${testData.hour.toString().padStart(2, '0')}:${(testData.minute || 0).toString().padStart(2, '0')} | ${testData.birthProvince} ${testData.birthCity}</span>
+                </div>
+            </div>
+
+            <!-- 八字信息 -->
+            <div class="bazi-info">
+                <h4>生辰八字</h4>
+                <div class="bazi-pillars">
+                    <div class="pillar">
+                        <div class="pillar-label">年柱</div>
+                        <div class="pillar-chars">${baziResult.yearPillar}</div>
+                        <div class="pillar-wuxing">${this.getPillarWuXing(baziResult.yearPillar)}</div>
+                        <div class="pillar-god">${baziResult.yearTenGod}</div>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-label">月柱</div>
+                        <div class="pillar-chars">${baziResult.monthPillar}</div>
+                        <div class="pillar-wuxing">${this.getPillarWuXing(baziResult.monthPillar)}</div>
+                        <div class="pillar-god">${baziResult.monthTenGod}</div>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-label">日柱</div>
+                        <div class="pillar-chars">${baziResult.dayPillar}</div>
+                        <div class="pillar-wuxing">${this.getPillarWuXing(baziResult.dayPillar)}</div>
+                        <div class="pillar-god">日主${baziResult.dayTianGan}</div>
+                    </div>
+                    <div class="pillar">
+                        <div class="pillar-label">时柱</div>
+                        <div class="pillar-chars">${baziResult.hourPillar}</div>
+                        <div class="pillar-wuxing">${this.getPillarWuXing(baziResult.hourPillar)}</div>
+                        <div class="pillar-god">${baziResult.hourTenGod}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 五行分析 -->
+            <div class="wuxing-analysis">
+                <h4>五行分析</h4>
+                <div class="wuxing-stats">
+                    ${this.generateWuXingStats(baziResult)}
                 </div>
             </div>
 
@@ -1849,17 +1859,515 @@ class CyberFortune {
                     </div>
 
                     <div class="detail-section">
-                        <h4>详细分析</h4>
+                        <h4>基础分析</h4>
                         <pre class="analysis-text">${nameAnalysis.analysis}</pre>
                     </div>
                 </div>
             </div>
+
+            <!-- AI深度分析区域 -->
+            <div class="ai-naming-analysis">
+                <div class="ai-naming-header">
+                    <h4>AI深度测名分析</h4>
+                    <p>基于八字命理、五格数理、字义内涵、音韵美学等多维度的专业分析</p>
+                    <div class="model-recommendation">
+                        <span class="rec-icon">💡</span>
+                        <span class="rec-text">推荐使用 <strong>DeepSeek-R1</strong>：具备强大的推理能力，能深入分析字义内涵和诗词典故</span>
+                    </div>
+                </div>
+
+
+
+                <!-- 分析按钮 -->
+                <div class="analysis-actions">
+                    <button class="cyber-button" id="generate-ceming-ai-analysis">
+                        <span>🤖 生成AI深度分析</span>
+                        <div class="button-glow"></div>
+                    </button>
+                </div>
+
+                <!-- 处理状态显示 -->
+                <div class="processing-box" id="ceming-ai-processing" style="display: none;">
+                    <div class="processing-message" id="ceming-processing-message">正在初始化AI分析...</div>
+                    <div class="processing-steps" id="ceming-processing-steps"></div>
+                </div>
+
+                <!-- AI分析结果 -->
+                <div class="ai-result-section" id="ceming-ai-result-section" style="display: none;">
+                    <h5>AI深度分析结果：</h5>
+                    <div class="ai-output" id="ceming-ai-output"></div>
+                    <div class="result-actions">
+                        <button class="cyber-button" id="copy-ceming-ai-result" style="display: none;">
+                            <span>📄 复制分析结果</span>
+                            <div class="button-glow"></div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 错误信息显示 -->
+                <div class="api-error-message" id="ceming-ai-error-message" style="display: none;"></div>
+
+                <!-- 提示词已隐藏，保护商业机密 -->
+            </div>
         `;
 
         resultContent.innerHTML = resultHTML;
+
+        // 绑定AI分析事件
+        this.bindCemingAIEvents(testData, nameAnalysis, baziResult, aiPrompt);
+
+        // 绑定模型切换事件
+        this.bindCemingModelSwitchEvents();
+
         resultPanel.style.display = 'block';
         resultPanel.classList.add('show');
         resultPanel.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 生成测名AI分析提示词
+    generateCemingAIPrompt(testData, nameAnalysis, baziResult) {
+        const { fullName, gender, year, month, day, hour, minute, birthProvince, birthCity } = testData;
+        const { yearPillar, monthPillar, dayPillar, hourPillar, yearTenGod, monthTenGod, hourTenGod, dayTianGan } = baziResult;
+
+        let prompt = "";
+
+        // 系统角色定义
+        prompt += `你是一位精通中国传统姓名学和现代起名理论的专家，擅长结合八字命理、五格数理、三才配置、字义内涵、音韵美学等多个维度进行综合姓名分析。\n\n`;
+
+        prompt += `你具备深厚的古典文学功底，熟悉《诗经》、《楚辞》、《论语》、《孟子》、《唐诗三百首》、《宋词》、《元曲》等经典文献，能够准确分析汉字的本义、引申义、文化内涵和诗词出处。你善于从古典诗词中寻找美好的字词寓意，为姓名分析提供深厚的文化底蕴。\n\n`;
+
+        prompt += `请运用你的推理能力，逐步分析姓名的各个维度。特别是在分析字义内涵时，请深入挖掘每个字的文化内涵和诗词典故，尽可能找出其在古典诗词中的具体出处和美好寓意。\n\n`;
+
+        prompt += `**重要要求**：\n`;
+        prompt += `1. 请深入分析姓名与八字的匹配程度\n`;
+        prompt += `2. 基于八字命理需求，评估姓名的优缺点\n`;
+        prompt += `3. 如果发现姓名有不足之处，请提出具体的改进建议\n`;
+        prompt += `4. 对姓名的字义、音韵、文化内涵进行详细分析\n`;
+        prompt += `5. 提供实用的人生建议和注意事项\n\n`;
+
+        // 基本信息
+        prompt += `求名者基本信息：\n`;
+        prompt += `姓名：${fullName}\n`;
+        prompt += `性别：${gender}\n`;
+        prompt += `出生时间：${year}年${month}月${day}日${hour}时${(minute || 0).toString().padStart(2, '0')}分\n`;
+        prompt += `出生地区：${birthProvince || '未知'} ${birthCity || '未知'}\n\n`;
+
+        // 八字信息
+        prompt += `生辰八字：\n`;
+        prompt += `年柱：${yearPillar} (${yearTenGod})\n`;
+        prompt += `月柱：${monthPillar} (${monthTenGod})\n`;
+        prompt += `日柱：${dayPillar} (日主：${dayTianGan})\n`;
+        prompt += `时柱：${hourPillar} (${hourTenGod})\n\n`;
+
+        // 五行分析
+        const neededWuXing = this.nameCalculator.analyzeBaziWuXing(baziResult);
+        prompt += `八字五行分析：\n`;
+        prompt += `需要补充的五行：${neededWuXing.join('、')}\n`;
+        prompt += `五行强弱分析：请根据八字分析五行的旺衰情况\n`;
+        prompt += `姓名建议：请分析当前姓名的五行属性是否与八字需求匹配，是否有助于平衡命理。\n\n`;
+
+        // 姓名分析信息
+        prompt += `姓名分析结果：\n`;
+        prompt += `五格数理：天格${nameAnalysis.wuGe.tianGe}、人格${nameAnalysis.wuGe.renGe}、地格${nameAnalysis.wuGe.diGe}、外格${nameAnalysis.wuGe.waiGe}、总格${nameAnalysis.wuGe.zongGe}\n`;
+        prompt += `三才配置：${nameAnalysis.sanCai.tianWuXing}${nameAnalysis.sanCai.renWuXing}${nameAnalysis.sanCai.diWuXing} (${nameAnalysis.sanCai.jiXiong})\n`;
+        prompt += `综合评分：${nameAnalysis.score}分\n\n`;
+
+        // 输出格式要求
+        prompt += `请按以下格式输出分析结果：\n\n`;
+        prompt += `## 🎯 AI深度测名分析报告\n\n`;
+        prompt += `### 📊 姓名综合评估\n\n`;
+        prompt += `**AI综合评分**：[分数]/100\n`;
+        prompt += `**八字匹配度**：[详细分析姓名与八字的匹配程度]\n`;
+        prompt += `**五格数理分析**：[详细分析五格配置的吉凶]\n`;
+        prompt += `**三才配置分析**：[详细分析三才配置的影响]\n\n`;
+
+        prompt += `### 📚 字义文化分析\n\n`;
+        const surname = fullName[0];
+        const firstName = fullName.slice(1);
+        prompt += `**姓氏分析**：\n`;
+        prompt += `- ${surname}：姓氏来源、历史文化、家族寓意\n\n`;
+        prompt += `**名字分析**：\n`;
+        for (let i = 0; i < firstName.length; i++) {
+            prompt += `- ${firstName[i]}：字义、出处典故、文化内涵、诗词引用\n`;
+        }
+        prompt += `- 整体寓意：姓名组合的整体含义和文化底蕴\n\n`;
+
+        prompt += `### 🎵 音韵美学分析\n\n`;
+        prompt += `**声调搭配**：[分析声调的和谐程度]\n`;
+        prompt += `**音韵效果**：[分析读音的美感和朗朗上口程度]\n`;
+        prompt += `**谐音分析**：[检查是否有不良谐音]\n\n`;
+
+        prompt += `### 🔮 命理匹配分析\n\n`;
+        prompt += `**五行补益**：[分析姓名五行对八字的补益作用]\n`;
+        prompt += `**格局影响**：[分析姓名对命理格局的影响]\n`;
+        prompt += `**运势助力**：[分析姓名对各方面运势的助力]\n\n`;
+
+        prompt += `### 💡 改进建议\n\n`;
+        prompt += `**优点总结**：[总结姓名的优点和亮点]\n`;
+        prompt += `**不足之处**：[指出姓名的不足或需要注意的地方]\n`;
+        prompt += `**改进方向**：[如果需要改名，提供具体的改进建议]\n`;
+        prompt += `**使用建议**：[如何更好地发挥姓名的正面作用]\n\n`;
+
+        prompt += `### 🌟 人生指导\n\n`;
+        prompt += `**性格特质**：[根据姓名和八字分析性格特点]\n`;
+        prompt += `**事业发展**：[适合的事业方向和发展建议]\n`;
+        prompt += `**人际关系**：[人际交往的优势和注意事项]\n`;
+        prompt += `**健康养生**：[根据五行分析健康养生建议]\n`;
+        prompt += `**开运建议**：[具体的开运方法和注意事项]\n\n`;
+
+        prompt += `请确保分析专业、详细、实用，既要体现传统姓名学的深度，也要结合现代生活的实际需求。特别要注重字义的文化内涵和诗词典故的准确引用。`;
+
+        return prompt;
+    }
+
+    // 绑定测名AI分析事件
+    bindCemingAIEvents(testData, nameAnalysis, baziResult, aiPrompt) {
+        const generateBtn = document.getElementById('generate-ceming-ai-analysis');
+        const copyBtn = document.getElementById('copy-ceming-ai-result');
+
+        if (generateBtn) {
+            generateBtn.addEventListener('click', () => {
+                this.generateCemingAIAnalysis(testData, nameAnalysis, baziResult, aiPrompt);
+            });
+        }
+
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                this.copyCemingAIResult();
+            });
+        }
+    }
+
+    // 绑定测名模型切换事件
+    bindCemingModelSwitchEvents() {
+        const modelSelect = document.getElementById('ceming-model');
+        const apiUrlInput = document.getElementById('ceming-api-url');
+
+        if (modelSelect && apiUrlInput) {
+            modelSelect.addEventListener('change', (e) => {
+                const selectedModel = e.target.value;
+                const apiUrls = {
+                    'deepseek-r1': 'https://api.deepseek.com/v1/chat/completions',
+                    'deepseek-chat': 'https://api.deepseek.com/v1/chat/completions',
+                    'gpt-4': 'https://api.openai.com/v1/chat/completions',
+                    'gpt-3.5-turbo': 'https://api.openai.com/v1/chat/completions',
+                    'claude-3-sonnet': 'https://api.anthropic.com/v1/messages',
+                    'claude-3-haiku': 'https://api.anthropic.com/v1/messages',
+                    'qwen-max': 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation',
+                    'glm-4': 'https://open.bigmodel.cn/api/paas/v4/chat/completions'
+                };
+
+                if (apiUrls[selectedModel]) {
+                    apiUrlInput.value = apiUrls[selectedModel];
+                }
+            });
+        }
+    }
+
+    // 生成测名AI分析
+    async generateCemingAIAnalysis(testData, nameAnalysis, baziResult, aiPrompt) {
+        // 使用全局配置
+        const globalConfig = this.getGlobalConfig();
+        if (!globalConfig) {
+            this.showCemingAIError('请先在右上角配置AI设置');
+            return;
+        }
+
+        const apiUrl = globalConfig.apiUrl;
+        const apiKey = globalConfig.apiKey;
+        const modelName = globalConfig.model;
+
+        // 验证输入
+        if (!apiKey) {
+            this.showCemingAIError('请输入API密钥');
+            return;
+        }
+        if (!apiUrl) {
+            this.showCemingAIError('请输入API地址');
+            return;
+        }
+
+        // 显示处理状态
+        this.showCemingAIProcessing();
+
+        try {
+            // 调用AI API
+            await this.callCemingAIAPI(aiPrompt, apiKey, modelName, apiUrl);
+
+        } catch (error) {
+            console.error('AI测名分析失败:', error);
+            this.showCemingAIError(error.message);
+        } finally {
+            this.hideCemingAIProcessing();
+        }
+    }
+
+    // 调用测名AI API
+    async callCemingAIAPI(prompt, apiKey, modelName, apiUrl) {
+        const processingSteps = document.getElementById('ceming-processing-steps');
+        const processingMessage = document.getElementById('ceming-processing-message');
+        const aiOutput = document.getElementById('ceming-ai-output');
+        const aiResultSection = document.getElementById('ceming-ai-result-section');
+        const copyBtn = document.getElementById('copy-ceming-ai-result');
+
+        let fullResponse = '';
+
+        try {
+            // 显示连接状态
+            processingSteps.innerHTML = '🔗 正在连接AI服务器...<br>';
+            processingMessage.textContent = '建立连接中...';
+
+            console.log('测名AI分析开始:', { apiUrl, modelName, promptLength: prompt.length });
+
+            // 构建请求体，针对不同模型进行优化
+            const requestBody = {
+                model: modelName,
+                messages: [
+                    {
+                        role: "system",
+                        content: "你是精通中国传统姓名学和现代起名理论的专家，擅长结合八字命理、五格数理、三才配置、字义内涵、音韵美学等多个维度进行综合姓名分析。具备深厚的古典文学功底，能够准确分析汉字的文化内涵和诗词出处。"
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                stream: true
+            };
+
+            // 针对不同模型设置不同参数
+            if (modelName.includes('deepseek-r1')) {
+                requestBody.temperature = 0.3;
+                requestBody.max_tokens = 8000;
+                requestBody.reasoning_effort = "high";
+            } else if (modelName.includes('deepseek')) {
+                requestBody.temperature = 0.5;
+                requestBody.max_tokens = 6000;
+            } else if (modelName.includes('gpt')) {
+                requestBody.temperature = 0.7;
+                requestBody.max_tokens = 4000;
+            } else {
+                requestBody.temperature = 0.6;
+                requestBody.max_tokens = 4000;
+            }
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('API响应错误:', response.status, errorData);
+                throw new Error(`API错误 (${response.status}): ${errorData.error?.message || '未知错误'}`);
+            }
+
+            console.log('API响应成功，开始处理流式数据');
+
+            // 显示分析状态
+            processingSteps.innerHTML += '🤖 AI正在分析姓名...<br>';
+            processingMessage.textContent = '正在生成分析结果...';
+
+            // 显示结果区域
+            aiResultSection.style.display = 'block';
+            aiOutput.innerHTML = '';
+
+            // 处理流式响应
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+                        if (data === '[DONE]') continue;
+
+                        try {
+                            const parsed = JSON.parse(data);
+                            const content = parsed.choices?.[0]?.delta?.content || '';
+                            if (content) {
+                                fullResponse += content;
+                                aiOutput.innerHTML = this.formatMarkdown(fullResponse);
+                                aiOutput.scrollTop = aiOutput.scrollHeight;
+                                console.log('收到内容片段:', content.length, '字符');
+                            }
+                        } catch (e) {
+                            console.warn('解析流式数据失败:', e, '数据:', data);
+                        }
+                    }
+                }
+            }
+
+            // 完成处理
+            console.log('AI分析完成，总响应长度:', fullResponse.length);
+            processingSteps.innerHTML += '✅ AI测名分析完成<br>';
+            processingMessage.textContent = '分析完成！';
+
+            // 显示复制按钮
+            if (fullResponse.trim()) {
+                copyBtn.style.display = 'block';
+                this.fullCemingAIResponse = fullResponse;
+
+                // 强制移除滚动条
+                this.removeCemingAIOutputScrollbar();
+                console.log('AI分析结果已显示');
+            } else {
+                console.warn('AI分析结果为空');
+            }
+
+        } catch (error) {
+            console.error('流式API调用失败，尝试非流式调用:', error);
+
+            // 尝试非流式调用作为备选方案
+            try {
+                const nonStreamRequestBody = { ...requestBody, stream: false };
+                const nonStreamResponse = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify(nonStreamRequestBody)
+                });
+
+                if (!nonStreamResponse.ok) {
+                    const errorData = await nonStreamResponse.json().catch(() => ({}));
+                    throw new Error(`API错误 (${nonStreamResponse.status}): ${errorData.error?.message || '未知错误'}`);
+                }
+
+                const result = await nonStreamResponse.json();
+                const content = result.choices?.[0]?.message?.content || '';
+
+                if (content) {
+                    aiOutput.innerHTML = this.formatMarkdown(content);
+                    this.fullCemingAIResponse = content;
+                    copyBtn.style.display = 'block';
+                    this.removeCemingAIOutputScrollbar();
+                    console.log('非流式API调用成功');
+                } else {
+                    throw new Error('AI返回内容为空');
+                }
+            } catch (fallbackError) {
+                throw new Error(`API通信失败: ${fallbackError.message}`);
+            }
+        }
+    }
+
+    // 显示测名AI处理状态
+    showCemingAIProcessing() {
+        const processingDiv = document.getElementById('ceming-ai-processing');
+        const resultSection = document.getElementById('ceming-ai-result-section');
+
+        if (processingDiv) {
+            processingDiv.style.display = 'block';
+        }
+        if (resultSection) {
+            resultSection.style.display = 'none';
+        }
+    }
+
+    // 隐藏测名AI处理状态
+    hideCemingAIProcessing() {
+        const processingDiv = document.getElementById('ceming-ai-processing');
+        if (processingDiv) {
+            processingDiv.style.display = 'none';
+        }
+    }
+
+    // 显示测名AI错误
+    showCemingAIError(message) {
+        const errorMessage = document.getElementById('ceming-ai-error-message');
+        errorMessage.textContent = `❌ ${message}`;
+        errorMessage.style.display = 'block';
+    }
+
+    // 复制测名AI分析结果
+    copyCemingAIResult() {
+        if (!this.fullCemingAIResponse) return;
+
+        const textArea = document.createElement('textarea');
+        textArea.value = this.fullCemingAIResponse;
+        document.body.appendChild(textArea);
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
+            const copyBtn = document.getElementById('copy-ceming-ai-result');
+            const originalText = copyBtn.querySelector('span').textContent;
+            copyBtn.querySelector('span').textContent = '✅ 复制成功!';
+            setTimeout(() => {
+                copyBtn.querySelector('span').textContent = originalText;
+            }, 2000);
+        } catch (err) {
+            console.error('复制失败:', err);
+        } finally {
+            document.body.removeChild(textArea);
+        }
+    }
+
+    // 强制移除测名AI输出区域的滚动条
+    removeCemingAIOutputScrollbar() {
+        const aiOutput = document.getElementById('ceming-ai-output');
+        const aiResultSection = document.getElementById('ceming-ai-result-section');
+
+        if (aiOutput) {
+            aiOutput.style.maxHeight = 'none';
+            aiOutput.style.height = 'auto';
+            aiOutput.style.overflow = 'visible';
+            aiOutput.style.overflowY = 'visible';
+            aiOutput.style.overflowX = 'visible';
+            aiOutput.classList.remove('scrollable');
+        }
+
+        if (aiResultSection) {
+            aiResultSection.style.maxHeight = 'none';
+            aiResultSection.style.height = 'auto';
+            aiResultSection.style.overflow = 'visible';
+            aiResultSection.style.overflowY = 'visible';
+            aiResultSection.style.overflowX = 'visible';
+        }
+
+        console.log('已强制移除测名AI输出区域的滚动条');
+    }
+
+    // 格式化Markdown文本
+    formatMarkdown(text) {
+        if (!text) return '';
+
+        // 简单的Markdown格式化
+        let formatted = text
+            // 标题格式化
+            .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+            .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+            .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+            // 粗体格式化
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            // 斜体格式化
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            // 代码格式化
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            // 换行处理
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+
+        // 包装在段落标签中
+        if (formatted && !formatted.startsWith('<h') && !formatted.startsWith('<p>')) {
+            formatted = '<p>' + formatted + '</p>';
+        }
+
+        return formatted;
     }
 
     // 显示合婚结果
@@ -3631,11 +4139,54 @@ class CyberFortune {
         return lines;
     }
 
-    // 绑定模型切换事件
-    bindModelSwitchEvents() {
-        const modelSelect = document.getElementById('naming-model');
-        const apiUrlInput = document.getElementById('naming-api-url');
 
+
+    // 初始化全局配置
+    initGlobalConfig() {
+        this.loadGlobalConfig();
+        this.bindGlobalConfigEvents();
+    }
+
+    // 绑定全局配置事件
+    bindGlobalConfigEvents() {
+        const configToggle = document.getElementById('config-toggle');
+        const configPanel = document.getElementById('global-config-panel');
+        const configOverlay = document.getElementById('config-overlay');
+        const configClose = document.getElementById('config-close');
+        const saveConfigBtn = document.getElementById('save-global-config');
+        const testConfigBtn = document.getElementById('test-global-config');
+        const modelSelect = document.getElementById('global-model');
+        const apiUrlInput = document.getElementById('global-api-url');
+
+        // 打开配置面板
+        if (configToggle) {
+            configToggle.addEventListener('click', () => {
+                configPanel.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            });
+        }
+
+        // 关闭配置面板
+        const closeConfig = () => {
+            configPanel.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+
+        if (configOverlay) {
+            configOverlay.addEventListener('click', closeConfig);
+        }
+        if (configClose) {
+            configClose.addEventListener('click', closeConfig);
+        }
+
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && configPanel.style.display === 'flex') {
+                closeConfig();
+            }
+        });
+
+        // 模型切换时自动更新API地址
         if (modelSelect && apiUrlInput) {
             modelSelect.addEventListener('change', (e) => {
                 const selectedModel = e.target.value;
@@ -3654,6 +4205,193 @@ class CyberFortune {
                     apiUrlInput.value = apiUrls[selectedModel];
                 }
             });
+        }
+
+        // 保存配置
+        if (saveConfigBtn) {
+            saveConfigBtn.addEventListener('click', () => {
+                this.saveGlobalConfig();
+            });
+        }
+
+        // 测试连接
+        if (testConfigBtn) {
+            testConfigBtn.addEventListener('click', () => {
+                this.testGlobalConfig();
+            });
+        }
+    }
+
+    // 加载全局配置
+    loadGlobalConfig() {
+        try {
+            const config = localStorage.getItem('cyberFortune_globalConfig');
+            if (config) {
+                const parsedConfig = JSON.parse(config);
+
+                const apiUrlInput = document.getElementById('global-api-url');
+                const apiKeyInput = document.getElementById('global-api-key');
+                const modelSelect = document.getElementById('global-model');
+
+                if (apiUrlInput && parsedConfig.apiUrl) {
+                    apiUrlInput.value = parsedConfig.apiUrl;
+                }
+                if (apiKeyInput && parsedConfig.apiKey) {
+                    apiKeyInput.value = parsedConfig.apiKey;
+                }
+                if (modelSelect && parsedConfig.model) {
+                    modelSelect.value = parsedConfig.model;
+                }
+
+                this.updateConfigStatus('✅', '已配置', '#4CAF50');
+            }
+        } catch (error) {
+            console.error('加载全局配置失败:', error);
+        }
+    }
+
+    // 保存全局配置
+    saveGlobalConfig() {
+        try {
+            const apiUrl = document.getElementById('global-api-url').value.trim();
+            const apiKey = document.getElementById('global-api-key').value.trim();
+            const model = document.getElementById('global-model').value;
+
+            if (!apiUrl || !apiKey) {
+                this.showConfigMessage('请填写完整的API配置信息', 'error');
+                return;
+            }
+
+            const config = {
+                apiUrl,
+                apiKey,
+                model,
+                savedAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('cyberFortune_globalConfig', JSON.stringify(config));
+            this.updateConfigStatus('✅', '已保存', '#4CAF50');
+            this.showConfigMessage('配置保存成功！', 'success');
+
+            // 同步到各个模块
+            this.syncConfigToModules(config);
+
+        } catch (error) {
+            console.error('保存全局配置失败:', error);
+            this.showConfigMessage('保存配置失败', 'error');
+        }
+    }
+
+    // 测试全局配置
+    async testGlobalConfig() {
+        const apiUrl = document.getElementById('global-api-url').value.trim();
+        const apiKey = document.getElementById('global-api-key').value.trim();
+        const model = document.getElementById('global-model').value;
+
+        if (!apiUrl || !apiKey) {
+            this.showConfigMessage('请先填写API配置信息', 'error');
+            return;
+        }
+
+        this.updateConfigStatus('🔄', '测试中...', '#FFC107');
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: model,
+                    messages: [
+                        {
+                            role: "user",
+                            content: "测试连接"
+                        }
+                    ],
+                    max_tokens: 10
+                })
+            });
+
+            if (response.ok) {
+                this.updateConfigStatus('✅', '连接成功', '#4CAF50');
+                this.showConfigMessage('API连接测试成功！', 'success');
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                this.updateConfigStatus('❌', '连接失败', '#F44336');
+                this.showConfigMessage(`连接失败: ${errorData.error?.message || '未知错误'}`, 'error');
+            }
+        } catch (error) {
+            this.updateConfigStatus('❌', '连接失败', '#F44336');
+            this.showConfigMessage(`连接失败: ${error.message}`, 'error');
+        }
+    }
+
+    // 更新配置状态显示
+    updateConfigStatus(indicator, text, color) {
+        const statusIndicator = document.querySelector('#config-status .status-indicator');
+        const statusText = document.querySelector('#config-status .status-text');
+
+        if (statusIndicator) statusIndicator.textContent = indicator;
+        if (statusText) {
+            statusText.textContent = text;
+            statusText.style.color = color;
+        }
+    }
+
+    // 显示配置消息
+    showConfigMessage(message, type) {
+        // 创建消息提示
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `config-message ${type}`;
+        messageDiv.textContent = message;
+        messageDiv.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 3000;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            background: ${type === 'success' ? '#4CAF50' : '#F44336'};
+        `;
+
+        document.body.appendChild(messageDiv);
+
+        // 显示动画
+        setTimeout(() => {
+            messageDiv.style.transform = 'translateX(0)';
+        }, 100);
+
+        // 自动隐藏
+        setTimeout(() => {
+            messageDiv.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                document.body.removeChild(messageDiv);
+            }, 300);
+        }, 3000);
+    }
+
+    // 同步配置到各个模块
+    syncConfigToModules(config) {
+        // 由于各模块已移除独立配置，现在直接使用全局配置
+        // 各模块的AI分析函数会自动调用getGlobalConfig()获取配置
+        console.log('全局配置已保存，各模块将自动使用全局配置');
+    }
+
+    // 获取全局配置
+    getGlobalConfig() {
+        try {
+            const config = localStorage.getItem('cyberFortune_globalConfig');
+            return config ? JSON.parse(config) : null;
+        } catch (error) {
+            console.error('获取全局配置失败:', error);
+            return null;
         }
     }
 }
