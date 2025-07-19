@@ -1970,6 +1970,207 @@ body {
     font-style: italic;
 }
 
+/* 合婚AI分析样式 */
+.ai-marriage-result-section {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 0, 128, 0.3);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    max-height: none !important;
+    overflow: visible !important;
+    height: auto !important;
+}
+
+.ai-marriage-result-section h5 {
+    color: #ff0080;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    text-shadow: 0 0 10px rgba(255, 0, 128, 0.5);
+}
+
+.ai-marriage-output {
+    background: linear-gradient(135deg, rgba(255, 0, 128, 0.05), rgba(0, 212, 255, 0.05));
+    border: 1px solid rgba(255, 0, 128, 0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    max-height: none !important;
+    overflow: visible !important;
+    height: auto !important;
+    font-size: 0.95rem;
+}
+
+.ai-marriage-output h1,
+.ai-marriage-output h2,
+.ai-marriage-output h3,
+.ai-marriage-output h4 {
+    color: var(--primary-color);
+    margin: 1rem 0 0.6rem 0;
+    text-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+}
+
+.ai-marriage-output h1 {
+    font-size: 1.6rem;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+    text-align: center;
+    margin: 0 0 1rem 0;
+}
+
+.ai-marriage-output h2 {
+    font-size: 1.4rem;
+    border-left: 4px solid var(--accent-color);
+    padding-left: 1rem;
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 4px;
+    margin: 1.2rem 0 0.8rem 0;
+}
+
+.ai-marriage-output h3 {
+    font-size: 1.2rem;
+    color: var(--accent-color);
+    margin: 0.8rem 0 0.5rem 0;
+}
+
+.ai-marriage-output h4 {
+    font-size: 1.1rem;
+    color: #ff0080;
+    margin: 0.6rem 0 0.4rem 0;
+}
+
+.ai-marriage-output strong {
+    color: var(--accent-color);
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
+}
+
+.ai-marriage-output em {
+    color: #ff0080;
+    font-style: italic;
+    text-shadow: 0 0 5px rgba(255, 0, 128, 0.3);
+}
+
+.ai-marriage-output p {
+    margin: 0.6rem 0;
+    text-indent: 2em;
+}
+
+.ai-marriage-output ul,
+.ai-marriage-output ol {
+    margin: 0.6rem 0;
+    padding-left: 2rem;
+}
+
+.ai-marriage-output li {
+    margin: 0.3rem 0;
+    position: relative;
+}
+
+.ai-marriage-output li::marker {
+    color: var(--accent-color);
+}
+
+/* 合婚AI分析特殊样式 */
+.ai-marriage-output .analysis-point {
+    background: rgba(0, 255, 136, 0.1);
+    border-left: 3px solid var(--accent-color);
+    padding: 0.6rem 0.8rem;
+    margin: 0.6rem 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.ai-marriage-output .analysis-point strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 1.05rem;
+}
+
+.ai-marriage-output .suggestion-box {
+    background: rgba(255, 0, 128, 0.1);
+    border: 1px solid rgba(255, 0, 128, 0.3);
+    border-radius: 8px;
+    padding: 0.8rem;
+    margin: 0.6rem 0;
+}
+
+.ai-marriage-output .highlight {
+    background: linear-gradient(90deg, rgba(0, 255, 136, 0.2), transparent);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border-left: 2px solid var(--accent-color);
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.ai-marriage-output .warning-box {
+    background: rgba(255, 165, 0, 0.1);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 6px;
+    padding: 0.6rem;
+    margin: 0.5rem 0;
+    color: #ffa500;
+    border-left: 4px solid #ffa500;
+}
+
+.ai-marriage-output .success-box {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 6px;
+    padding: 0.6rem;
+    margin: 0.5rem 0;
+    color: var(--accent-color);
+    border-left: 4px solid var(--accent-color);
+}
+
+/* 合婚AI分析处理状态样式 */
+.ai-marriage-processing {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 0, 128, 0.3);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.ai-marriage-processing .processing-message {
+    color: #ff0080;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.ai-marriage-processing .processing-steps {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* 合婚AI分析响应式样式 */
+@media (max-width: 768px) {
+    .ai-marriage-output {
+        font-size: 0.9rem;
+        padding: 1rem;
+    }
+
+    .ai-marriage-output h1 {
+        font-size: 1.4rem;
+    }
+
+    .ai-marriage-output h2 {
+        font-size: 1.2rem;
+    }
+
+    .ai-marriage-output h3 {
+        font-size: 1.1rem;
+    }
+
+    .ai-marriage-output .analysis-point {
+        padding: 0.6rem 0.8rem;
+    }
+}
+
 /* 八字信息样式 */
 .bazi-info {
     background: rgba(0, 0, 0, 0.2);

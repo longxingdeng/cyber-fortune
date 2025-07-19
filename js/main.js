@@ -134,9 +134,9 @@ class CyberFortune {
 
     // 填充年份选择框
     populateYears() {
-        const yearSelects = document.querySelectorAll('select[name="birthYear"]');
+        const yearSelects = document.querySelectorAll('select[name="birthYear"], select[name="maleBirthYear"], select[name="femaleBirthYear"]');
         const currentYear = new Date().getFullYear();
-        
+
         yearSelects.forEach(select => {
             for (let year = currentYear; year >= 1900; year--) {
                 const option = document.createElement('option');
@@ -149,8 +149,8 @@ class CyberFortune {
 
     // 填充月份选择框
     populateMonths() {
-        const monthSelects = document.querySelectorAll('select[name="birthMonth"]');
-        
+        const monthSelects = document.querySelectorAll('select[name="birthMonth"], select[name="maleBirthMonth"], select[name="femaleBirthMonth"]');
+
         monthSelects.forEach(select => {
             for (let month = 1; month <= 12; month++) {
                 const option = document.createElement('option');
@@ -163,8 +163,8 @@ class CyberFortune {
 
     // 填充日期选择框
     populateDays() {
-        const daySelects = document.querySelectorAll('select[name="birthDay"]');
-        
+        const daySelects = document.querySelectorAll('select[name="birthDay"], select[name="maleBirthDay"], select[name="femaleBirthDay"]');
+
         daySelects.forEach(select => {
             for (let day = 1; day <= 31; day++) {
                 const option = document.createElement('option');
@@ -210,7 +210,7 @@ class CyberFortune {
         });
 
         // 月份变化时更新日期
-        const monthSelects = document.querySelectorAll('select[name="birthMonth"]');
+        const monthSelects = document.querySelectorAll('select[name="birthMonth"], select[name="maleBirthMonth"], select[name="femaleBirthMonth"]');
         monthSelects.forEach(select => {
             select.addEventListener('change', (e) => {
                 this.updateDays(e.target.closest('form'));
@@ -218,7 +218,7 @@ class CyberFortune {
         });
 
         // 年份变化时更新日期
-        const yearSelects = document.querySelectorAll('select[name="birthYear"]');
+        const yearSelects = document.querySelectorAll('select[name="birthYear"], select[name="maleBirthYear"], select[name="femaleBirthYear"]');
         yearSelects.forEach(select => {
             select.addEventListener('change', (e) => {
                 this.updateDays(e.target.closest('form'));
@@ -281,15 +281,32 @@ class CyberFortune {
 
     // 更新日期选择框
     updateDays(form) {
-        const yearSelect = form.querySelector('select[name="birthYear"]');
-        const monthSelect = form.querySelector('select[name="birthMonth"]');
-        const daySelect = form.querySelector('select[name="birthDay"]');
-        
+        // 尝试不同的字段名模式
+        const yearSelectors = ['select[name="birthYear"]', 'select[name="maleBirthYear"]', 'select[name="femaleBirthYear"]'];
+        const monthSelectors = ['select[name="birthMonth"]', 'select[name="maleBirthMonth"]', 'select[name="femaleBirthMonth"]'];
+        const daySelectors = ['select[name="birthDay"]', 'select[name="maleBirthDay"]', 'select[name="femaleBirthDay"]'];
+
+        let yearSelect, monthSelect, daySelect;
+
+        // 查找对应的选择框
+        for (let i = 0; i < yearSelectors.length; i++) {
+            const year = form.querySelector(yearSelectors[i]);
+            const month = form.querySelector(monthSelectors[i]);
+            const day = form.querySelector(daySelectors[i]);
+
+            if (year && month && day) {
+                yearSelect = year;
+                monthSelect = month;
+                daySelect = day;
+                break;
+            }
+        }
+
         if (!yearSelect || !monthSelect || !daySelect) return;
 
         const year = parseInt(yearSelect.value);
         const month = parseInt(monthSelect.value);
-        
+
         if (!year || !month) return;
 
         // 清空现有选项
@@ -297,7 +314,7 @@ class CyberFortune {
 
         // 计算该月的天数
         const daysInMonth = new Date(year, month, 0).getDate();
-        
+
         for (let day = 1; day <= daysInMonth; day++) {
             const option = document.createElement('option');
             option.value = day;
@@ -1356,12 +1373,36 @@ class CyberFortune {
 
                 <!-- 提示词已隐藏，保护商业机密 -->
             </div>
+
+            <!-- PDF报告下载 -->
+            <div class="result-actions">
+                <div class="download-options">
+                    <button class="cyber-button" id="download-naming-pdf-btn">
+                        <span>📄 生成PDF报告</span>
+                        <div class="button-glow"></div>
+                    </button>
+                    <button class="cyber-button" id="download-naming-image-btn">
+                        <span>🖼️ 下载长图报告</span>
+                        <div class="button-glow"></div>
+                    </button>
+                    <button class="cyber-button secondary" id="download-naming-text-btn">
+                        <span>📝 下载文本报告</span>
+                        <div class="button-glow"></div>
+                    </button>
+                </div>
+                <div class="download-note">
+                    <small>💡 PDF报告将在新窗口中打开，您可以使用浏览器的"打印"功能保存为PDF</small>
+                </div>
+            </div>
         `;
 
         resultContent.innerHTML = resultHTML;
 
         // 绑定AI起名分析事件
         this.bindAINamingEvents(birthData, baziResult, nameSuggestions, aiPrompt);
+
+        // 绑定PDF下载事件
+        this.bindNamingDownloadEvents(birthData, baziResult, nameSuggestions);
 
         // 显示结果面板
         resultPanel.style.display = 'block';
@@ -1909,6 +1950,27 @@ class CyberFortune {
 
                 <!-- 提示词已隐藏，保护商业机密 -->
             </div>
+
+            <!-- PDF报告下载 -->
+            <div class="result-actions">
+                <div class="download-options">
+                    <button class="cyber-button" id="download-ceming-pdf-btn">
+                        <span>📄 生成PDF报告</span>
+                        <div class="button-glow"></div>
+                    </button>
+                    <button class="cyber-button" id="download-ceming-image-btn">
+                        <span>🖼️ 下载长图报告</span>
+                        <div class="button-glow"></div>
+                    </button>
+                    <button class="cyber-button secondary" id="download-ceming-text-btn">
+                        <span>📝 下载文本报告</span>
+                        <div class="button-glow"></div>
+                    </button>
+                </div>
+                <div class="download-note">
+                    <small>💡 PDF报告将在新窗口中打开，您可以使用浏览器的"打印"功能保存为PDF</small>
+                </div>
+            </div>
         `;
 
         resultContent.innerHTML = resultHTML;
@@ -1918,6 +1980,9 @@ class CyberFortune {
 
         // 绑定模型切换事件
         this.bindCemingModelSwitchEvents();
+
+        // 绑定PDF下载事件
+        this.bindCemingDownloadEvents(testData, nameAnalysis, baziResult);
 
         resultPanel.style.display = 'block';
         resultPanel.classList.add('show');
@@ -2377,6 +2442,9 @@ class CyberFortune {
 
         if (!resultPanel || !resultContent) return;
 
+        // 生成AI分析提示词
+        const aiPrompt = this.generateMarriageAIPrompt(marriageData, marriageResult);
+
         const resultHTML = `
             <div class="result-header">
                 <h3 class="result-title">合婚分析报告</h3>
@@ -2438,10 +2506,77 @@ class CyberFortune {
                         ${marriageResult.suggestions.map(suggestion => `<li>${suggestion}</li>`).join('')}
                     </ul>
                 </div>
+
+                <!-- AI深度分析区域 -->
+                <div class="ai-analysis-section">
+                    <h4>🤖 AI深度合婚分析</h4>
+                    <p class="ai-description">基于传统合婚理论，结合现代心理学和情感分析，为您提供更深入的合婚指导</p>
+
+                    <div class="ai-controls">
+                        <button class="cyber-button" id="generate-marriage-ai-analysis">
+                            <span>🧠 生成AI深度分析</span>
+                            <div class="button-glow"></div>
+                        </button>
+                    </div>
+
+                    <!-- AI分析处理状态 -->
+                    <div class="ai-marriage-processing" id="ai-marriage-processing" style="display: none;">
+                        <div class="processing-animation">
+                            <div class="cyber-loader"></div>
+                        </div>
+                        <div class="processing-info">
+                            <div class="processing-message" id="ai-marriage-processing-message">正在准备AI分析...</div>
+                            <div class="processing-steps" id="ai-marriage-processing-steps"></div>
+                        </div>
+                    </div>
+
+                    <!-- AI分析结果 -->
+                    <div class="ai-marriage-result-section" id="ai-marriage-result-section" style="display: none;">
+                        <h5>AI深度分析结果：</h5>
+                        <div class="ai-marriage-output" id="ai-marriage-output"></div>
+                        <div class="result-actions">
+                            <button class="cyber-button" id="copy-ai-marriage-result" style="display: none;">
+                                <span>📄 复制分析结果</span>
+                                <div class="button-glow"></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 提示词已隐藏，保护商业机密 -->
+                </div>
+
+                <!-- PDF报告下载 -->
+                <div class="result-actions">
+                    <div class="download-options">
+                        <button class="cyber-button" id="download-marriage-pdf-btn">
+                            <span>📄 生成PDF报告</span>
+                            <div class="button-glow"></div>
+                        </button>
+                        <button class="cyber-button" id="download-marriage-image-btn">
+                            <span>🖼️ 下载长图报告</span>
+                            <div class="button-glow"></div>
+                        </button>
+                        <button class="cyber-button secondary" id="download-marriage-text-btn">
+                            <span>📝 下载文本报告</span>
+                            <div class="button-glow"></div>
+                        </button>
+                    </div>
+                    <div class="download-note">
+                        <small>💡 PDF报告将在新窗口中打开，您可以使用浏览器的"打印"功能保存为PDF</small>
+                    </div>
+                </div>
             </div>
         `;
 
         resultContent.innerHTML = resultHTML;
+
+        // 绑定AI合婚分析事件
+        this.bindMarriageAIEvents(marriageData, marriageResult, aiPrompt);
+
+        // 绑定PDF下载事件
+        this.bindMarriageDownloadEvents(marriageData, marriageResult);
+
+        // 显示结果面板
         resultPanel.style.display = 'block';
         resultPanel.classList.add('show');
         resultPanel.scrollIntoView({ behavior: 'smooth' });
@@ -4393,6 +4528,1381 @@ class CyberFortune {
             console.error('获取全局配置失败:', error);
             return null;
         }
+    }
+
+    // ==================== 合婚AI分析相关函数 ====================
+
+    // 绑定合婚AI分析事件
+    bindMarriageAIEvents(marriageData, marriageResult, aiPrompt) {
+        const generateBtn = document.getElementById('generate-marriage-ai-analysis');
+        const copyBtn = document.getElementById('copy-ai-marriage-result');
+
+        console.log('绑定合婚AI事件:', { generateBtn, copyBtn });
+
+        if (generateBtn) {
+            generateBtn.addEventListener('click', () => {
+                console.log('AI分析按钮被点击');
+                this.generateMarriageAIAnalysis(marriageData, marriageResult, aiPrompt);
+            });
+        } else {
+            console.error('未找到AI分析按钮');
+        }
+
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                this.copyMarriageAIResult();
+            });
+        }
+    }
+
+    // 生成合婚AI分析提示词
+    generateMarriageAIPrompt(marriageData, marriageResult) {
+        const { male, female } = marriageData;
+
+        let prompt = "";
+        prompt += `你是一位精通中国传统合婚理论和现代情感心理学的专家，擅长结合八字命理、生肖配对、五行相配、十神关系等传统理论，以及现代心理学、性格分析、情感匹配等科学方法，为情侣提供全面深入的合婚分析和情感指导。\n\n`;
+
+        prompt += `你具备深厚的传统文化底蕴，熟悉《易经》、《子平真诠》、《滴天髓》等经典著作，同时了解现代心理学理论，能够将古代智慧与现代科学相结合，为现代人的情感生活提供有价值的指导。\n\n`;
+
+        prompt += `现在请你对以下这对情侣进行全面的合婚分析：\n\n`;
+
+        // 男方信息
+        prompt += `【男方信息】\n`;
+        prompt += `姓名：${male.name}\n`;
+        prompt += `出生时间：${male.year}年${male.month}月${male.day}日 ${male.hour.toString().padStart(2, '0')}:${(male.minute || 0).toString().padStart(2, '0')}\n`;
+        prompt += `出生地区：${male.birthProvince || '未知'} ${male.birthCity || '未知'}\n`;
+        prompt += `生肖：${this.getZodiacAnimal(male.year)}\n\n`;
+
+        // 女方信息
+        prompt += `【女方信息】\n`;
+        prompt += `姓名：${female.name}\n`;
+        prompt += `出生时间：${female.year}年${female.month}月${female.day}日 ${female.hour.toString().padStart(2, '0')}:${(female.minute || 0).toString().padStart(2, '0')}\n`;
+        prompt += `出生地区：${female.birthProvince || '未知'} ${female.birthCity || '未知'}\n`;
+        prompt += `生肖：${this.getZodiacAnimal(female.year)}\n\n`;
+
+        // 基础合婚分析结果
+        prompt += `【基础合婚分析结果】\n`;
+        prompt += `综合匹配度：${marriageResult.totalScore}分 (${marriageResult.level})\n\n`;
+
+        prompt += `生肖配对：${marriageResult.shengXiaoMatch.score}分\n`;
+        prompt += `${marriageResult.shengXiaoMatch.analysis}\n\n`;
+
+        prompt += `五行配对：${marriageResult.wuXingMatch.score}分\n`;
+        prompt += `${marriageResult.wuXingMatch.analysis}\n\n`;
+
+        prompt += `十神配对：${marriageResult.shiShenMatch.score}分\n`;
+        prompt += `${marriageResult.shiShenMatch.analysis}\n\n`;
+
+        prompt += `年龄配对：${marriageResult.ageMatch.score}分\n`;
+        prompt += `${marriageResult.ageMatch.analysis}\n\n`;
+
+        prompt += `【分析要求】\n`;
+        prompt += `请基于以上信息，从以下几个维度进行深入分析：\n\n`;
+
+        prompt += `1. **性格匹配分析**\n`;
+        prompt += `   - 根据生肖和出生时间分析双方的性格特点\n`;
+        prompt += `   - 分析性格互补性和潜在冲突点\n`;
+        prompt += `   - 提供性格磨合的具体建议\n\n`;
+
+        prompt += `2. **情感相处模式**\n`;
+        prompt += `   - 分析双方在恋爱中的表现特点\n`;
+        prompt += `   - 预测可能的情感发展模式\n`;
+        prompt += `   - 提供增进感情的实用方法\n\n`;
+
+        prompt += `3. **婚姻生活预测**\n`;
+        prompt += `   - 分析婚后生活的和谐度\n`;
+        prompt += `   - 预测可能面临的挑战和机遇\n`;
+        prompt += `   - 提供维护婚姻稳定的建议\n\n`;
+
+        prompt += `4. **事业财运配合**\n`;
+        prompt += `   - 分析双方事业发展的互助性\n`;
+        prompt += `   - 预测财运配合情况\n`;
+        prompt += `   - 提供共同发展的策略建议\n\n`;
+
+        prompt += `5. **子女教育观念**\n`;
+        prompt += `   - 分析双方的教育理念匹配度\n`;
+        prompt += `   - 预测子女运势和教育方向\n`;
+        prompt += `   - 提供家庭教育的协调建议\n\n`;
+
+        prompt += `6. **长期发展建议**\n`;
+        prompt += `   - 提供具体的相处技巧和沟通方法\n`;
+        prompt += `   - 给出化解矛盾的实用策略\n`;
+        prompt += `   - 制定增进感情的长期规划\n\n`;
+
+        prompt += `【输出格式要求】\n`;
+        prompt += `请按以下格式输出分析结果：\n\n`;
+
+        prompt += `# 🤖 AI深度合婚分析报告\n\n`;
+
+        prompt += `## 📊 综合评估概览\n`;
+        prompt += `**AI综合评分**：[分数]/100\n`;
+        prompt += `**匹配等级**：[等级评价]\n`;
+        prompt += `**核心优势**：[主要优势点]\n`;
+        prompt += `**关注要点**：[需要注意的方面]\n\n`;
+
+        prompt += `## 1. 💝 性格匹配分析\n`;
+        prompt += `### 男方性格特点\n`;
+        prompt += `- [具体分析]\n\n`;
+        prompt += `### 女方性格特点\n`;
+        prompt += `- [具体分析]\n\n`;
+        prompt += `### 性格互补性\n`;
+        prompt += `✅ **优势互补**：[具体说明]\n`;
+        prompt += `⚠️ **潜在冲突**：[具体说明]\n`;
+        prompt += `💡 **磨合建议**：[具体建议]\n\n`;
+
+        prompt += `## 2. 💕 情感相处模式\n`;
+        prompt += `### 恋爱表现特点\n`;
+        prompt += `- [双方在恋爱中的表现]\n\n`;
+        prompt += `### 情感发展预测\n`;
+        prompt += `- [可能的发展模式]\n\n`;
+        prompt += `### 增进感情方法\n`;
+        prompt += `💡 [具体实用方法]\n\n`;
+
+        prompt += `## 3. 🏠 婚姻生活预测\n`;
+        prompt += `### 婚后和谐度分析\n`;
+        prompt += `- [详细分析]\n\n`;
+        prompt += `### 可能的挑战与机遇\n`;
+        prompt += `⚠️ **挑战**：[具体挑战]\n`;
+        prompt += `✅ **机遇**：[具体机遇]\n\n`;
+        prompt += `### 婚姻稳定建议\n`;
+        prompt += `💡 [具体建议]\n\n`;
+
+        prompt += `## 4. 💼 事业财运配合\n`;
+        prompt += `### 事业互助性\n`;
+        prompt += `- [分析双方事业发展的互助性]\n\n`;
+        prompt += `### 财运配合情况\n`;
+        prompt += `- [财运配合分析]\n\n`;
+        prompt += `### 共同发展策略\n`;
+        prompt += `💡 [具体策略建议]\n\n`;
+
+        prompt += `## 5. 👶 子女教育观念\n`;
+        prompt += `### 教育理念匹配度\n`;
+        prompt += `- [分析双方教育理念]\n\n`;
+        prompt += `### 子女运势预测\n`;
+        prompt += `- [子女运势和教育方向]\n\n`;
+        prompt += `### 家庭教育协调\n`;
+        prompt += `💡 [协调建议]\n\n`;
+
+        prompt += `## 6. 🌟 长期发展建议\n`;
+        prompt += `### 相处技巧\n`;
+        prompt += `💡 [具体的相处技巧和沟通方法]\n\n`;
+        prompt += `### 矛盾化解策略\n`;
+        prompt += `💡 [化解矛盾的实用策略]\n\n`;
+        prompt += `### 感情增进规划\n`;
+        prompt += `💡 [长期感情增进规划]\n\n`;
+
+        prompt += `## 📝 总结与祝福\n`;
+        prompt += `[对这对情侣的总结性评价和美好祝福]\n\n`;
+
+        prompt += `请确保分析专业、详细、实用，既要体现传统合婚理论的深度，也要结合现代情感心理学的科学性，为这对情侣提供真正有价值的指导建议。分析应该具体、可操作，避免空泛的表述。`;
+
+        return prompt;
+    }
+
+    // 获取生肖
+    getZodiacAnimal(year) {
+        const zodiacAnimals = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+        return zodiacAnimals[(year - 4) % 12];
+    }
+
+    // 生成合婚AI分析
+    async generateMarriageAIAnalysis(marriageData, marriageResult, aiPrompt) {
+        console.log('开始生成合婚AI分析');
+
+        // 使用全局配置
+        const globalConfig = this.getGlobalConfig();
+        console.log('获取到的AI配置:', globalConfig);
+
+        if (!globalConfig) {
+            console.error('未找到AI配置');
+            this.showMarriageAIError('请先配置AI设置');
+            return;
+        }
+
+        const apiUrl = globalConfig.apiUrl;
+        const apiKey = globalConfig.apiKey;
+        const modelName = globalConfig.model;
+
+        // 验证输入
+        if (!apiKey) {
+            this.showMarriageAIError('请输入API密钥');
+            return;
+        }
+        if (!apiUrl) {
+            this.showMarriageAIError('请输入API地址');
+            return;
+        }
+
+        // 显示处理状态
+        this.showMarriageAIProcessing();
+
+        try {
+            // 调用AI API
+            await this.callMarriageAIAPI(aiPrompt, apiKey, modelName, apiUrl);
+
+        } catch (error) {
+            console.error('AI合婚分析失败:', error);
+            this.showMarriageAIError(error.message);
+        } finally {
+            this.hideMarriageAIProcessing();
+        }
+    }
+
+    // 调用合婚AI API
+    async callMarriageAIAPI(prompt, apiKey, modelName, apiUrl) {
+        const processingSteps = document.getElementById('ai-marriage-processing-steps');
+        const processingMessage = document.getElementById('ai-marriage-processing-message');
+
+        try {
+            // 显示连接状态
+            processingSteps.innerHTML = '🔗 正在连接AI服务器...<br>';
+            processingMessage.textContent = '建立连接中...';
+
+            console.log('合婚AI分析开始:', { apiUrl, modelName, promptLength: prompt.length });
+
+            // 构建请求体
+            const requestBody = {
+                model: modelName,
+                messages: [
+                    {
+                        role: "system",
+                        content: "你是精通中国传统合婚理论和现代情感心理学的专家，擅长结合传统命理与现代心理学为情侣提供深入的合婚分析和情感指导。"
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                stream: true
+            };
+
+            // 根据模型调整参数
+            if (modelName.includes('gpt')) {
+                requestBody.temperature = 0.7;
+                requestBody.max_tokens = 4000;
+            } else if (modelName.includes('claude')) {
+                requestBody.max_tokens = 4000;
+            }
+
+            processingSteps.innerHTML += '📡 发送分析请求...<br>';
+            processingMessage.textContent = '正在发送请求...';
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`API错误 (${response.status}): ${errorData.error?.message || '未知错误'}`);
+            }
+
+            processingSteps.innerHTML += '🧠 AI正在分析中...<br>';
+            processingMessage.textContent = '正在生成分析结果...';
+
+            // 处理流式响应
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullResponse = '';
+
+            // 显示结果区域
+            const resultSection = document.getElementById('ai-marriage-result-section');
+            const output = document.getElementById('ai-marriage-output');
+            const copyBtn = document.getElementById('copy-ai-marriage-result');
+
+            if (resultSection) {
+                resultSection.style.display = 'block';
+                output.innerHTML = '<div class="ai-response-streaming">正在生成分析...</div>';
+            }
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+                        if (data === '[DONE]') continue;
+
+                        try {
+                            const parsed = JSON.parse(data);
+                            const content = parsed.choices?.[0]?.delta?.content || '';
+                            if (content) {
+                                fullResponse += content;
+                                // 实时更新显示
+                                if (output) {
+                                    output.innerHTML = this.formatMarriageAIResponse(fullResponse);
+                                }
+                            }
+                        } catch (e) {
+                            // 忽略解析错误
+                        }
+                    }
+                }
+            }
+
+            processingSteps.innerHTML += '✅ 分析完成！<br>';
+            processingMessage.textContent = '分析完成';
+
+            // 显示复制按钮
+            if (copyBtn && fullResponse.trim()) {
+                copyBtn.style.display = 'inline-block';
+            }
+
+            console.log('合婚AI分析完成');
+
+        } catch (error) {
+            console.error('合婚AI API调用失败:', error);
+            throw error;
+        }
+    }
+
+    // 显示合婚AI处理状态
+    showMarriageAIProcessing() {
+        const processingDiv = document.getElementById('ai-marriage-processing');
+        const generateBtn = document.getElementById('generate-marriage-ai-analysis');
+
+        if (processingDiv) {
+            processingDiv.style.display = 'block';
+        }
+        if (generateBtn) {
+            generateBtn.disabled = true;
+            generateBtn.querySelector('span').textContent = '🧠 正在分析中...';
+        }
+    }
+
+    // 隐藏合婚AI处理状态
+    hideMarriageAIProcessing() {
+        const processingDiv = document.getElementById('ai-marriage-processing');
+        const generateBtn = document.getElementById('generate-marriage-ai-analysis');
+
+        if (processingDiv) {
+            processingDiv.style.display = 'none';
+        }
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.querySelector('span').textContent = '🧠 生成AI深度分析';
+        }
+    }
+
+    // 显示合婚AI错误
+    showMarriageAIError(message) {
+        console.error('合婚AI错误:', message);
+
+        const resultSection = document.getElementById('ai-marriage-result-section');
+        const output = document.getElementById('ai-marriage-output');
+
+        console.log('错误显示元素:', { resultSection, output });
+
+        if (resultSection && output) {
+            resultSection.style.display = 'block';
+            output.innerHTML = `
+                <div class="ai-error">
+                    <div class="error-icon">⚠️</div>
+                    <div class="error-message">${message}</div>
+                    <div class="error-suggestion">请检查AI配置或稍后重试</div>
+                </div>
+            `;
+        } else {
+            console.error('未找到错误显示元素');
+            alert('AI分析错误: ' + message);
+        }
+    }
+
+    // 复制合婚AI分析结果
+    copyMarriageAIResult() {
+        const output = document.getElementById('ai-marriage-output');
+        if (!output) return;
+
+        const text = output.textContent || output.innerText;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                this.showConfigMessage('分析结果已复制到剪贴板', 'success');
+            }).catch(err => {
+                console.error('复制失败:', err);
+                this.fallbackCopyText(text);
+            });
+        } else {
+            this.fallbackCopyText(text);
+        }
+    }
+
+    // 备用复制方法
+    fallbackCopyText(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
+            this.showConfigMessage('分析结果已复制到剪贴板', 'success');
+        } catch (err) {
+            console.error('复制失败:', err);
+            this.showConfigMessage('复制失败，请手动选择文本复制', 'error');
+        }
+
+        document.body.removeChild(textArea);
+    }
+
+    // ==================== PDF下载功能 ====================
+
+    // 绑定起名模块下载事件
+    bindNamingDownloadEvents(birthData, baziResult, nameSuggestions) {
+        const downloadPdfBtn = document.getElementById('download-naming-pdf-btn');
+        const downloadImageBtn = document.getElementById('download-naming-image-btn');
+        const downloadTextBtn = document.getElementById('download-naming-text-btn');
+
+        if (downloadPdfBtn) {
+            downloadPdfBtn.addEventListener('click', () => {
+                this.downloadNamingPDFReport(birthData, baziResult, nameSuggestions);
+            });
+        }
+
+        if (downloadImageBtn) {
+            downloadImageBtn.addEventListener('click', () => {
+                this.downloadNamingImageReport(birthData, baziResult, nameSuggestions);
+            });
+        }
+
+        if (downloadTextBtn) {
+            downloadTextBtn.addEventListener('click', () => {
+                this.downloadNamingTextReport(birthData, baziResult, nameSuggestions);
+            });
+        }
+    }
+
+    // 绑定测名模块下载事件
+    bindCemingDownloadEvents(testData, nameAnalysis, baziResult) {
+        const downloadPdfBtn = document.getElementById('download-ceming-pdf-btn');
+        const downloadImageBtn = document.getElementById('download-ceming-image-btn');
+        const downloadTextBtn = document.getElementById('download-ceming-text-btn');
+
+        if (downloadPdfBtn) {
+            downloadPdfBtn.addEventListener('click', () => {
+                this.downloadCemingPDFReport(testData, nameAnalysis, baziResult);
+            });
+        }
+
+        if (downloadImageBtn) {
+            downloadImageBtn.addEventListener('click', () => {
+                this.downloadCemingImageReport(testData, nameAnalysis, baziResult);
+            });
+        }
+
+        if (downloadTextBtn) {
+            downloadTextBtn.addEventListener('click', () => {
+                this.downloadCemingTextReport(testData, nameAnalysis, baziResult);
+            });
+        }
+    }
+
+    // 绑定合婚模块下载事件
+    bindMarriageDownloadEvents(marriageData, marriageResult) {
+        const downloadPdfBtn = document.getElementById('download-marriage-pdf-btn');
+        const downloadImageBtn = document.getElementById('download-marriage-image-btn');
+        const downloadTextBtn = document.getElementById('download-marriage-text-btn');
+
+        if (downloadPdfBtn) {
+            downloadPdfBtn.addEventListener('click', () => {
+                this.downloadMarriagePDFReport(marriageData, marriageResult);
+            });
+        }
+
+        if (downloadImageBtn) {
+            downloadImageBtn.addEventListener('click', () => {
+                this.downloadMarriageImageReport(marriageData, marriageResult);
+            });
+        }
+
+        if (downloadTextBtn) {
+            downloadTextBtn.addEventListener('click', () => {
+                this.downloadMarriageTextReport(marriageData, marriageResult);
+            });
+        }
+    }
+
+    // 格式化合婚AI响应
+    formatMarriageAIResponse(text) {
+        if (!text) return '<div class="ai-response-streaming">正在生成分析...</div>';
+
+        let formatted = text;
+
+        // 处理标题层级
+        formatted = formatted
+            .replace(/^# (.*?)$/gm, '<h1>$1</h1>')
+            .replace(/^## (.*?)$/gm, '<h2>$1</h2>')
+            .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
+            .replace(/^#### (.*?)$/gm, '<h4>$1</h4>');
+
+        // 处理粗体和斜体
+        formatted = formatted
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+        // 处理编号列表和要点
+        formatted = formatted
+            .replace(/^(\d+)\.\s*\*\*(.*?)\*\*/gm, '<div class="analysis-point"><strong>$1. $2</strong></div>')
+            .replace(/^(\d+)\.\s*(.*?)$/gm, '<div class="analysis-point"><strong>$1. $2</strong></div>')
+            .replace(/^-\s*(.*?)$/gm, '<li>$1</li>');
+
+        // 处理特殊标记
+        formatted = formatted
+            .replace(/【(.*?)】/g, '<span class="highlight">【$1】</span>')
+            .replace(/💡\s*(.*?)$/gm, '<div class="suggestion-box">💡 $1</div>')
+            .replace(/⚠️\s*(.*?)$/gm, '<div class="warning-box">⚠️ $1</div>')
+            .replace(/✅\s*(.*?)$/gm, '<div class="success-box">✅ $1</div>');
+
+        // 处理段落
+        const lines = formatted.split('\n');
+        let result = '';
+        let inList = false;
+        let currentParagraph = '';
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            if (line === '') {
+                if (currentParagraph) {
+                    result += `<p>${currentParagraph}</p>\n`;
+                    currentParagraph = '';
+                }
+                if (inList) {
+                    result += '</ul>\n';
+                    inList = false;
+                }
+                continue;
+            }
+
+            if (line.startsWith('<li>')) {
+                if (currentParagraph) {
+                    result += `<p>${currentParagraph}</p>\n`;
+                    currentParagraph = '';
+                }
+                if (!inList) {
+                    result += '<ul>\n';
+                    inList = true;
+                }
+                result += line + '\n';
+            } else if (line.startsWith('<h') || line.startsWith('<div class="analysis-point">') ||
+                      line.startsWith('<div class="suggestion-box">') || line.startsWith('<div class="warning-box">') ||
+                      line.startsWith('<div class="success-box">')) {
+                if (currentParagraph) {
+                    result += `<p>${currentParagraph}</p>\n`;
+                    currentParagraph = '';
+                }
+                if (inList) {
+                    result += '</ul>\n';
+                    inList = false;
+                }
+                result += line + '\n';
+            } else {
+                if (inList) {
+                    result += '</ul>\n';
+                    inList = false;
+                }
+                if (currentParagraph) {
+                    currentParagraph += '<br>' + line;
+                } else {
+                    currentParagraph = line;
+                }
+            }
+        }
+
+        // 处理最后的段落和列表
+        if (currentParagraph) {
+            result += `<p>${currentParagraph}</p>\n`;
+        }
+        if (inList) {
+            result += '</ul>\n';
+        }
+
+        return `<div class="ai-response-content">${result}</div>`;
+    }
+
+    // ==================== 起名模块PDF生成 ====================
+
+    // 下载起名PDF报告
+    downloadNamingPDFReport(birthData, baziResult, nameSuggestions) {
+        const resultContent = document.querySelector('#qiming-result .result-content');
+        if (!resultContent) {
+            this.showError('没有可下载的报告内容');
+            return;
+        }
+
+        this.showProcessing('正在准备PDF报告...');
+
+        setTimeout(() => {
+            this.hideProcessing();
+            this.openNamingPrintPreview(birthData, baziResult, nameSuggestions);
+        }, 500);
+    }
+
+    // 下载起名长图报告
+    async downloadNamingImageReport(birthData, baziResult, nameSuggestions) {
+        const resultContent = document.querySelector('#qiming-result .result-content');
+        if (!resultContent) {
+            this.showError('没有可下载的报告内容');
+            return;
+        }
+
+        this.showProcessing('正在生成长图报告...');
+
+        try {
+            const reportHTML = this.generateNamingReportHTML(birthData, baziResult, nameSuggestions);
+            const canvas = await this.createCanvasFromHTML(reportHTML);
+
+            const link = document.createElement('a');
+            link.download = `赛博起名报告_${birthData.name}_${new Date().toISOString().split('T')[0]}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+
+            this.showSuccess('长图报告已下载');
+        } catch (error) {
+            console.error('生成长图失败:', error);
+            this.showError('生成长图失败: ' + error.message);
+        } finally {
+            this.hideProcessing();
+        }
+    }
+
+    // 下载起名文本报告
+    downloadNamingTextReport(birthData, baziResult, nameSuggestions) {
+        const resultContent = document.querySelector('#qiming-result .result-content');
+        if (!resultContent) {
+            this.showError('没有可下载的报告内容');
+            return;
+        }
+
+        const reportText = this.generateNamingCompleteReport(birthData, baziResult, nameSuggestions);
+
+        const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `赛博起名文本报告_${birthData.name}_${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+        this.showSuccess('文本报告已下载');
+    }
+
+    // 生成起名完整报告文本
+    generateNamingCompleteReport(birthData, baziResult, nameSuggestions) {
+        let report = '';
+
+        // 报告标题
+        report += '赛博起名 - 完整起名分析报告\n';
+        report += '='.repeat(60) + '\n\n';
+
+        // 基本信息
+        report += `姓名：${birthData.name}\n`;
+        report += `性别：${birthData.gender}\n`;
+        report += `出生时间：${birthData.year}年${birthData.month}月${birthData.day}日 ${birthData.hour.toString().padStart(2, '0')}:${(birthData.minute || 0).toString().padStart(2, '0')}\n`;
+        report += `出生地区：${birthData.birthProvince} ${birthData.birthCity}\n\n`;
+
+        // 八字信息
+        report += '生辰八字\n';
+        report += '-'.repeat(30) + '\n';
+        report += `年柱：${baziResult.yearPillar} (${baziResult.yearTenGod})\n`;
+        report += `月柱：${baziResult.monthPillar} (${baziResult.monthTenGod})\n`;
+        report += `日柱：${baziResult.dayPillar} (日主${baziResult.dayTianGan})\n`;
+        report += `时柱：${baziResult.hourPillar} (${baziResult.hourTenGod})\n\n`;
+
+        // 五行分析
+        report += '五行分析\n';
+        report += '-'.repeat(30) + '\n';
+        const wuxingStats = this.getWuXingStats(baziResult);
+        Object.entries(wuxingStats).forEach(([element, count]) => {
+            report += `${element}：${count}个\n`;
+        });
+        report += '\n';
+
+        // 起名建议
+        report += '起名建议\n';
+        report += '-'.repeat(30) + '\n';
+        nameSuggestions.forEach((suggestion, index) => {
+            report += `${index + 1}. ${suggestion.name}\n`;
+            report += `   评分：${suggestion.score}分\n`;
+            report += `   五行：${suggestion.wuxing}\n`;
+            report += `   寓意：${suggestion.meaning}\n`;
+            report += `   分析：${suggestion.analysis}\n\n`;
+        });
+
+        // AI分析结果
+        const aiOutput = document.getElementById('naming-ai-output');
+        if (aiOutput && aiOutput.textContent.trim()) {
+            report += 'AI深度分析\n';
+            report += '-'.repeat(30) + '\n';
+            report += aiOutput.textContent.trim() + '\n\n';
+        }
+
+        // 报告尾部
+        report += '-'.repeat(60) + '\n';
+        report += `报告生成时间：${new Date().toLocaleString('zh-CN')}\n`;
+        report += '本报告由赛博起名系统生成\n';
+
+        return report;
+    }
+
+    // 打开起名打印预览
+    openNamingPrintPreview(birthData, baziResult, nameSuggestions) {
+        const reportHTML = this.generateNamingPrintableHTML(birthData, baziResult, nameSuggestions);
+
+        const printWindow = window.open('', '_blank', 'width=800,height=600');
+        printWindow.document.write(reportHTML);
+        printWindow.document.close();
+
+        printWindow.onload = function() {
+            setTimeout(() => {
+                printWindow.print();
+            }, 1000);
+        };
+
+        this.showSuccess('已打开打印预览，您可以选择"另存为PDF"保存');
+    }
+
+    // 生成起名可打印HTML
+    generateNamingPrintableHTML(birthData, baziResult, nameSuggestions) {
+        const aiOutput = document.getElementById('naming-ai-output');
+        const aiAnalysis = aiOutput ? aiOutput.innerHTML : '';
+
+        return `
+            <!DOCTYPE html>
+            <html lang="zh-CN">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>赛博起名报告</title>
+                <link rel="stylesheet" href="css/print.css">
+                <style>
+                    body { font-family: 'Microsoft YaHei', 'SimHei', Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .report-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+                    .report-header { text-align: center; border-bottom: 3px solid #333; margin-bottom: 30px; padding-bottom: 15px; }
+                    .report-title { font-size: 2.5rem; font-weight: bold; color: #333; margin-bottom: 10px; }
+                    .report-subtitle { font-size: 1.2rem; color: #666; }
+                    .basic-info { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                    .section { margin: 30px 0; }
+                    .section-title { font-size: 1.4rem; font-weight: bold; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; }
+                    .bazi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
+                    .bazi-pillar { text-align: center; padding: 15px; border: 2px solid #ddd; border-radius: 8px; background: #f8f9fa; }
+                    .pillar-label { font-weight: bold; color: #007bff; margin-bottom: 8px; }
+                    .pillar-chars { font-size: 1.5rem; font-weight: bold; margin: 8px 0; }
+                    .wuxing-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 15px 0; }
+                    .wuxing-item { text-align: center; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+                    .name-suggestions { margin: 20px 0; }
+                    .name-item { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #007bff; }
+                    .name-title { font-size: 1.2rem; font-weight: bold; color: #333; margin-bottom: 8px; }
+                    .name-score { color: #007bff; font-weight: bold; }
+                    .ai-analysis { background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                    .report-footer { text-align: center; margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px; color: #666; }
+                    @media print {
+                        body { margin: 0; padding: 15px; }
+                        .report-container { padding: 0; }
+                        .section { page-break-inside: avoid; }
+                        .name-item { page-break-inside: avoid; }
+                        .ai-analysis { page-break-inside: avoid; }
+                    }
+                    @page { margin: 2cm; size: A4; }
+                </style>
+            </head>
+            <body>
+                <div class="report-container">
+                    <div class="report-header">
+                        <div class="report-title">赛博起名</div>
+                        <div class="report-subtitle">完整起名分析报告</div>
+                    </div>
+
+                    <div class="basic-info">
+                        <strong>基本信息</strong><br>
+                        姓名：${birthData.name}<br>
+                        性别：${birthData.gender}<br>
+                        出生时间：${birthData.year}年${birthData.month}月${birthData.day}日 ${birthData.hour.toString().padStart(2, '0')}:${(birthData.minute || 0).toString().padStart(2, '0')}<br>
+                        出生地区：${birthData.birthProvince} ${birthData.birthCity}
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">生辰八字</div>
+                        <div class="bazi-grid">
+                            <div class="bazi-pillar">
+                                <div class="pillar-label">年柱</div>
+                                <div class="pillar-chars">${baziResult.yearPillar}</div>
+                                <div class="pillar-god">${baziResult.yearTenGod}</div>
+                            </div>
+                            <div class="bazi-pillar">
+                                <div class="pillar-label">月柱</div>
+                                <div class="pillar-chars">${baziResult.monthPillar}</div>
+                                <div class="pillar-god">${baziResult.monthTenGod}</div>
+                            </div>
+                            <div class="bazi-pillar">
+                                <div class="pillar-label">日柱</div>
+                                <div class="pillar-chars">${baziResult.dayPillar}</div>
+                                <div class="pillar-god">日主${baziResult.dayTianGan}</div>
+                            </div>
+                            <div class="bazi-pillar">
+                                <div class="pillar-label">时柱</div>
+                                <div class="pillar-chars">${baziResult.hourPillar}</div>
+                                <div class="pillar-god">${baziResult.hourTenGod}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">五行分析</div>
+                        <div class="wuxing-stats">
+                            ${this.generateWuXingStatsHTML(baziResult)}
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">起名建议</div>
+                        <div class="name-suggestions">
+                            ${nameSuggestions.map((suggestion, index) => `
+                                <div class="name-item">
+                                    <div class="name-title">${index + 1}. ${suggestion.name} <span class="name-score">(${suggestion.score}分)</span></div>
+                                    <div><strong>五行：</strong>${suggestion.wuxing}</div>
+                                    <div><strong>寓意：</strong>${suggestion.meaning}</div>
+                                    <div><strong>分析：</strong>${suggestion.analysis}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    ${aiAnalysis ? `
+                        <div class="section">
+                            <div class="section-title">AI智能分析</div>
+                            <div class="ai-analysis">
+                                ${aiAnalysis}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="report-footer">
+                        报告生成时间：${new Date().toLocaleString('zh-CN')}<br>
+                        本报告由赛博起名系统生成
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+    }
+
+    // 生成五行统计HTML
+    generateWuXingStatsHTML(baziResult) {
+        const wuxingStats = this.getWuXingStats(baziResult);
+        return Object.entries(wuxingStats).map(([element, count]) => `
+            <div class="wuxing-item">
+                <div style="font-weight: bold; color: #007bff;">${element}</div>
+                <div>${count}个</div>
+            </div>
+        `).join('');
+    }
+
+    // 获取五行统计
+    getWuXingStats(baziResult) {
+        const stats = { '金': 0, '木': 0, '水': 0, '火': 0, '土': 0 };
+
+        // 统计天干五行
+        [baziResult.yearPillar[0], baziResult.monthPillar[0], baziResult.dayPillar[0], baziResult.hourPillar[0]].forEach(tianGan => {
+            const wuxing = this.getTianGanWuXing(tianGan);
+            if (stats[wuxing] !== undefined) stats[wuxing]++;
+        });
+
+        // 统计地支五行
+        [baziResult.yearPillar[1], baziResult.monthPillar[1], baziResult.dayPillar[1], baziResult.hourPillar[1]].forEach(diZhi => {
+            const wuxing = this.getDiZhiWuXing(diZhi);
+            if (stats[wuxing] !== undefined) stats[wuxing]++;
+        });
+
+        return stats;
+    }
+
+    // 获取天干五行
+    getTianGanWuXing(tianGan) {
+        const wuxingMap = {
+            '甲': '木', '乙': '木',
+            '丙': '火', '丁': '火',
+            '戊': '土', '己': '土',
+            '庚': '金', '辛': '金',
+            '壬': '水', '癸': '水'
+        };
+        return wuxingMap[tianGan] || '未知';
+    }
+
+    // 获取地支五行
+    getDiZhiWuXing(diZhi) {
+        const wuxingMap = {
+            '子': '水', '亥': '水',
+            '寅': '木', '卯': '木',
+            '巳': '火', '午': '火',
+            '申': '金', '酉': '金',
+            '辰': '土', '戌': '土', '丑': '土', '未': '土'
+        };
+        return wuxingMap[diZhi] || '未知';
+    }
+
+    // ==================== 测名模块PDF生成 ====================
+
+    // 下载测名PDF报告
+    downloadCemingPDFReport(testData, nameAnalysis, baziResult) {
+        const resultContent = document.querySelector('#ceming-result .result-content');
+        if (!resultContent) {
+            this.showError('没有可下载的报告内容');
+            return;
+        }
+
+        this.showProcessing('正在准备PDF报告...');
+
+        setTimeout(() => {
+            this.hideProcessing();
+            this.openCemingPrintPreview(testData, nameAnalysis, baziResult);
+        }, 500);
+    }
+
+    // 下载测名长图报告
+    async downloadCemingImageReport(testData, nameAnalysis, baziResult) {
+        const resultContent = document.querySelector('#ceming-result .result-content');
+        if (!resultContent) {
+            this.showError('没有可下载的报告内容');
+            return;
+        }
+
+        this.showProcessing('正在生成长图报告...');
+
+        try {
+            const reportHTML = this.generateCemingReportHTML(testData, nameAnalysis, baziResult);
+            const canvas = await this.createCanvasFromHTML(reportHTML);
+
+            const link = document.createElement('a');
+            link.download = `赛博测名报告_${testData.fullName}_${new Date().toISOString().split('T')[0]}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+
+            this.showSuccess('长图报告已下载');
+        } catch (error) {
+            console.error('生成长图失败:', error);
+            this.showError('生成长图失败: ' + error.message);
+        } finally {
+            this.hideProcessing();
+        }
+    }
+
+    // 下载测名文本报告
+    downloadCemingTextReport(testData, nameAnalysis, baziResult) {
+        const resultContent = document.querySelector('#ceming-result .result-content');
+        if (!resultContent) {
+            this.showError('没有可下载的报告内容');
+            return;
+        }
+
+        const reportText = this.generateCemingCompleteReport(testData, nameAnalysis, baziResult);
+
+        const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `赛博测名文本报告_${testData.fullName}_${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+        this.showSuccess('文本报告已下载');
+    }
+
+    // 生成测名完整报告文本
+    generateCemingCompleteReport(testData, nameAnalysis, baziResult) {
+        let report = '';
+
+        // 报告标题
+        report += '赛博测名 - 完整姓名分析报告\n';
+        report += '='.repeat(60) + '\n\n';
+
+        // 基本信息
+        report += `姓名：${testData.fullName}\n`;
+        report += `性别：${testData.gender}\n`;
+        report += `出生时间：${testData.year}年${testData.month}月${testData.day}日 ${testData.hour.toString().padStart(2, '0')}:${(testData.minute || 0).toString().padStart(2, '0')}\n`;
+        report += `出生地区：${testData.birthProvince} ${testData.birthCity}\n\n`;
+
+        // 八字信息
+        report += '生辰八字\n';
+        report += '-'.repeat(30) + '\n';
+        report += `年柱：${baziResult.yearPillar} (${baziResult.yearTenGod})\n`;
+        report += `月柱：${baziResult.monthPillar} (${baziResult.monthTenGod})\n`;
+        report += `日柱：${baziResult.dayPillar} (日主${baziResult.dayTianGan})\n`;
+        report += `时柱：${baziResult.hourPillar} (${baziResult.hourTenGod})\n\n`;
+
+        // 姓名分析
+        report += '姓名分析\n';
+        report += '-'.repeat(30) + '\n';
+        report += `综合评分：${nameAnalysis.score}分\n\n`;
+
+        // 五格数理
+        report += '五格数理：\n';
+        report += `天格：${nameAnalysis.wuGe.tianGe}\n`;
+        report += `人格：${nameAnalysis.wuGe.renGe}\n`;
+        report += `地格：${nameAnalysis.wuGe.diGe}\n`;
+        report += `外格：${nameAnalysis.wuGe.waiGe}\n`;
+        report += `总格：${nameAnalysis.wuGe.zongGe}\n\n`;
+
+        // 三才配置
+        report += `三才配置：${nameAnalysis.sanCai.tianWuXing}${nameAnalysis.sanCai.renWuXing}${nameAnalysis.sanCai.diWuXing} (${nameAnalysis.sanCai.jiXiong})\n\n`;
+
+        // 基础分析
+        report += '基础分析\n';
+        report += '-'.repeat(30) + '\n';
+        report += nameAnalysis.analysis + '\n\n';
+
+        // AI分析结果
+        const aiOutput = document.getElementById('ceming-ai-output');
+        if (aiOutput && aiOutput.textContent.trim()) {
+            report += 'AI深度分析\n';
+            report += '-'.repeat(30) + '\n';
+            report += aiOutput.textContent.trim() + '\n\n';
+        }
+
+        // 报告尾部
+        report += '-'.repeat(60) + '\n';
+        report += `报告生成时间：${new Date().toLocaleString('zh-CN')}\n`;
+        report += '本报告由赛博测名系统生成\n';
+
+        return report;
+    }
+
+    // 打开测名打印预览
+    openCemingPrintPreview(testData, nameAnalysis, baziResult) {
+        const reportHTML = this.generateCemingPrintableHTML(testData, nameAnalysis, baziResult);
+
+        const printWindow = window.open('', '_blank', 'width=800,height=600');
+        printWindow.document.write(reportHTML);
+        printWindow.document.close();
+
+        printWindow.onload = function() {
+            setTimeout(() => {
+                printWindow.print();
+            }, 1000);
+        };
+
+        this.showSuccess('已打开打印预览，您可以选择"另存为PDF"保存');
+    }
+
+    // 生成测名可打印HTML
+    generateCemingPrintableHTML(testData, nameAnalysis, baziResult) {
+        const aiOutput = document.getElementById('ceming-ai-output');
+        const aiAnalysis = aiOutput ? aiOutput.innerHTML : '';
+
+        return `
+            <!DOCTYPE html>
+            <html lang="zh-CN">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>赛博测名报告</title>
+                <link rel="stylesheet" href="css/print.css">
+                <style>
+                    body { font-family: 'Microsoft YaHei', 'SimHei', Arial, sans-serif; line-height: 1.6; color: #333; }
+                    .report-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+                    .report-header { text-align: center; border-bottom: 3px solid #333; margin-bottom: 30px; padding-bottom: 15px; }
+                    .report-title { font-size: 2.5rem; font-weight: bold; color: #333; margin-bottom: 10px; }
+                    .report-subtitle { font-size: 1.2rem; color: #666; }
+                    .basic-info { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                    .section { margin: 30px 0; }
+                    .section-title { font-size: 1.4rem; font-weight: bold; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; }
+                    .score-display { text-align: center; margin: 20px 0; }
+                    .score-circle { display: inline-block; width: 120px; height: 120px; border: 4px solid #007bff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+                    .score-number { font-size: 2.5rem; font-weight: bold; color: #007bff; }
+                    .score-label { font-size: 1rem; color: #666; }
+                    .bazi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
+                    .bazi-pillar { text-align: center; padding: 15px; border: 2px solid #ddd; border-radius: 8px; background: #f8f9fa; }
+                    .pillar-label { font-weight: bold; color: #007bff; margin-bottom: 8px; }
+                    .pillar-chars { font-size: 1.5rem; font-weight: bold; margin: 8px 0; }
+                    .wuge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 15px 0; }
+                    .wuge-item { text-align: center; padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: #f8f9fa; }
+                    .wuge-label { font-weight: bold; color: #007bff; }
+                    .wuge-value { font-size: 1.2rem; font-weight: bold; margin-top: 5px; }
+                    .sancai-info { background: #f0f8ff; padding: 15px; border-radius: 8px; margin: 15px 0; }
+                    .analysis-text { background: #f8f9fa; padding: 15px; border-radius: 8px; white-space: pre-wrap; }
+                    .ai-analysis { background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                    .report-footer { text-align: center; margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px; color: #666; }
+                    @media print {
+                        body { margin: 0; padding: 15px; }
+                        .report-container { padding: 0; }
+                        .section { page-break-inside: avoid; }
+                        .score-display { page-break-inside: avoid; }
+                        .ai-analysis { page-break-inside: avoid; }
+                    }
+                    @page { margin: 2cm; size: A4; }
+                </style>
+            </head>
+            <body>
+                <div class="report-container">
+                    <div class="report-header">
+                        <div class="report-title">赛博测名</div>
+                        <div class="report-subtitle">完整姓名分析报告</div>
+                    </div>
+
+                    <div class="basic-info">
+                        <strong>基本信息</strong><br>
+                        姓名：${testData.fullName}<br>
+                        性别：${testData.gender}<br>
+                        出生时间：${testData.year}年${testData.month}月${testData.day}日 ${testData.hour.toString().padStart(2, '0')}:${(testData.minute || 0).toString().padStart(2, '0')}<br>
+                        出生地区：${testData.birthProvince} ${testData.birthCity}
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">综合评分</div>
+                        <div class="score-display">
+                            <div class="score-circle">
+                                <div class="score-number">${nameAnalysis.score}</div>
+                                <div class="score-label">分</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">生辰八字</div>
+                        <div class="bazi-grid">
+                            <div class="bazi-pillar">
+                                <div class="pillar-label">年柱</div>
+                                <div class="pillar-chars">${baziResult.yearPillar}</div>
+                                <div class="pillar-god">${baziResult.yearTenGod}</div>
+                            </div>
+                            <div class="bazi-pillar">
+                                <div class="pillar-label">月柱</div>
+                                <div class="pillar-chars">${baziResult.monthPillar}</div>
+                                <div class="pillar-god">${baziResult.monthTenGod}</div>
+                            </div>
+                            <div class="bazi-pillar">
+                                <div class="pillar-label">日柱</div>
+                                <div class="pillar-chars">${baziResult.dayPillar}</div>
+                                <div class="pillar-god">日主${baziResult.dayTianGan}</div>
+                            </div>
+                            <div class="bazi-pillar">
+                                <div class="pillar-label">时柱</div>
+                                <div class="pillar-chars">${baziResult.hourPillar}</div>
+                                <div class="pillar-god">${baziResult.hourTenGod}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">五格数理</div>
+                        <div class="wuge-grid">
+                            <div class="wuge-item">
+                                <div class="wuge-label">天格</div>
+                                <div class="wuge-value">${nameAnalysis.wuGe.tianGe}</div>
+                            </div>
+                            <div class="wuge-item">
+                                <div class="wuge-label">人格</div>
+                                <div class="wuge-value">${nameAnalysis.wuGe.renGe}</div>
+                            </div>
+                            <div class="wuge-item">
+                                <div class="wuge-label">地格</div>
+                                <div class="wuge-value">${nameAnalysis.wuGe.diGe}</div>
+                            </div>
+                            <div class="wuge-item">
+                                <div class="wuge-label">外格</div>
+                                <div class="wuge-value">${nameAnalysis.wuGe.waiGe}</div>
+                            </div>
+                            <div class="wuge-item">
+                                <div class="wuge-label">总格</div>
+                                <div class="wuge-value">${nameAnalysis.wuGe.zongGe}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">三才配置</div>
+                        <div class="sancai-info">
+                            <strong>${nameAnalysis.sanCai.tianWuXing}${nameAnalysis.sanCai.renWuXing}${nameAnalysis.sanCai.diWuXing}</strong> (${nameAnalysis.sanCai.jiXiong})
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">基础分析</div>
+                        <div class="analysis-text">${nameAnalysis.analysis}</div>
+                    </div>
+
+                    ${aiAnalysis ? `
+                        <div class="section">
+                            <div class="section-title">AI智能分析</div>
+                            <div class="ai-analysis">
+                                ${aiAnalysis}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="report-footer">
+                        报告生成时间：${new Date().toLocaleString('zh-CN')}<br>
+                        本报告由赛博测名系统生成
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+    }
+
+    // ==================== 合婚模块PDF生成 ====================
+
+    // 下载合婚PDF报告
+    downloadMarriagePDFReport(marriageData, marriageResult) {
+        const resultContent = document.querySelector('#hehun-result .result-content');
+        if (!resultContent) {
+            this.showError('没有可下载的报告内容');
+            return;
+        }
+
+        this.showProcessing('正在准备PDF报告...');
+
+        setTimeout(() => {
+            this.hideProcessing();
+            this.openMarriagePrintPreview(marriageData, marriageResult);
+        }, 500);
+    }
+
+    // 下载合婚长图报告
+    async downloadMarriageImageReport(marriageData, marriageResult) {
+        const resultContent = document.querySelector('#hehun-result .result-content');
+        if (!resultContent) {
+            this.showError('没有可下载的报告内容');
+            return;
+        }
+
+        this.showProcessing('正在生成长图报告...');
+
+        try {
+            const reportHTML = this.generateMarriageReportHTML(marriageData, marriageResult);
+            const canvas = await this.createCanvasFromHTML(reportHTML);
+
+            const link = document.createElement('a');
+            link.download = `赛博合婚报告_${marriageData.male.name}_${marriageData.female.name}_${new Date().toISOString().split('T')[0]}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+
+            this.showSuccess('长图报告已下载');
+        } catch (error) {
+            console.error('生成长图失败:', error);
+            this.showError('生成长图失败: ' + error.message);
+        } finally {
+            this.hideProcessing();
+        }
+    }
+
+    // 下载合婚文本报告
+    downloadMarriageTextReport(marriageData, marriageResult) {
+        const resultContent = document.querySelector('#hehun-result .result-content');
+        if (!resultContent) {
+            this.showError('没有可下载的报告内容');
+            return;
+        }
+
+        const reportText = this.generateMarriageCompleteReport(marriageData, marriageResult);
+
+        const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `赛博合婚文本报告_${marriageData.male.name}_${marriageData.female.name}_${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+        this.showSuccess('文本报告已下载');
+    }
+
+    // 生成合婚完整报告文本
+    generateMarriageCompleteReport(marriageData, marriageResult) {
+        let report = '';
+
+        // 报告标题
+        report += '赛博合婚 - 完整合婚分析报告\n';
+        report += '='.repeat(60) + '\n\n';
+
+        // 基本信息
+        report += `男方：${marriageData.male.name}\n`;
+        report += `出生时间：${marriageData.male.year}年${marriageData.male.month}月${marriageData.male.day}日 ${marriageData.male.hour.toString().padStart(2, '0')}:${(marriageData.male.minute || 0).toString().padStart(2, '0')}\n`;
+        report += `出生地区：${marriageData.male.birthProvince || '未知'} ${marriageData.male.birthCity || '未知'}\n`;
+        report += `生肖：${this.getZodiacAnimal(marriageData.male.year)}\n\n`;
+
+        report += `女方：${marriageData.female.name}\n`;
+        report += `出生时间：${marriageData.female.year}年${marriageData.female.month}月${marriageData.female.day}日 ${marriageData.female.hour.toString().padStart(2, '0')}:${(marriageData.female.minute || 0).toString().padStart(2, '0')}\n`;
+        report += `出生地区：${marriageData.female.birthProvince || '未知'} ${marriageData.female.birthCity || '未知'}\n`;
+        report += `生肖：${this.getZodiacAnimal(marriageData.female.year)}\n\n`;
+
+        // 合婚分析
+        report += '合婚分析\n';
+        report += '-'.repeat(30) + '\n';
+        report += `综合匹配度：${marriageResult.totalScore}分 (${marriageResult.level})\n\n`;
+
+        report += `生肖配对：${marriageResult.shengXiaoMatch.score}分\n`;
+        report += `${marriageResult.shengXiaoMatch.analysis}\n\n`;
+
+        report += `五行配对：${marriageResult.wuXingMatch.score}分\n`;
+        report += `${marriageResult.wuXingMatch.analysis}\n\n`;
+
+        report += `十神配对：${marriageResult.shiShenMatch.score}分\n`;
+        report += `${marriageResult.shiShenMatch.analysis}\n\n`;
+
+        report += `年龄配对：${marriageResult.ageMatch.score}分\n`;
+        report += `${marriageResult.ageMatch.analysis}\n\n`;
+
+        // 改进建议
+        report += '改进建议\n';
+        report += '-'.repeat(30) + '\n';
+        marriageResult.suggestions.forEach((suggestion, index) => {
+            report += `${index + 1}. ${suggestion}\n`;
+        });
+        report += '\n';
+
+        // AI分析结果
+        const aiOutput = document.getElementById('ai-marriage-output');
+        if (aiOutput && aiOutput.textContent.trim()) {
+            report += 'AI深度分析\n';
+            report += '-'.repeat(30) + '\n';
+            report += aiOutput.textContent.trim() + '\n\n';
+        }
+
+        // 报告尾部
+        report += '-'.repeat(60) + '\n';
+        report += `报告生成时间：${new Date().toLocaleString('zh-CN')}\n`;
+        report += '本报告由赛博合婚系统生成\n';
+
+        return report;
+    }
+
+    // 打开合婚打印预览
+    openMarriagePrintPreview(marriageData, marriageResult) {
+        const reportHTML = this.generateMarriagePrintableHTML(marriageData, marriageResult);
+
+        const printWindow = window.open('', '_blank', 'width=800,height=600');
+        printWindow.document.write(reportHTML);
+        printWindow.document.close();
+
+        printWindow.onload = function() {
+            setTimeout(() => {
+                printWindow.print();
+            }, 1000);
+        };
+
+        this.showSuccess('已打开打印预览，您可以选择"另存为PDF"保存');
     }
 }
 
