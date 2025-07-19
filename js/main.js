@@ -19,11 +19,22 @@ class CyberFortune {
     }
 
     init() {
+        console.log('Initializing CyberFortune...');
         this.setupNavigation();
         this.setupForms();
-        this.populateSelects();
+
+        // 延迟填充选择框，确保DOM完全加载
+        setTimeout(() => {
+            this.populateSelects();
+        }, 100);
+
         this.setupEventListeners();
         this.initGlobalConfig();
+
+        // 再次检查并填充选择框（防止第一次失败）
+        setTimeout(() => {
+            this.ensureSelectsPopulated();
+        }, 500);
     }
 
     // 设置导航
@@ -126,10 +137,44 @@ class CyberFortune {
 
     // 填充选择框
     populateSelects() {
+        console.log('Starting to populate selects...');
         this.populateYears();
         this.populateMonths();
         this.populateDays();
         this.populateProvinces();
+        console.log('Finished populating selects');
+    }
+
+    // 确保选择框已填充（重试机制）
+    ensureSelectsPopulated() {
+        console.log('Checking if selects are properly populated...');
+
+        // 检查年份选择框
+        const yearSelects = document.querySelectorAll('select[name="birthYear"], select[name="maleBirthYear"], select[name="femaleBirthYear"]');
+        let needsRepopulation = false;
+
+        yearSelects.forEach(select => {
+            if (select.children.length <= 1) { // 只有默认选项
+                console.log(`Year select ${select.name} is empty, needs repopulation`);
+                needsRepopulation = true;
+            }
+        });
+
+        // 检查月份选择框
+        const monthSelects = document.querySelectorAll('select[name="birthMonth"], select[name="maleBirthMonth"], select[name="femaleBirthMonth"]');
+        monthSelects.forEach(select => {
+            if (select.children.length <= 1) { // 只有默认选项
+                console.log(`Month select ${select.name} is empty, needs repopulation`);
+                needsRepopulation = true;
+            }
+        });
+
+        if (needsRepopulation) {
+            console.log('Repopulating selects...');
+            this.populateSelects();
+        } else {
+            console.log('All selects are properly populated');
+        }
     }
 
     // 填充年份选择框
@@ -137,13 +182,22 @@ class CyberFortune {
         const yearSelects = document.querySelectorAll('select[name="birthYear"], select[name="maleBirthYear"], select[name="femaleBirthYear"]');
         const currentYear = new Date().getFullYear();
 
-        yearSelects.forEach(select => {
+        console.log('Populating years, found selects:', yearSelects.length);
+
+        yearSelects.forEach((select, index) => {
+            console.log(`Populating year select ${index}:`, select.name);
+            // 清空现有选项（保留第一个默认选项）
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+
             for (let year = currentYear; year >= 1900; year--) {
                 const option = document.createElement('option');
                 option.value = year;
                 option.textContent = year + '年';
                 select.appendChild(option);
             }
+            console.log(`Year select ${select.name} populated with ${select.children.length - 1} options`);
         });
     }
 
@@ -151,13 +205,22 @@ class CyberFortune {
     populateMonths() {
         const monthSelects = document.querySelectorAll('select[name="birthMonth"], select[name="maleBirthMonth"], select[name="femaleBirthMonth"]');
 
-        monthSelects.forEach(select => {
+        console.log('Populating months, found selects:', monthSelects.length);
+
+        monthSelects.forEach((select, index) => {
+            console.log(`Populating month select ${index}:`, select.name);
+            // 清空现有选项（保留第一个默认选项）
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+
             for (let month = 1; month <= 12; month++) {
                 const option = document.createElement('option');
                 option.value = month;
                 option.textContent = month + '月';
                 select.appendChild(option);
             }
+            console.log(`Month select ${select.name} populated with ${select.children.length - 1} options`);
         });
     }
 
@@ -5968,7 +6031,36 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         window.cyberFortune = new CyberFortune();
         console.log('CyberFortune initialized successfully');
+
+        // 额外的延迟检查，确保在所有环境下都能正常工作
+        setTimeout(() => {
+            console.log('Performing final check of select elements...');
+            if (window.cyberFortune && typeof window.cyberFortune.ensureSelectsPopulated === 'function') {
+                window.cyberFortune.ensureSelectsPopulated();
+            }
+        }, 1000);
+
     } catch (error) {
         console.error('Error initializing CyberFortune:', error);
+    }
+});
+
+// 备用初始化（防止DOMContentLoaded事件失效）
+window.addEventListener('load', function() {
+    console.log('Window loaded, checking CyberFortune initialization...');
+    if (!window.cyberFortune) {
+        console.log('CyberFortune not initialized, trying again...');
+        try {
+            window.cyberFortune = new CyberFortune();
+            console.log('CyberFortune initialized on window load');
+        } catch (error) {
+            console.error('Error initializing CyberFortune on window load:', error);
+        }
+    } else {
+        console.log('CyberFortune already initialized');
+        // 再次确保选择框已填充
+        if (typeof window.cyberFortune.ensureSelectsPopulated === 'function') {
+            window.cyberFortune.ensureSelectsPopulated();
+        }
     }
 });
