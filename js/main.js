@@ -213,7 +213,7 @@ class CyberFortune {
         const monthSelects = document.querySelectorAll('select[name="birthMonth"], select[name="maleBirthMonth"], select[name="femaleBirthMonth"]');
         monthSelects.forEach(select => {
             select.addEventListener('change', (e) => {
-                this.updateDays(e.target.closest('form'));
+                this.updateDaysForTarget(e.target);
             });
         });
 
@@ -221,7 +221,7 @@ class CyberFortune {
         const yearSelects = document.querySelectorAll('select[name="birthYear"], select[name="maleBirthYear"], select[name="femaleBirthYear"]');
         yearSelects.forEach(select => {
             select.addEventListener('change', (e) => {
-                this.updateDays(e.target.closest('form'));
+                this.updateDaysForTarget(e.target);
             });
         });
     }
@@ -279,7 +279,63 @@ class CyberFortune {
         return ['市区']; // 备用选项
     }
 
-    // 更新日期选择框
+    // 根据触发的目标元素更新对应的日期选择框
+    updateDaysForTarget(targetElement) {
+        const form = targetElement.closest('form');
+        if (!form) return;
+
+        const targetName = targetElement.name;
+        let prefix = '';
+
+        // 根据触发元素的name确定前缀
+        if (targetName.includes('male')) {
+            prefix = 'male';
+        } else if (targetName.includes('female')) {
+            prefix = 'female';
+        } else {
+            prefix = ''; // 通用字段（如知命模块）
+        }
+
+        // 构建对应的字段名
+        const yearName = prefix ? `${prefix}BirthYear` : 'birthYear';
+        const monthName = prefix ? `${prefix}BirthMonth` : 'birthMonth';
+        const dayName = prefix ? `${prefix}BirthDay` : 'birthDay';
+
+        // 查找对应的选择框
+        const yearSelect = form.querySelector(`select[name="${yearName}"]`);
+        const monthSelect = form.querySelector(`select[name="${monthName}"]`);
+        const daySelect = form.querySelector(`select[name="${dayName}"]`);
+
+        if (!yearSelect || !monthSelect || !daySelect) return;
+
+        const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+
+        if (!year || !month) return;
+
+        // 保存当前选中的日期
+        const currentDay = daySelect.value;
+
+        // 清空现有选项
+        daySelect.innerHTML = '<option value="">选择日期</option>';
+
+        // 计算该月的天数
+        const daysInMonth = new Date(year, month, 0).getDate();
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const option = document.createElement('option');
+            option.value = day;
+            option.textContent = day + '日';
+            daySelect.appendChild(option);
+        }
+
+        // 如果之前选择的日期在新月份中仍然有效，则保持选中
+        if (currentDay && parseInt(currentDay) <= daysInMonth) {
+            daySelect.value = currentDay;
+        }
+    }
+
+    // 更新日期选择框（保留原函数以兼容其他调用）
     updateDays(form) {
         // 尝试不同的字段名模式
         const yearSelectors = ['select[name="birthYear"]', 'select[name="maleBirthYear"]', 'select[name="femaleBirthYear"]'];
