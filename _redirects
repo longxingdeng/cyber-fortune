@@ -1,0 +1,9 @@
+# Redirect all 404s to index.html for SPA behavior
+/* /index.html 200
+
+# Redirect old paths if any
+/fortune /index.html 200
+/bazi /index.html 200
+/ziwei /index.html 200
+/name /index.html 200
+/marriage /index.html 200

@@ -101,6 +101,78 @@ Cyberpunk Fortune/
 3. **访问网站**
    打开浏览器访问 `http://localhost:8000`
 
+## 🌐 部署到Cloudflare Pages
+
+### 方法一：GitHub自动部署（推荐）
+
+1. **准备GitHub仓库**
+   ```bash
+   # 确保代码已推送到GitHub
+   git add .
+   git commit -m "准备部署到Cloudflare Pages"
+   git push origin main
+   ```
+
+2. **登录Cloudflare Dashboard**
+   - 访问 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+   - 登录您的Cloudflare账户
+
+3. **创建Pages项目**
+   - 在左侧菜单中点击 "Pages"
+   - 点击 "Create a project"
+   - 选择 "Connect to Git"
+
+4. **连接GitHub仓库**
+   - 选择 "GitHub"
+   - 授权Cloudflare访问您的GitHub账户
+   - 选择仓库：`longxingdeng/cyberpunk-fortune-`
+
+5. **配置构建设置**
+   - **项目名称**：`cyberpunk-fortune`（或自定义名称）
+   - **生产分支**：`main`
+   - **构建命令**：留空（纯静态网站）
+   - **构建输出目录**：`/`（根目录）
+   - **根目录**：`/`（根目录）
+
+6. **完成部署**
+   - 点击 "Save and Deploy"
+   - 等待部署完成（通常1-3分钟）
+   - 获得您的网站URL：`https://your-project-name.pages.dev`
+
+### 方法二：手动上传
+
+1. **准备部署文件**
+   - 确保项目包含 `_headers` 和 `_redirects` 配置文件
+   - 这些文件已包含在项目中，用于优化性能和SEO
+
+2. **手动部署**
+   - 在Cloudflare Pages中选择 "Upload assets"
+   - 将整个项目文件夹拖拽上传
+   - 等待部署完成
+
+### 部署后配置
+
+1. **自定义域名**（可选）
+   - 在Pages项目设置中添加自定义域名
+   - 配置DNS记录指向Cloudflare
+
+2. **环境变量**（如需要）
+   - 在项目设置中添加环境变量
+   - 当前项目为纯前端，暂不需要
+
+3. **自动部署**
+   - 每次推送到GitHub main分支会自动触发部署
+   - 可在Cloudflare Dashboard中查看部署状态
+
+### 部署优势
+
+- ✅ **全球CDN**：快速访问速度
+- ✅ **免费SSL**：自动HTTPS证书
+- ✅ **自动部署**：GitHub集成，推送即部署
+- ✅ **版本管理**：支持回滚到历史版本
+- ✅ **预览部署**：分支预览功能
+- ✅ **无限带宽**：免费计划包含无限带宽
+
 ## 💡 使用说明
 
 ### 赛博知命使用流程
