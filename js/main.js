@@ -542,6 +542,12 @@ class CyberFortune {
 
         // 滚动到结果区域
         resultPanel.scrollIntoView({ behavior: 'smooth' });
+
+        // 自动开始AI分析
+        setTimeout(() => {
+            console.log('自动开始知命AI分析...');
+            this.generateAIAnalysis(birthData, baziResult, prompt, ziweiResult);
+        }, 1000); // 延迟1秒，确保界面渲染完成
     }
 
     // 构建赛博知命结果HTML
@@ -1527,6 +1533,12 @@ class CyberFortune {
         resultPanel.style.display = 'block';
         resultPanel.classList.add('show');
         resultPanel.scrollIntoView({ behavior: 'smooth' });
+
+        // 自动开始AI起名分析
+        setTimeout(() => {
+            console.log('自动开始起名AI分析...');
+            this.generateNamingAIAnalysis(birthData, baziResult, nameSuggestions, aiPrompt);
+        }, 1000); // 延迟1秒，确保界面渲染完成
     }
 
     // 生成自定义配置显示
@@ -2106,6 +2118,12 @@ class CyberFortune {
         resultPanel.style.display = 'block';
         resultPanel.classList.add('show');
         resultPanel.scrollIntoView({ behavior: 'smooth' });
+
+        // 自动开始AI测名分析
+        setTimeout(() => {
+            console.log('自动开始测名AI分析...');
+            this.generateCemingAIAnalysis(testData, nameAnalysis, baziResult, aiPrompt);
+        }, 1000); // 延迟1秒，确保界面渲染完成
     }
 
     // 生成测名AI分析提示词
@@ -2699,6 +2717,12 @@ class CyberFortune {
         resultPanel.style.display = 'block';
         resultPanel.classList.add('show');
         resultPanel.scrollIntoView({ behavior: 'smooth' });
+
+        // 自动开始AI合婚分析
+        setTimeout(() => {
+            console.log('自动开始合婚AI分析...');
+            this.generateMarriageAIAnalysis(marriageData, marriageResult, aiPrompt);
+        }, 1000); // 延迟1秒，确保界面渲染完成
     }
 
     // 调用AI API
