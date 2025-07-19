@@ -1184,6 +1184,227 @@ body {
     font-size: 0.9rem;
 }
 
+/* AI分析相关样式 */
+.ai-config-section {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.config-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.config-row:last-child {
+    margin-bottom: 0;
+}
+
+.config-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.config-item label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.config-item input,
+.config-item select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 0.8rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.config-item input:focus,
+.config-item select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(0, 212, 255, 0.3);
+}
+
+.config-item input[type="checkbox"] {
+    width: auto;
+    margin-right: 0.5rem;
+}
+
+.analysis-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    justify-content: center;
+}
+
+.cyber-button.secondary {
+    background: linear-gradient(45deg, #666, #999);
+}
+
+.cyber-button.secondary:hover {
+    background: linear-gradient(45deg, #777, #aaa);
+}
+
+.processing-box {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.processing-message {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.processing-steps {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    text-align: left;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.ai-result-section {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    max-height: none !important;
+    overflow: visible !important;
+    height: auto !important;
+}
+
+.ai-result-section h5 {
+    color: #00ff88;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.ai-output {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    padding: 1.5rem;
+    color: var(--text-primary);
+    line-height: 1.8;
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow: visible !important;
+    height: auto !important;
+    font-size: 0.95rem;
+}
+
+.ai-output h1,
+.ai-output h2,
+.ai-output h3 {
+    color: var(--primary-color);
+    margin: 1.5rem 0 1rem 0;
+}
+
+.ai-output h1 {
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+}
+
+.ai-output h2 {
+    font-size: 1.3rem;
+}
+
+.ai-output h3 {
+    font-size: 1.1rem;
+}
+
+.ai-output strong {
+    color: var(--accent-color);
+}
+
+.ai-output em {
+    color: #00ff88;
+    font-style: italic;
+}
+
+.api-error-message {
+    background: rgba(255, 68, 68, 0.1);
+    border: 1px solid rgba(255, 68, 68, 0.3);
+    color: #ff4444;
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.analysis-prompt h5 {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    user-select: none;
+}
+
+.analysis-prompt h5:hover {
+    color: var(--primary-color);
+}
+
+.prompt-content {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+.prompt-content pre {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* 下载选项样式 */
+.download-options {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.download-options .cyber-button {
+    flex: 1;
+    min-width: 180px;
+    max-width: 220px;
+}
+
+.download-options .cyber-button.secondary {
+    background: linear-gradient(45deg, #666, #999);
+    opacity: 0.8;
+}
+
+.download-options .cyber-button.secondary:hover {
+    background: linear-gradient(45deg, #777, #aaa);
+    opacity: 1;
+}
+
+.download-note {
+    text-align: center;
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
     .nav-container {
@@ -1275,4 +1496,577 @@ body {
         gap: 0.2rem;
         margin-bottom: 0.8rem;
     }
+
+    .config-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .analysis-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cyber-button {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .ai-output {
+        font-size: 0.9rem;
+        padding: 1rem;
+        max-height: none !important;
+        overflow-y: visible !important;
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .processing-steps {
+        font-size: 0.8rem;
+    }
+
+    .download-options {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .download-options .cyber-button {
+        width: 100%;
+        max-width: 300px;
+        min-width: auto;
+    }
+
+    .ai-naming-controls {
+        flex-direction: column;
+    }
+
+    .ai-config {
+        grid-template-columns: 1fr;
+    }
+
+    .config-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .config-row label {
+        min-width: auto;
+    }
+
+    .bazi-pillars {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .names-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ai-naming-output {
+        font-size: 0.9rem;
+        padding: 1rem;
+        max-height: none !important;
+        overflow-y: visible !important;
+        overflow: visible !important;
+        height: auto !important;
+    }
+}
+
+/* AI起名分析样式 */
+.ai-naming-section {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    max-height: none !important;
+    overflow: visible !important;
+    height: auto !important;
+}
+
+.ai-naming-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.ai-naming-header h4 {
+    color: #00ff88;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.ai-naming-header p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0 0 0.8rem 0;
+}
+
+.model-recommendation {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 4px;
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.rec-icon {
+    font-size: 1rem;
+}
+
+.rec-text {
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.rec-text strong {
+    color: #00ff88;
+    font-weight: bold;
+}
+
+.ai-naming-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.ai-config {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.config-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.config-row label {
+    min-width: 80px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.config-row input,
+.config-row select {
+    flex: 1;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.config-row input:focus,
+.config-row select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(0, 212, 255, 0.3);
+}
+
+.ai-naming-processing {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.ai-naming-processing-message {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.ai-naming-processing-steps {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    text-align: left;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+.ai-naming-result-section {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    max-height: none !important;
+    overflow: visible !important;
+    height: auto !important;
+}
+
+.ai-naming-result-section h5 {
+    color: #00ff88;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.ai-naming-output {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    padding: 1.5rem;
+    color: var(--text-primary);
+    line-height: 1.8;
+    max-height: none !important;
+    overflow-y: visible !important;
+    overflow: visible !important;
+    height: auto !important;
+    font-size: 0.95rem;
+}
+
+.ai-naming-output h1,
+.ai-naming-output h2,
+.ai-naming-output h3 {
+    color: var(--primary-color);
+    margin: 1.5rem 0 1rem 0;
+}
+
+.ai-naming-output h1 {
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+}
+
+.ai-naming-output h2 {
+    font-size: 1.3rem;
+}
+
+.ai-naming-output h3 {
+    font-size: 1.1rem;
+}
+
+.ai-naming-output strong {
+    color: var(--accent-color);
+}
+
+.ai-naming-output em {
+    color: #00ff88;
+    font-style: italic;
+}
+
+/* 八字信息样式 */
+.bazi-info {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.bazi-info h4 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.bazi-pillars {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.pillar {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.pillar-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.pillar-chars {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
+
+.pillar-wuxing {
+    color: #00ff88;
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+}
+
+.pillar-god {
+    color: var(--accent-color);
+    font-size: 0.9rem;
+}
+
+/* 五行分析样式 */
+.wuxing-analysis {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.wuxing-analysis h5 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.wuxing-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.wuxing-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.wuxing-name {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.wuxing-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.wuxing-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    transition: width 0.3s ease;
+}
+
+.wuxing-count {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.wuxing-needs {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 4px;
+    padding: 0.8rem;
+    text-align: center;
+}
+
+.needs-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-right: 0.5rem;
+}
+
+.needs-values {
+    color: #00ff88;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* 名字卡片样式增强 */
+.names-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.name-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.name-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.name-rank {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    background: var(--primary-color);
+    color: var(--bg-primary);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.name-text {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.name-score {
+    color: var(--accent-color);
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.name-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.name-wuxing,
+.name-sancai,
+.name-wuge {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+/* 自定义字相关样式 */
+.custom-chars-info {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 4px;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.custom-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-right: 0.5rem;
+}
+
+.custom-chars {
+    color: #00ff88;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.custom-name {
+    border-color: rgba(0, 255, 136, 0.5) !important;
+    background: rgba(0, 255, 136, 0.05);
+}
+
+.custom-name:hover {
+    border-color: #00ff88 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+}
+
+.custom-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #00ff88;
+    color: var(--bg-primary);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+/* 自定义字配置样式 */
+.custom-chars-config {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+.char-position-group {
+    margin-bottom: 1rem;
+}
+
+.char-position-group:last-child {
+    margin-bottom: 0;
+}
+
+.position-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    font-weight: normal;
+}
+
+.char-position-group input {
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.char-position-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(0, 212, 255, 0.3);
+}
+
+.char-position-group small {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+/* 自定义配置显示样式 */
+.custom-config-display {
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.config-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.config-item:last-child {
+    margin-bottom: 0;
+}
+
+.config-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-right: 0.5rem;
+    min-width: 120px;
+}
+
+.config-value {
+    color: #00ff88;
+    font-weight: bold;
+    font-size: 1rem;
 }

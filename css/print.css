@@ -1,0 +1,255 @@
+/* 打印专用样式 */
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background: white !important;
+        color: #333 !important;
+        font-family: 'Microsoft YaHei', 'SimHei', Arial, sans-serif;
+        line-height: 1.6;
+    }
+
+    .report-container {
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        background: white !important;
+        border-radius: 0 !important;
+        max-width: none !important;
+        width: 100% !important;
+    }
+
+    .report-header {
+        border-bottom: 3px solid #333 !important;
+        margin-bottom: 30px !important;
+        padding-bottom: 15px !important;
+    }
+
+    .report-title {
+        color: #333 !important;
+        font-size: 2rem !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        margin-bottom: 10px !important;
+    }
+
+    .report-subtitle {
+        color: #666 !important;
+        font-size: 1rem !important;
+        text-align: center !important;
+    }
+
+    .basic-info {
+        background: #f8f9fa !important;
+        border-left: 5px solid #333 !important;
+        padding: 15px !important;
+        margin-bottom: 25px !important;
+        border-radius: 0 !important;
+    }
+
+    .section {
+        margin-bottom: 25px !important;
+        padding: 15px !important;
+        background: #f8f9fa !important;
+        border-radius: 0 !important;
+        page-break-inside: avoid;
+    }
+
+    .section-title {
+        color: #333 !important;
+        font-size: 1.3rem !important;
+        font-weight: bold !important;
+        margin-bottom: 15px !important;
+        border-bottom: 2px solid #333 !important;
+        padding-bottom: 5px !important;
+    }
+
+    .bazi-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 10px !important;
+        margin: 15px 0 !important;
+    }
+
+    .pillar-card {
+        background: white !important;
+        border: 2px solid #333 !important;
+        border-radius: 5px !important;
+        padding: 10px !important;
+        text-align: center !important;
+        page-break-inside: avoid;
+    }
+
+    .pillar-name {
+        font-weight: bold !important;
+        color: #333 !important;
+        margin-bottom: 5px !important;
+        font-size: 0.9rem !important;
+    }
+
+    .pillar-chars {
+        font-size: 1.2rem !important;
+        font-weight: bold !important;
+        color: #000 !important;
+        margin-bottom: 5px !important;
+    }
+
+    .pillar-god {
+        color: #666 !important;
+        font-size: 0.8rem !important;
+    }
+
+    .ai-analysis {
+        background: #f0f8ff !important;
+        border: 2px solid #333 !important;
+        border-radius: 5px !important;
+        padding: 20px !important;
+        page-break-inside: avoid;
+    }
+
+    .ai-analysis h1,
+    .ai-analysis h2,
+    .ai-analysis h3 {
+        color: #333 !important;
+        margin-top: 15px !important;
+        margin-bottom: 10px !important;
+    }
+
+    .ai-analysis h1 {
+        font-size: 1.5rem !important;
+        border-bottom: 2px solid #333 !important;
+        padding-bottom: 5px !important;
+    }
+
+    .ai-analysis h2 {
+        font-size: 1.3rem !important;
+    }
+
+    .ai-analysis h3 {
+        font-size: 1.1rem !important;
+    }
+
+    .ai-analysis strong {
+        color: #000 !important;
+        font-weight: bold !important;
+    }
+
+    .ai-analysis em {
+        color: #333 !important;
+        font-style: italic !important;
+    }
+
+    .report-footer {
+        text-align: center !important;
+        margin-top: 30px !important;
+        padding-top: 15px !important;
+        border-top: 2px solid #333 !important;
+        color: #666 !important;
+        font-size: 0.9rem !important;
+        page-break-inside: avoid;
+    }
+
+    .watermark {
+        display: none !important;
+    }
+
+    /* 隐藏不需要打印的元素 */
+    .download-options,
+    .analysis-actions,
+    .processing-box,
+    .api-error-message,
+    .analysis-prompt,
+    .result-actions {
+        display: none !important;
+    }
+
+    /* 分页控制 */
+    .section {
+        page-break-inside: avoid;
+    }
+
+    .bazi-grid {
+        page-break-inside: avoid;
+    }
+
+    .ai-analysis {
+        page-break-inside: avoid;
+    }
+
+    /* 确保重要内容不被分页 */
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+    }
+
+    /* 表格样式 */
+    table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        margin: 15px 0 !important;
+    }
+
+    table th,
+    table td {
+        border: 1px solid #333 !important;
+        padding: 8px !important;
+        text-align: left !important;
+    }
+
+    table th {
+        background: #f0f0f0 !important;
+        font-weight: bold !important;
+    }
+
+    /* 链接样式 */
+    a {
+        color: #333 !important;
+        text-decoration: underline !important;
+    }
+
+    /* 代码块样式 */
+    pre {
+        background: #f5f5f5 !important;
+        border: 1px solid #ddd !important;
+        padding: 10px !important;
+        border-radius: 3px !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+    }
+
+    /* 列表样式 */
+    ul, ol {
+        margin: 10px 0 !important;
+        padding-left: 20px !important;
+    }
+
+    li {
+        margin: 5px 0 !important;
+    }
+
+    /* 段落样式 */
+    p {
+        margin: 10px 0 !important;
+        line-height: 1.6 !important;
+    }
+
+    /* 强调样式 */
+    strong {
+        font-weight: bold !important;
+        color: #000 !important;
+    }
+
+    em {
+        font-style: italic !important;
+    }
+}
+
+/* 打印时的页面设置 */
+@page {
+    margin: 2cm;
+    size: A4;
+}

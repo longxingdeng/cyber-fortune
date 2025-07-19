@@ -6,6 +6,7 @@
     <title>赛博论命 - Cyber Fortune</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/print.css" media="print">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -284,10 +285,40 @@
                             </div>
                         </div>
 
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>出生省份</label>
+                                <select name="birthProvince" required>
+                                    <option value="">选择省份</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>出生城市</label>
+                                <select name="birthCity" required>
+                                    <option value="">选择城市</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label>自定义用字（可选）</label>
-                            <input type="text" name="customChars" placeholder="请输入希望使用的字，用逗号分隔">
-                            <small>例如：文,武,智,勇</small>
+                            <div class="custom-chars-config">
+                                <div class="char-position-group">
+                                    <label class="position-label">第一个字（辈分字）：</label>
+                                    <input type="text" name="firstChar" placeholder="留空表示不指定" maxlength="1">
+                                    <small>例如：文（辈分字固定在第一位）</small>
+                                </div>
+                                <div class="char-position-group">
+                                    <label class="position-label">第二个字：</label>
+                                    <input type="text" name="secondChar" placeholder="留空表示不指定" maxlength="1">
+                                    <small>例如：武（指定第二个字）</small>
+                                </div>
+                                <div class="char-position-group">
+                                    <label class="position-label">候选字库：</label>
+                                    <input type="text" name="candidateChars" placeholder="可选字，用逗号分隔">
+                                    <small>例如：智,勇,华,强,明,亮（从这些字中选择搭配）</small>
+                                </div>
+                            </div>
                         </div>
 
                         <button type="submit" class="cyber-button">
@@ -638,6 +669,9 @@
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lunisolar@2.5.1/dist/lunisolar.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/iztro@2.5.3/dist/iztro.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="js/particles-config.js"></script>
     <script src="js/bazi-calculator.js"></script>
     <script src="js/ziwei-calculator.js"></script>
