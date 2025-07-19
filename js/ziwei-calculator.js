@@ -1,239 +1,202 @@
-// 赛博论命 - 紫薇斗数计算模块
+// 赛博论命 - 紫薇斗数计算模块（基于iztro库）
 
 class ZiweiCalculator {
     constructor() {
+        // 检查iztro库是否可用
+        this.iztroAvailable = typeof iztro !== 'undefined';
+        if (this.iztroAvailable) {
+            console.log('✅ iztro库已加载，将使用专业紫薇斗数计算');
+        } else {
+            console.error('❌ iztro库未加载，将使用备用计算方法');
+        }
+        
         // 十二宫位
         this.gongWei = [
             '命宫', '兄弟宫', '夫妻宫', '子女宫', '财帛宫', '疾厄宫',
             '迁移宫', '奴仆宫', '官禄宫', '田宅宫', '福德宫', '父母宫'
         ];
         
-        // 主星
-        this.zhuXing = [
-            '紫微', '天机', '太阳', '武曲', '天同', '廉贞', '天府',
-            '太阴', '贪狼', '巨门', '天相', '天梁', '七杀', '破军'
-        ];
-        
-        // 辅星
-        this.fuXing = [
-            '左辅', '右弼', '天魁', '天钺', '文昌', '文曲',
-            '禄存', '天马', '擎羊', '陀罗', '火星', '铃星'
-        ];
-        
-        // 四化
-        this.siHua = ['化禄', '化权', '化科', '化忌'];
-        
         // 地支
         this.diZhi = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
     }
 
-    // 计算命宫位置
-    calculateMingGong(month, hour) {
-        // 简化的命宫计算公式
-        // 实际计算需要考虑更多因素
-        const hourIndex = this.getHourIndex(hour);
-        const mingGongIndex = (14 - month - hourIndex) % 12;
-        return this.diZhi[mingGongIndex];
+    // 使用iztro库计算紫薇斗数
+    calculate(birthData) {
+        if (this.iztroAvailable) {
+            return this.calculateWithIztro(birthData);
+        } else {
+            return this.getFallbackResult(birthData);
+        }
     }
 
-    // 获取时辰索引
-    getHourIndex(hour) {
-        if (hour >= 23 || hour < 1) return 0; // 子时
-        if (hour >= 1 && hour < 3) return 1;  // 丑时
-        if (hour >= 3 && hour < 5) return 2;  // 寅时
-        if (hour >= 5 && hour < 7) return 3;  // 卯时
-        if (hour >= 7 && hour < 9) return 4;  // 辰时
-        if (hour >= 9 && hour < 11) return 5; // 巳时
-        if (hour >= 11 && hour < 13) return 6; // 午时
-        if (hour >= 13 && hour < 15) return 7; // 未时
-        if (hour >= 15 && hour < 17) return 8; // 申时
-        if (hour >= 17 && hour < 19) return 9; // 酉时
-        if (hour >= 19 && hour < 21) return 10; // 戌时
-        if (hour >= 21 && hour < 23) return 11; // 亥时
-        return 0;
+    // 使用iztro库进行专业计算
+    calculateWithIztro(birthData) {
+        try {
+            const { year, month, day, hour, gender } = birthData;
+            
+            // 构建日期字符串
+            const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+            
+            // 转换性别格式
+            const genderStr = gender === '男' ? 'male' : 'female';
+            
+            // 使用iztro库计算星盘
+            const astrolabe = iztro.astro.bySolar(dateStr, hour, genderStr);
+            
+            // 解析星盘数据
+            const result = this.parseAstrolabe(astrolabe);
+            
+            console.log('紫薇斗数计算完成:', result);
+            return result;
+            
+        } catch (error) {
+            console.error('iztro计算错误:', error);
+            return this.getFallbackResult(birthData);
+        }
     }
 
-    // 计算身宫位置
-    calculateShenGong(month, hour) {
-        const hourIndex = this.getHourIndex(hour);
-        const shenGongIndex = (month + hourIndex) % 12;
-        return this.diZhi[shenGongIndex];
-    }
-
-    // 安排紫微星
-    arrangePurpleEmperor(day, mingGong) {
-        // 简化的紫微星安排
-        const mingGongIndex = this.diZhi.indexOf(mingGong);
-        const ziweiIndex = (day + mingGongIndex) % 12;
-        return this.diZhi[ziweiIndex];
-    }
-
-    // 安排天府星
-    arrangeTianFu(ziweiPosition) {
-        const ziweiIndex = this.diZhi.indexOf(ziweiPosition);
-        // 天府星与紫微星相对
-        const tianFuIndex = (ziweiIndex + 6) % 12;
-        return this.diZhi[tianFuIndex];
-    }
-
-    // 计算十二宫的星曜分布
-    calculateStarDistribution(birthData) {
-        const { year, month, day, hour } = birthData;
+    // 解析iztro星盘数据
+    parseAstrolabe(astrolabe) {
+        const palaces = [];
         
-        // 计算基本宫位
-        const mingGong = this.calculateMingGong(month, hour);
-        const shenGong = this.calculateShenGong(month, hour);
-        
-        // 安排主星
-        const ziweiPosition = this.arrangePurpleEmperor(day, mingGong);
-        const tianFuPosition = this.arrangeTianFu(ziweiPosition);
-        
-        // 构建星盘
-        const starChart = {};
-        this.diZhi.forEach(gong => {
-            starChart[gong] = {
-                gongWei: this.getGongWei(gong, mingGong),
-                zhuXing: [],
-                fuXing: [],
-                siHua: []
+        // 遍历十二宫
+        astrolabe.palaces.forEach((palace) => {
+            const palaceData = {
+                name: palace.name,
+                earthlyBranch: palace.earthlyBranch,
+                heavenlyStems: palace.heavenlyStems,
+                majorStars: this.formatStars(palace.majorStars || []),
+                minorStars: this.formatStars(palace.minorStars || []),
+                adjectiveStars: this.formatStars(palace.adjectiveStars || []),
+                changStars: this.formatStars(palace.changStars || []),
+                decadal: palace.decadal || null,
+                ages: palace.ages || []
             };
+            palaces.push(palaceData);
         });
-        
-        // 安排紫微星系
-        this.arrangeZiweiStars(starChart, ziweiPosition);
-        
-        // 安排天府星系
-        this.arrangeTianFuStars(starChart, tianFuPosition);
-        
-        // 安排辅星
-        this.arrangeFuXing(starChart, birthData);
-        
+
         return {
-            mingGong,
-            shenGong,
-            ziweiPosition,
-            tianFuPosition,
-            starChart
+            palaces: palaces,
+            solarDate: astrolabe.solarDate,
+            lunarDate: astrolabe.lunarDate,
+            chineseDate: astrolabe.chineseDate,
+            time: astrolabe.time,
+            timeRange: astrolabe.timeRange,
+            sign: astrolabe.sign,
+            zodiac: astrolabe.zodiac,
+            earthlyBranchOfSoulPalace: astrolabe.earthlyBranchOfSoulPalace,
+            earthlyBranchOfBodyPalace: astrolabe.earthlyBranchOfBodyPalace,
+            soul: astrolabe.soul,
+            body: astrolabe.body,
+            fiveElementsClass: astrolabe.fiveElementsClass,
+            calculationMethod: 'iztro'
         };
     }
 
-    // 获取宫位名称
-    getGongWei(currentGong, mingGong) {
-        const mingGongIndex = this.diZhi.indexOf(mingGong);
-        const currentIndex = this.diZhi.indexOf(currentGong);
-        const gongWeiIndex = (currentIndex - mingGongIndex + 12) % 12;
-        return this.gongWei[gongWeiIndex];
-    }
-
-    // 安排紫微星系
-    arrangeZiweiStars(starChart, ziweiPosition) {
-        const ziweiIndex = this.diZhi.indexOf(ziweiPosition);
-        
-        // 紫微星系的星曜排列（简化版）
-        const ziweiStars = [
-            { star: '紫微', offset: 0 },
-            { star: '天机', offset: 1 },
-            { star: '太阳', offset: 3 },
-            { star: '武曲', offset: 4 },
-            { star: '天同', offset: 5 }
-        ];
-        
-        ziweiStars.forEach(({ star, offset }) => {
-            const position = this.diZhi[(ziweiIndex + offset) % 12];
-            starChart[position].zhuXing.push(star);
+    // 格式化星曜数据
+    formatStars(stars) {
+        if (!Array.isArray(stars)) return [];
+        return stars.map(star => {
+            if (typeof star === 'string') return star;
+            if (star && star.name) return star.name;
+            return star.toString();
         });
     }
 
-    // 安排天府星系
-    arrangeTianFuStars(starChart, tianFuPosition) {
-        const tianFuIndex = this.diZhi.indexOf(tianFuPosition);
+    // 备用计算方法（当iztro库不可用时）
+    getFallbackResult(birthData) {
+        const { year, month, day, hour, gender } = birthData;
         
-        // 天府星系的星曜排列（简化版）
-        const tianFuStars = [
-            { star: '天府', offset: 0 },
-            { star: '太阴', offset: 1 },
-            { star: '贪狼', offset: 2 },
-            { star: '巨门', offset: 3 },
-            { star: '天相', offset: 4 },
-            { star: '天梁', offset: 5 },
-            { star: '七杀', offset: 6 },
-            { star: '破军', offset: 10 }
-        ];
-        
-        tianFuStars.forEach(({ star, offset }) => {
-            const position = this.diZhi[(tianFuIndex + offset) % 12];
-            starChart[position].zhuXing.push(star);
-        });
+        // 简化的紫薇斗数信息
+        const palaces = this.gongWei.map((name, index) => ({
+            name: name,
+            earthlyBranch: this.diZhi[index],
+            heavenlyStems: '',
+            majorStars: [],
+            minorStars: [],
+            adjectiveStars: [],
+            changStars: [],
+            decadal: null,
+            ages: []
+        }));
+
+        return {
+            palaces: palaces,
+            solarDate: `${year}-${month}-${day}`,
+            lunarDate: '农历信息需要专业库计算',
+            chineseDate: '中文日期需要专业库计算',
+            time: `${hour}时`,
+            timeRange: `${hour}:00-${hour+1}:00`,
+            sign: gender === '男' ? '乾' : '坤',
+            zodiac: '生肖需要专业库计算',
+            earthlyBranchOfSoulPalace: this.diZhi[0],
+            earthlyBranchOfBodyPalace: this.diZhi[1],
+            soul: '命宫',
+            body: '身宫',
+            fiveElementsClass: '五行需要专业库计算',
+            calculationMethod: 'fallback',
+            warning: '使用简化计算，建议加载iztro库获得准确结果'
+        };
     }
 
-    // 安排辅星
-    arrangeFuXing(starChart, birthData) {
-        const { year, month, day, hour } = birthData;
+    // 获取宫位简要信息
+    getPalaceSummary(palace) {
+        const majorStars = palace.majorStars || [];
+        const minorStars = palace.minorStars || [];
         
-        // 简化的辅星安排
-        // 实际计算需要更复杂的公式
-        
-        // 左辅右弼
-        const leftIndex = (month + day) % 12;
-        const rightIndex = (leftIndex + 6) % 12;
-        starChart[this.diZhi[leftIndex]].fuXing.push('左辅');
-        starChart[this.diZhi[rightIndex]].fuXing.push('右弼');
-        
-        // 文昌文曲
-        const changIndex = (hour + 1) % 12;
-        const quIndex = (changIndex + 6) % 12;
-        starChart[this.diZhi[changIndex]].fuXing.push('文昌');
-        starChart[this.diZhi[quIndex]].fuXing.push('文曲');
-        
-        // 天魁天钺
-        const kuiIndex = (year + month) % 12;
-        const yueIndex = (kuiIndex + 4) % 12;
-        starChart[this.diZhi[kuiIndex]].fuXing.push('天魁');
-        starChart[this.diZhi[yueIndex]].fuXing.push('天钺');
+        return {
+            name: palace.name,
+            earthlyBranch: palace.earthlyBranch,
+            majorStars: majorStars.slice(0, 3), // 只显示前3个主星
+            minorStars: minorStars.slice(0, 2), // 只显示前2个辅星
+            hasImportantStars: majorStars.length > 0
+        };
     }
 
-    // 生成紫薇斗数分析
-    generateAnalysis(ziweiResult) {
-        const { mingGong, shenGong, starChart } = ziweiResult;
-        
-        let analysis = "紫薇斗数命盘分析：\n\n";
-        
-        // 命宫分析
-        const mingGongStars = starChart[mingGong];
-        analysis += `命宫位于${mingGong}，主星：${mingGongStars.zhuXing.join('、') || '无主星'}\n`;
-        analysis += `辅星：${mingGongStars.fuXing.join('、') || '无辅星'}\n\n`;
-        
-        // 身宫分析
-        const shenGongStars = starChart[shenGong];
-        analysis += `身宫位于${shenGong}，主星：${shenGongStars.zhuXing.join('、') || '无主星'}\n`;
-        analysis += `辅星：${shenGongStars.fuXing.join('、') || '无辅星'}\n\n`;
-        
-        // 各宫位星曜分布
-        analysis += "十二宫星曜分布：\n";
-        this.diZhi.forEach(gong => {
-            const gongData = starChart[gong];
-            const gongWei = gongData.gongWei;
-            const allStars = [...gongData.zhuXing, ...gongData.fuXing];
-            analysis += `${gongWei}(${gong})：${allStars.join('、') || '空宫'}\n`;
-        });
-        
-        return analysis;
-    }
-
-    // 主计算函数
-    calculate(birthData) {
-        try {
-            const ziweiResult = this.calculateStarDistribution(birthData);
-            const analysis = this.generateAnalysis(ziweiResult);
-            
-            return {
-                ...ziweiResult,
-                analysis
-            };
-        } catch (error) {
-            console.error('紫薇斗数计算错误:', error);
-            throw new Error('紫薇斗数计算失败');
+    // 生成简要分析
+    generateSummary(result) {
+        if (!result || !result.palaces) {
+            return '无法生成分析，请检查输入数据';
         }
+
+        let summary = `紫薇斗数命盘分析（${result.calculationMethod === 'iztro' ? '专业版' : '简化版'}）\n\n`;
+        
+        // 找到命宫
+        const soulPalace = result.palaces.find(p => 
+            p.earthlyBranch === result.earthlyBranchOfSoulPalace
+        );
+        
+        if (soulPalace) {
+            summary += `命宫位于${soulPalace.earthlyBranch}宫\n`;
+            if (soulPalace.majorStars.length > 0) {
+                summary += `主星：${soulPalace.majorStars.join('、')}\n`;
+            }
+            if (soulPalace.minorStars.length > 0) {
+                summary += `辅星：${soulPalace.minorStars.slice(0, 3).join('、')}\n`;
+            }
+        }
+
+        // 找到身宫
+        const bodyPalace = result.palaces.find(p => 
+            p.earthlyBranch === result.earthlyBranchOfBodyPalace
+        );
+        
+        if (bodyPalace && bodyPalace !== soulPalace) {
+            summary += `\n身宫位于${bodyPalace.earthlyBranch}宫\n`;
+            if (bodyPalace.majorStars.length > 0) {
+                summary += `主星：${bodyPalace.majorStars.join('、')}\n`;
+            }
+        }
+
+        if (result.fiveElementsClass) {
+            summary += `\n五行局：${result.fiveElementsClass}\n`;
+        }
+
+        if (result.warning) {
+            summary += `\n⚠️ ${result.warning}`;
+        }
+
+        return summary;
     }
 }
 

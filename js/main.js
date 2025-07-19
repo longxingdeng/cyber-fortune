@@ -6,6 +6,15 @@ class CyberFortune {
         this.baziCalculator = new BaziCalculator();
         this.nameCalculator = new NameCalculator();
         this.marriageCalculator = new MarriageCalculator();
+
+        // 初始化紫薇斗数计算器
+        try {
+            this.ziweiCalculator = new ZiweiCalculator();
+        } catch (error) {
+            console.error('紫薇斗数计算器初始化失败:', error);
+            this.ziweiCalculator = null;
+        }
+
         this.init();
     }
 
@@ -324,13 +333,23 @@ class CyberFortune {
         try {
             // 计算八字
             const baziResult = this.baziCalculator.calculate(birthData);
-            
+
+            // 计算紫薇斗数（如果可用）
+            let ziweiResult = null;
+            if (this.ziweiCalculator) {
+                try {
+                    ziweiResult = this.ziweiCalculator.calculate(birthData);
+                } catch (ziweiError) {
+                    console.error('紫薇斗数计算错误:', ziweiError);
+                }
+            }
+
             // 生成AI分析提示词
             const prompt = this.baziCalculator.generatePrompt(birthData, baziResult);
-            
+
             // 显示结果
-            this.displayZhimingResult(birthData, baziResult, prompt);
-            
+            this.displayZhimingResult(birthData, baziResult, prompt, ziweiResult);
+
         } catch (error) {
             console.error('计算错误:', error);
             this.showError('计算过程中出现错误，请重试');
@@ -367,14 +386,14 @@ class CyberFortune {
     }
 
     // 显示赛博知命结果
-    displayZhimingResult(birthData, baziResult, prompt) {
+    displayZhimingResult(birthData, baziResult, prompt, ziweiResult = null) {
         const resultPanel = document.getElementById('zhiming-result');
         const resultContent = resultPanel.querySelector('.result-content');
 
         if (!resultPanel || !resultContent) return;
 
         // 构建结果HTML
-        const resultHTML = this.buildZhimingResultHTML(birthData, baziResult, prompt);
+        const resultHTML = this.buildZhimingResultHTML(birthData, baziResult, prompt, ziweiResult);
         resultContent.innerHTML = resultHTML;
 
         // 显示结果面板
@@ -386,7 +405,7 @@ class CyberFortune {
     }
 
     // 构建赛博知命结果HTML
-    buildZhimingResultHTML(birthData, baziResult, prompt) {
+    buildZhimingResultHTML(birthData, baziResult, prompt, ziweiResult = null) {
         const { gender, year, month, day, hour, minute, birthProvince, birthCity } = birthData;
         const { yearPillar, monthPillar, dayPillar, hourPillar, yearTenGod, monthTenGod, hourTenGod, bigLuck, wuxingInfo, naYinInfo } = baziResult;
 
@@ -499,6 +518,8 @@ class CyberFortune {
                 </div>
             </div>
 
+            ${this.buildZiweiSection(ziweiResult)}
+
             <div class="ai-analysis">
                 <h4>AI命理分析</h4>
                 <div class="analysis-prompt">
@@ -524,6 +545,86 @@ class CyberFortune {
                     <span>下载报告</span>
                     <div class="button-glow"></div>
                 </button>
+            </div>
+        `;
+    }
+
+    // 构建紫薇斗数分析部分
+    buildZiweiSection(ziweiResult) {
+        if (!ziweiResult) {
+            return `
+                <div class="ziwei-section">
+                    <h4>紫薇斗数分析</h4>
+                    <div class="ziwei-unavailable">
+                        <p>⚠️ 紫薇斗数功能暂时不可用</p>
+                        <p>请确保网络连接正常，或稍后重试</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 生成紫薇斗数分析
+        const summary = this.ziweiCalculator ? this.ziweiCalculator.generateSummary(ziweiResult) : '无法生成分析';
+
+        return `
+            <div class="ziwei-section">
+                <h4>紫薇斗数分析</h4>
+                <div class="ziwei-content">
+                    <div class="ziwei-basic-info">
+                        <div class="info-row">
+                            <span class="info-label">计算方法：</span>
+                            <span class="info-value">${ziweiResult.calculationMethod === 'iztro' ? '专业算法' : '简化算法'}</span>
+                        </div>
+                        ${ziweiResult.solarDate ? `
+                            <div class="info-row">
+                                <span class="info-label">阳历日期：</span>
+                                <span class="info-value">${ziweiResult.solarDate}</span>
+                            </div>
+                        ` : ''}
+                        ${ziweiResult.lunarDate ? `
+                            <div class="info-row">
+                                <span class="info-label">农历日期：</span>
+                                <span class="info-value">${ziweiResult.lunarDate}</span>
+                            </div>
+                        ` : ''}
+                        ${ziweiResult.fiveElementsClass ? `
+                            <div class="info-row">
+                                <span class="info-label">五行局：</span>
+                                <span class="info-value">${ziweiResult.fiveElementsClass}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="ziwei-analysis">
+                        <h5>命盘分析：</h5>
+                        <div class="analysis-text">
+                            <pre>${summary}</pre>
+                        </div>
+                    </div>
+
+                    ${ziweiResult.palaces && ziweiResult.palaces.length > 0 ? `
+                        <div class="ziwei-palaces">
+                            <h5>十二宫概览：</h5>
+                            <div class="palaces-grid">
+                                ${ziweiResult.palaces.slice(0, 6).map(palace => `
+                                    <div class="palace-item">
+                                        <div class="palace-name">${palace.name}</div>
+                                        <div class="palace-branch">${palace.earthlyBranch}</div>
+                                        ${palace.majorStars && palace.majorStars.length > 0 ? `
+                                            <div class="palace-stars">${palace.majorStars.slice(0, 2).join('、')}</div>
+                                        ` : '<div class="palace-empty">空宫</div>'}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${ziweiResult.warning ? `
+                        <div class="ziwei-warning">
+                            <p>⚠️ ${ziweiResult.warning}</p>
+                        </div>
+                    ` : ''}
+                </div>
             </div>
         `;
     }

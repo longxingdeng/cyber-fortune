@@ -1047,6 +1047,141 @@ body {
     100% { transform: rotate(360deg); }
 }
 
+/* 紫薇斗数分析样式 */
+.ziwei-section {
+    background: rgba(138, 43, 226, 0.05);
+    border: 1px solid rgba(138, 43, 226, 0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.ziwei-section h4 {
+    color: #8a2be2;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-family: var(--font-primary);
+}
+
+.ziwei-unavailable {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+}
+
+.ziwei-basic-info {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.info-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.info-value {
+    color: #8a2be2;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.ziwei-analysis {
+    margin-bottom: 1.5rem;
+}
+
+.ziwei-analysis h5 {
+    color: #8a2be2;
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+}
+
+.analysis-text {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.analysis-text pre {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.ziwei-palaces h5 {
+    color: #8a2be2;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.palaces-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.palace-item {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    border-radius: 6px;
+    padding: 0.8rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.palace-item:hover {
+    border-color: #8a2be2;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+}
+
+.palace-name {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+}
+
+.palace-branch {
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    color: #8a2be2;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
+
+.palace-stars {
+    font-size: 0.75rem;
+    color: var(--primary-color);
+}
+
+.palace-empty {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.ziwei-warning {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.ziwei-warning p {
+    color: #ffc107;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
     .nav-container {
@@ -1118,5 +1253,24 @@ body {
 
     .wuge-grid {
         grid-template-columns: repeat(3, 1fr);
+    }
+
+    .palaces-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+
+    .palace-item {
+        padding: 0.6rem;
+    }
+
+    .ziwei-basic-info {
+        padding: 0.8rem;
+    }
+
+    .info-row {
+        flex-direction: column;
+        gap: 0.2rem;
+        margin-bottom: 0.8rem;
     }
 }
