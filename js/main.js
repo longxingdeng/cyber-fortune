@@ -5314,8 +5314,8 @@ class CyberFortune {
         this.showProcessing('正在生成长图报告...');
 
         try {
-            const reportHTML = this.generateNamingReportHTML(birthData, baziResult, nameSuggestions);
-            const canvas = await this.createCanvasFromHTML(reportHTML);
+            // 直接截取网页的实际显示效果
+            const canvas = await this.captureWebPageContent(resultContent);
 
             const link = document.createElement('a');
             link.download = `赛博起名报告_${birthData.name}_${new Date().toISOString().split('T')[0]}.png`;
@@ -5733,8 +5733,8 @@ class CyberFortune {
         this.showProcessing('正在生成长图报告...');
 
         try {
-            const reportHTML = this.generateCemingReportHTML(testData, nameAnalysis, baziResult);
-            const canvas = await this.createCanvasFromHTML(reportHTML);
+            // 直接截取网页的实际显示效果
+            const canvas = await this.captureWebPageContent(resultContent);
 
             const link = document.createElement('a');
             link.download = `赛博测名报告_${testData.fullName}_${new Date().toISOString().split('T')[0]}.png`;
@@ -6150,8 +6150,8 @@ class CyberFortune {
         this.showProcessing('正在生成长图报告...');
 
         try {
-            const reportHTML = this.generateMarriageReportHTML(marriageData, marriageResult);
-            const canvas = await this.createCanvasFromHTML(reportHTML);
+            // 直接截取网页的实际显示效果
+            const canvas = await this.captureWebPageContent(resultContent);
 
             const link = document.createElement('a');
             link.download = `赛博合婚报告_${marriageData.male.name}_${marriageData.female.name}_${new Date().toISOString().split('T')[0]}.png`;
@@ -6371,6 +6371,97 @@ class CyberFortune {
     getZodiacAnimal(year) {
         const animals = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
         return animals[(year - 4) % 12];
+    }
+
+    // 直接截取网页内容生成长图（保留原始视觉效果）
+    async captureWebPageContent(element) {
+        if (typeof html2canvas === 'undefined') {
+            throw new Error('html2canvas库未加载，请检查网络连接');
+        }
+
+        console.log('开始截取网页内容...');
+
+        // 临时修改样式以便截图
+        const originalStyle = element.style.cssText;
+
+        // 确保AI分析结果区域完全展开
+        const aiOutputs = element.querySelectorAll('.ai-output, #naming-ai-output, #ceming-ai-output, #ai-marriage-output');
+        const aiOriginalStyles = [];
+
+        aiOutputs.forEach((aiOutput, index) => {
+            aiOriginalStyles[index] = aiOutput.style.cssText;
+            aiOutput.style.cssText = `
+                ${aiOriginalStyles[index]}
+                max-height: none !important;
+                overflow: visible !important;
+                height: auto !important;
+            `;
+        });
+
+        // 设置元素样式以便截图
+        element.style.cssText = `
+            ${originalStyle}
+            position: relative;
+            width: 800px;
+            max-height: none !important;
+            overflow: visible !important;
+            height: auto !important;
+            background: transparent;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        `;
+
+        try {
+            // 等待样式应用
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // 强制重新计算高度
+            const actualHeight = Math.max(
+                element.scrollHeight,
+                element.offsetHeight,
+                element.clientHeight
+            );
+
+            console.log('截图元素尺寸:', {
+                width: element.offsetWidth,
+                height: actualHeight,
+                scrollHeight: element.scrollHeight
+            });
+
+            // 使用html2canvas截图
+            const canvas = await html2canvas(element, {
+                width: 800,
+                height: actualHeight,
+                scale: 2, // 高清截图
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: null, // 保持透明背景
+                scrollX: 0,
+                scrollY: 0,
+                logging: true, // 启用调试日志
+                onclone: (clonedDoc) => {
+                    // 在克隆的文档中确保样式正确
+                    const clonedElement = clonedDoc.querySelector(`#${element.id} .result-content`) ||
+                                        clonedDoc.querySelector('.result-content');
+                    if (clonedElement) {
+                        clonedElement.style.maxHeight = 'none';
+                        clonedElement.style.overflow = 'visible';
+                        clonedElement.style.height = 'auto';
+                    }
+                }
+            });
+
+            console.log('截图完成，canvas尺寸:', canvas.width, 'x', canvas.height);
+            return canvas;
+
+        } finally {
+            // 恢复原始样式
+            element.style.cssText = originalStyle;
+            aiOutputs.forEach((aiOutput, index) => {
+                aiOutput.style.cssText = aiOriginalStyles[index];
+            });
+        }
     }
 }
 
