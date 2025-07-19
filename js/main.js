@@ -678,14 +678,7 @@ class CyberFortune {
                     </label>
                 </div>
 
-                <!-- 分析按钮 -->
-                <div class="analysis-actions">
-                    <button class="cyber-button" id="generate-ai-analysis">
-                        <span>🤖 生成AI分析</span>
-                        <div class="button-glow"></div>
-                    </button>
-                    <!-- 复制提示词按钮已隐藏，保护商业机密 -->
-                </div>
+                <!-- AI分析自动开始，无需手动按钮 -->
 
                 <!-- 处理状态显示 -->
                 <div class="processing-box" id="ai-processing-box" style="display: none;">
@@ -739,17 +732,11 @@ class CyberFortune {
 
     // 绑定AI分析相关事件
     bindAIAnalysisEvents(birthData, baziResult, prompt, ziweiResult) {
-        const generateBtn = document.getElementById('generate-ai-analysis');
+        // AI分析现在自动开始，无需手动按钮
         const copyBtn = document.getElementById('copy-ai-result');
         const downloadPdfBtn = document.getElementById('download-pdf-btn');
         const downloadImageBtn = document.getElementById('download-image-btn');
         const downloadTextBtn = document.getElementById('download-text-btn');
-
-        if (generateBtn) {
-            generateBtn.addEventListener('click', () => {
-                this.generateAIAnalysis(birthData, baziResult, prompt, ziweiResult);
-            });
-        }
 
         if (copyBtn) {
             copyBtn.addEventListener('click', () => {
@@ -1470,13 +1457,7 @@ class CyberFortune {
                     </div>
                 </div>
 
-                <!-- AI分析控制 -->
-                <div class="ai-naming-controls">
-                    <button class="cyber-button" id="generate-ai-naming">
-                        <span>🤖 生成AI起名分析</span>
-                        <div class="button-glow"></div>
-                    </button>
-                </div>
+                <!-- AI分析自动开始，无需手动按钮 -->
 
                 <!-- AI分析处理状态 -->
                 <div class="ai-naming-processing" id="ai-naming-processing" style="display: none;">
@@ -1656,14 +1637,8 @@ class CyberFortune {
 
     // 绑定AI起名分析相关事件
     bindAINamingEvents(birthData, baziResult, nameSuggestions, aiPrompt) {
-        const generateBtn = document.getElementById('generate-ai-naming');
+        // AI分析现在自动开始，无需手动按钮
         const copyBtn = document.getElementById('copy-ai-naming-result');
-
-        if (generateBtn) {
-            generateBtn.addEventListener('click', () => {
-                this.generateAINamingAnalysis(birthData, baziResult, nameSuggestions, aiPrompt);
-            });
-        }
 
         if (copyBtn) {
             copyBtn.addEventListener('click', () => {
@@ -2050,13 +2025,7 @@ class CyberFortune {
 
 
 
-                <!-- 分析按钮 -->
-                <div class="analysis-actions">
-                    <button class="cyber-button" id="generate-ceming-ai-analysis">
-                        <span>🤖 生成AI深度分析</span>
-                        <div class="button-glow"></div>
-                    </button>
-                </div>
+                <!-- AI分析自动开始，无需手动按钮 -->
 
                 <!-- 处理状态显示 -->
                 <div class="processing-box" id="ceming-ai-processing" style="display: none;">
@@ -2224,14 +2193,8 @@ class CyberFortune {
 
     // 绑定测名AI分析事件
     bindCemingAIEvents(testData, nameAnalysis, baziResult, aiPrompt) {
-        const generateBtn = document.getElementById('generate-ceming-ai-analysis');
+        // AI分析现在自动开始，无需手动按钮
         const copyBtn = document.getElementById('copy-ceming-ai-result');
-
-        if (generateBtn) {
-            generateBtn.addEventListener('click', () => {
-                this.generateCemingAIAnalysis(testData, nameAnalysis, baziResult, aiPrompt);
-            });
-        }
 
         if (copyBtn) {
             copyBtn.addEventListener('click', () => {
@@ -2649,12 +2612,7 @@ class CyberFortune {
                     <h4>🤖 AI深度合婚分析</h4>
                     <p class="ai-description">基于传统合婚理论，结合现代心理学和情感分析，为您提供更深入的合婚指导</p>
 
-                    <div class="ai-controls">
-                        <button class="cyber-button" id="generate-marriage-ai-analysis">
-                            <span>🧠 生成AI深度分析</span>
-                            <div class="button-glow"></div>
-                        </button>
-                    </div>
+                    <!-- AI分析自动开始，无需手动按钮 -->
 
                     <!-- AI分析处理状态 -->
                     <div class="ai-marriage-processing" id="ai-marriage-processing" style="display: none;">
@@ -4721,19 +4679,10 @@ class CyberFortune {
 
     // 绑定合婚AI分析事件
     bindMarriageAIEvents(marriageData, marriageResult, aiPrompt) {
-        const generateBtn = document.getElementById('generate-marriage-ai-analysis');
+        // AI分析现在自动开始，无需手动按钮
         const copyBtn = document.getElementById('copy-ai-marriage-result');
 
-        console.log('绑定合婚AI事件:', { generateBtn, copyBtn });
-
-        if (generateBtn) {
-            generateBtn.addEventListener('click', () => {
-                console.log('AI分析按钮被点击');
-                this.generateMarriageAIAnalysis(marriageData, marriageResult, aiPrompt);
-            });
-        } else {
-            console.error('未找到AI分析按钮');
-        }
+        console.log('绑定合婚AI事件:', { copyBtn });
 
         if (copyBtn) {
             copyBtn.addEventListener('click', () => {
