@@ -2716,33 +2716,50 @@ class CyberFortune {
             processingSteps.innerHTML = '🔗 正在连接AI服务器...<br>';
             processingMessage.textContent = '建立连接中...';
 
+            console.log('API调用开始:', { apiUrl, modelName, environment: 'cloudflare-pages' });
+
+            const requestBody = {
+                model: modelName,
+                messages: [
+                    {
+                        role: "system",
+                        content: "你是精通中国传统命理学的AI助手，擅长八字命理和紫薇斗数分析。请用专业术语进行详细分析，并提供实用的人生建议。"
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                stream: true,
+                temperature: 0.7,
+                max_tokens: 4000
+            };
+
+            console.log('发送请求体:', JSON.stringify(requestBody, null, 2));
+
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify({
-                    model: modelName,
-                    messages: [
-                        {
-                            role: "system",
-                            content: "你是精通中国传统命理学的AI助手，擅长八字命理和紫薇斗数分析。请用专业术语进行详细分析，并提供实用的人生建议。"
-                        },
-                        {
-                            role: "user",
-                            content: prompt
-                        }
-                    ],
-                    stream: true,
-                    temperature: 0.7,
-                    max_tokens: 4000
-                })
+                body: JSON.stringify(requestBody)
             });
 
+            console.log('API响应状态:', response.status, response.statusText);
+
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`API错误 (${response.status}): ${errorData.error?.message || '未知错误'}`);
+                const errorText = await response.text().catch(() => '无法读取错误信息');
+                console.error('API错误详情:', errorText);
+
+                let errorData = {};
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch (e) {
+                    console.error('无法解析错误JSON:', e);
+                }
+
+                throw new Error(`API错误 (${response.status}): ${errorData.error?.message || errorText || '未知错误'}`);
             }
 
             // 显示分析状态
@@ -2804,6 +2821,23 @@ class CyberFortune {
             }
 
         } catch (error) {
+            console.error('API调用失败:', error);
+
+            // 检查是否是网络或CORS错误
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error('网络连接失败，可能的原因：\n1. 网络连接问题\n2. API地址不正确\n3. CORS跨域限制\n4. 防火墙或代理阻止\n\n请检查网络连接和API配置。');
+            }
+
+            // 检查是否是API密钥错误
+            if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+                throw new Error('API密钥验证失败，请检查：\n1. API密钥是否正确\n2. API密钥是否有效\n3. 是否有足够的API配额');
+            }
+
+            // 检查是否是模型不存在错误
+            if (error.message.includes('404') || error.message.includes('model')) {
+                throw new Error('模型不存在或不可用，请检查：\n1. 模型名称是否正确\n2. 该模型是否在您的API账户中可用\n3. 尝试切换到其他模型');
+            }
+
             throw new Error(`API通信失败: ${error.message}`);
         }
     }
