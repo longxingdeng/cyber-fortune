@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>起名模块简单测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🔮 起名计算模块测试</h1>
+    <div id="test-results"></div>
+    
+    <script src="../js/name-calculator.js"></script>
+    <script>
+        function runTests() {
+            const results = document.getElementById('test-results');
+            const nameCalculator = new NameCalculator();
+            
+            function addResult(message, type = 'info') {
+                const div = document.createElement('div');
+                div.className = 'test-result ' + type;
+                div.textContent = message;
+                results.appendChild(div);
+            }
+            
+            addResult('开始测试起名计算模块...', 'info');
+            
+            // 测试1: 笔画数计算
+            try {
+                const strokes = nameCalculator.getCharStrokes('王');
+                if (strokes === 4) {
+                    addResult('✅ 笔画数计算测试通过: 王字4画', 'success');
+                } else {
+                    addResult('❌ 笔画数计算测试失败: 王字应为4画，实际' + strokes + '画', 'error');
+                }
+            } catch (error) {
+                addResult('❌ 笔画数计算测试出错: ' + error.message, 'error');
+            }
+            
+            // 测试2: 五行属性
+            try {
+                const wuxing = nameCalculator.getCharWuXing('林');
+                if (wuxing === '木') {
+                    addResult('✅ 五行属性测试通过: 林字属木', 'success');
+                } else {
+                    addResult('❌ 五行属性测试失败: 林字应属木，实际属' + wuxing, 'error');
+                }
+            } catch (error) {
+                addResult('❌ 五行属性测试出错: ' + error.message, 'error');
+            }
+            
+            // 测试3: 五格数理
+            try {
+                const wuge = nameCalculator.calculateWuGe('王', '小明');
+                if (wuge.tianGe && wuge.renGe && wuge.diGe && wuge.waiGe && wuge.zongGe) {
+                    addResult('✅ 五格数理测试通过: 天' + wuge.tianGe + ' 人' + wuge.renGe + ' 地' + wuge.diGe + ' 外' + wuge.waiGe + ' 总' + wuge.zongGe, 'success');
+                } else {
+                    addResult('❌ 五格数理测试失败: 五格数据不完整', 'error');
+                }
+            } catch (error) {
+                addResult('❌ 五格数理测试出错: ' + error.message, 'error');
+            }
+            
+            // 测试4: 三才配置
+            try {
+                const wuge = nameCalculator.calculateWuGe('王', '小明');
+                const sanCai = nameCalculator.calculateSanCai(wuge);
+                if (sanCai.tianWuXing && sanCai.renWuXing && sanCai.diWuXing) {
+                    addResult('✅ 三才配置测试通过: ' + sanCai.tianWuXing + sanCai.renWuXing + sanCai.diWuXing + ' (' + sanCai.jiXiong + ')', 'success');
+                } else {
+                    addResult('❌ 三才配置测试失败: 三才数据不完整', 'error');
+                }
+            } catch (error) {
+                addResult('❌ 三才配置测试出错: ' + error.message, 'error');
+            }
+            
+            // 测试5: 起名建议
+            try {
+                const mockBaziResult = {
+                    dayTianGan: '戊',
+                    wuxingInfo: {
+                        year: { tianGan: '木', diZhi: '水' },
+                        month: { tianGan: '火', diZhi: '火' },
+                        day: { tianGan: '土', diZhi: '金' },
+                        hour: { tianGan: '水', diZhi: '土' }
+                    }
+                };
+                
+                const suggestions = nameCalculator.generateNameSuggestions('李', '男', mockBaziResult);
+                if (suggestions && suggestions.length > 0) {
+                    addResult('✅ 起名建议测试通过: 生成了' + suggestions.length + '个建议', 'success');
+                    addResult('   示例: ' + suggestions[0].fullName + ' (评分:' + suggestions[0].score + ')', 'info');
+                } else {
+                    addResult('❌ 起名建议测试失败: 未生成建议', 'error');
+                }
+            } catch (error) {
+                addResult('❌ 起名建议测试出错: ' + error.message, 'error');
+            }
+            
+            // 测试6: 姓名分析
+            try {
+                const mockBaziResult = {
+                    dayTianGan: '戊',
+                    wuxingInfo: {
+                        year: { tianGan: '木', diZhi: '水' },
+                        month: { tianGan: '火', diZhi: '火' },
+                        day: { tianGan: '土', diZhi: '金' },
+                        hour: { tianGan: '水', diZhi: '土' }
+                    }
+                };
+                
+                const analysis = nameCalculator.analyzeName('王小明', mockBaziResult);
+                if (analysis && analysis.score !== undefined) {
+                    addResult('✅ 姓名分析测试通过: 王小明评分' + analysis.score + '分', 'success');
+                } else {
+                    addResult('❌ 姓名分析测试失败: 分析结果不完整', 'error');
+                }
+            } catch (error) {
+                addResult('❌ 姓名分析测试出错: ' + error.message, 'error');
+            }
+            
+            addResult('测试完成！', 'info');
+        }
+        
+        // 页面加载完成后自动运行测试
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>
