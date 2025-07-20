@@ -5262,7 +5262,7 @@ class CyberFortune {
         });
 
         // AI分析结果
-        const aiOutput = document.getElementById('naming-ai-output');
+        const aiOutput = document.getElementById('ai-naming-output');
         if (aiOutput && aiOutput.textContent.trim()) {
             report += 'AI深度分析\n';
             report += '-'.repeat(30) + '\n';
@@ -5296,7 +5296,7 @@ class CyberFortune {
 
     // 生成起名报告HTML（用于长图生成）
     generateNamingReportHTML(birthData, baziResult, nameSuggestions) {
-        const aiOutput = document.getElementById('naming-ai-output');
+        const aiOutput = document.getElementById('ai-naming-output');
         const aiAnalysis = aiOutput ? aiOutput.innerHTML : '';
 
         return `
@@ -5391,7 +5391,7 @@ class CyberFortune {
 
     // 生成起名可打印HTML
     generateNamingPrintableHTML(birthData, baziResult, nameSuggestions) {
-        const aiOutput = document.getElementById('naming-ai-output');
+        const aiOutput = document.getElementById('ai-naming-output');
         const aiAnalysis = aiOutput ? aiOutput.innerHTML : '';
 
         return `
