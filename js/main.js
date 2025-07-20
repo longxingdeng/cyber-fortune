@@ -1396,7 +1396,7 @@ class CyberFortune {
             </div>
 
             <!-- AI分析区域 -->
-            <div class="ai-naming-section">
+            <div class="ai-naming-analysis">
                 <div class="ai-naming-header">
                     <h4>AI智能起名分析</h4>
                     <p>基于八字命理、五格数理、字义内涵、音韵美学等多维度的专业分析</p>
@@ -1408,16 +1408,16 @@ class CyberFortune {
 
                 <!-- AI分析自动开始，无需手动按钮 -->
 
-                <!-- AI分析处理状态 -->
-                <div class="ai-naming-processing" id="ai-naming-processing" style="display: none;">
+                <!-- 处理状态显示 -->
+                <div class="processing-box" id="ai-naming-processing" style="display: none;">
                     <div class="processing-message" id="ai-naming-processing-message">正在初始化AI分析...</div>
                     <div class="processing-steps" id="ai-naming-processing-steps"></div>
                 </div>
 
                 <!-- AI分析结果 -->
-                <div class="ai-naming-result-section" id="ai-naming-result-section" style="display: none;">
-                    <h5>AI分析结果：</h5>
-                    <div class="ai-naming-output" id="ai-naming-output"></div>
+                <div class="ai-result-section" id="ai-naming-result-section" style="display: none;">
+                    <h5>AI深度分析结果：</h5>
+                    <div class="ai-output" id="ai-naming-output"></div>
                     <div class="result-actions">
                         <button class="cyber-button" id="copy-ai-naming-result" style="display: none;">
                             <span>📄 复制分析结果</span>
@@ -1425,6 +1425,9 @@ class CyberFortune {
                         </button>
                     </div>
                 </div>
+
+                <!-- 错误信息显示 -->
+                <div class="api-error-message" id="ai-naming-error-message" style="display: none;"></div>
 
                 <!-- 提示词已隐藏，保护商业机密 -->
             </div>
@@ -1594,9 +1597,20 @@ class CyberFortune {
 
     // 生成AI起名分析
     async generateAINamingAnalysis(birthData, baziResult, nameSuggestions, aiPrompt) {
+        console.log('=== 开始AI起名分析 ===');
+        console.log('参数检查:', {
+            hasBirthData: !!birthData,
+            hasBaziResult: !!baziResult,
+            nameSuggestionsCount: nameSuggestions?.length || 0,
+            promptLength: aiPrompt?.length || 0
+        });
+
         // 使用全局配置
         const globalConfig = this.getGlobalConfig();
+        console.log('获取全局配置:', globalConfig);
+
         if (!globalConfig) {
+            console.error('未找到全局AI配置');
             this.showAINamingError('请先在右上角配置AI设置');
             return;
         }
@@ -1605,28 +1619,68 @@ class CyberFortune {
         const apiKey = globalConfig.apiKey;
         const modelName = globalConfig.model;
 
+        console.log('AI配置详情:', {
+            apiUrl: apiUrl ? `${apiUrl.substring(0, 30)}...` : '未设置',
+            hasApiKey: !!apiKey,
+            apiKeyLength: apiKey ? apiKey.length : 0,
+            modelName: modelName || '未设置'
+        });
+
         // 验证输入
         if (!apiKey) {
+            console.error('API密钥未设置');
             this.showAINamingError('请输入API密钥');
             return;
         }
         if (!apiUrl) {
+            console.error('API地址未设置');
             this.showAINamingError('请输入API地址');
             return;
         }
 
+        console.log('开始显示处理状态...');
         // 显示处理状态
         this.showAINamingProcessing();
+        this.showAIDebugInfo('显示处理状态...');
+
+        let analysisSuccessful = false;
 
         try {
+            console.log('开始调用AI API...');
             // 调用AI API
             await this.callAINamingAPI(aiPrompt, apiKey, modelName, apiUrl);
+            console.log('AI API调用完成');
+            analysisSuccessful = true;
 
         } catch (error) {
             console.error('AI起名分析失败:', error);
             this.showAINamingError(error.message);
+            // 出错时隐藏处理状态，但不显示结果区域
+            const processingDiv = document.getElementById('ai-naming-processing');
+            if (processingDiv) {
+                processingDiv.style.display = 'none';
+            }
         } finally {
-            this.hideAINamingProcessing();
+            // 只有在分析成功时才调用hideAINamingProcessing来显示结果
+            if (analysisSuccessful) {
+                console.log('分析成功，显示结果区域...');
+                this.hideAINamingProcessing();
+            }
+        }
+        console.log('=== AI起名分析结束 ===');
+    }
+
+    // 显示AI调试信息
+    showAIDebugInfo(message) {
+        const debugDiv = document.getElementById('ai-debug-info');
+        const debugText = document.getElementById('ai-debug-text');
+        if (debugDiv && debugText) {
+            debugDiv.style.display = 'block';
+            const timestamp = new Date().toLocaleTimeString();
+            debugText.innerHTML += `<br>[${timestamp}] ${message}`;
+            console.log(`[AI调试] ${message}`);
+        } else {
+            console.log(`[AI调试] 调试元素未找到: ${message}`);
         }
     }
 
@@ -1699,6 +1753,16 @@ class CyberFortune {
             // 显示结果区域
             aiResultSection.style.display = 'block';
             aiOutput.innerHTML = '';
+            console.log('AI结果区域已设置为显示');
+
+            // 通过调试信息确认结果区域状态
+            const app = this;
+            setTimeout(() => {
+                const resultSection = document.getElementById('ai-naming-result-section');
+                if (resultSection) {
+                    app.showAIDebugInfo(`结果区域状态: ${resultSection.style.display}`);
+                }
+            }, 100);
 
             // 处理流式响应
             const reader = response.body.getReader();
@@ -1740,6 +1804,7 @@ class CyberFortune {
             // 分析完成
             processingSteps.innerHTML += '✅ AI起名分析完成<br>';
             processingMessage.textContent = '分析完成！';
+            console.log('AI分析完成，响应长度:', fullResponse.length);
 
             // 显示复制按钮
             if (fullResponse.trim()) {
@@ -1748,6 +1813,19 @@ class CyberFortune {
 
                 // 强制移除滚动条
                 this.removeAINamingOutputScrollbar();
+
+                // 调试信息
+                const app = this;
+                app.showAIDebugInfo(`✅ AI分析完成，响应长度: ${fullResponse.length}`);
+
+                // 确认结果区域最终状态
+                setTimeout(() => {
+                    const resultSection = document.getElementById('ai-naming-result-section');
+                    const output = document.getElementById('ai-naming-output');
+                    app.showAIDebugInfo(`最终状态 - 结果区域: ${resultSection?.style.display}, 输出内容: ${output?.innerHTML.length || 0}字符`);
+                }, 200);
+            } else {
+                this.showAIDebugInfo('⚠️ AI响应为空');
             }
 
         } catch (error) {
@@ -1771,37 +1849,36 @@ class CyberFortune {
     // 隐藏AI起名处理状态
     hideAINamingProcessing() {
         const processingDiv = document.getElementById('ai-naming-processing');
+        const resultSection = document.getElementById('ai-naming-result-section');
+
         if (processingDiv) {
             processingDiv.style.display = 'none';
+        }
+
+        // 确保结果区域显示出来
+        if (resultSection) {
+            resultSection.style.display = 'block';
         }
     }
 
     // 显示AI起名错误信息
     showAINamingError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'api-error-message';
-        errorDiv.textContent = `❌ ${message}`;
-        errorDiv.style.cssText = `
-            background: rgba(255, 0, 0, 0.1);
-            border: 1px solid #ff4444;
-            color: #ff4444;
-            padding: 1rem;
-            border-radius: 4px;
-            margin: 1rem 0;
-            text-align: center;
-        `;
+        console.log('显示AI起名错误:', message);
+        const errorMessage = document.getElementById('ai-naming-error-message');
+        if (errorMessage) {
+            errorMessage.textContent = `❌ ${message}`;
+            errorMessage.style.display = 'block';
+            console.log('错误信息已显示在页面上');
 
-        const processingDiv = document.getElementById('ai-naming-processing');
-        if (processingDiv) {
-            processingDiv.style.display = 'none';
-            processingDiv.parentNode.insertBefore(errorDiv, processingDiv.nextSibling);
-
-            // 3秒后自动移除错误信息
+            // 5秒后自动隐藏错误信息
             setTimeout(() => {
-                if (errorDiv.parentNode) {
-                    errorDiv.parentNode.removeChild(errorDiv);
-                }
-            }, 3000);
+                errorMessage.style.display = 'none';
+                console.log('错误信息已自动隐藏');
+            }, 5000);
+        } else {
+            console.error('未找到错误消息元素');
+            // 作为备选方案，显示alert
+            alert(`AI起名分析错误: ${message}`);
         }
     }
 

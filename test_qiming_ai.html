@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能起名AI自动提交测试</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            padding: 20px;
+            background: #0a0a0a;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 5px;
+        }
+        .test-title {
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .test-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            color: #00ff88;
+            font-size: 14px;
+        }
+        .form-group input, .form-group select {
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ff88;
+            border-radius: 4px;
+            color: #00ff88;
+            font-family: inherit;
+        }
+        .test-button {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.4);
+        }
+        .log-area {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff88;
+            border-radius: 4px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+        .status.error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+        }
+        .status.warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🤖 智能起名AI自动提交功能测试</h1>
+        
+        <!-- 配置测试 -->
+        <div class="test-section">
+            <div class="test-title">1. AI配置测试</div>
+            <div class="test-form">
+                <div class="form-group">
+                    <label>API地址</label>
+                    <input type="text" id="test-api-url" placeholder="https://api.deepseek.com/v1/chat/completions">
+                </div>
+                <div class="form-group">
+                    <label>API密钥</label>
+                    <input type="password" id="test-api-key" placeholder="sk-...">
+                </div>
+                <div class="form-group">
+                    <label>模型</label>
+                    <select id="test-model">
+                        <option value="deepseek-reasoner">DeepSeek-R1</option>
+                        <option value="deepseek-chat">DeepSeek-V3</option>
+                        <option value="gpt-4">GPT-4</option>
+                        <option value="gpt-3.5-turbo">GPT-3.5</option>
+                    </select>
+                </div>
+            </div>
+            <button class="test-button" onclick="testAIConfig()">保存并测试AI配置</button>
+            <div id="config-status"></div>
+        </div>
+
+        <!-- 起名表单测试 -->
+        <div class="test-section">
+            <div class="test-title">2. 智能起名表单测试</div>
+            <div class="test-form">
+                <div class="form-group">
+                    <label>姓氏</label>
+                    <input type="text" id="test-surname" value="张" placeholder="请输入姓氏">
+                </div>
+                <div class="form-group">
+                    <label>性别</label>
+                    <select id="test-gender">
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>出生年份</label>
+                    <input type="number" id="test-year" value="1990" min="1900" max="2030">
+                </div>
+                <div class="form-group">
+                    <label>出生月份</label>
+                    <input type="number" id="test-month" value="5" min="1" max="12">
+                </div>
+                <div class="form-group">
+                    <label>出生日期</label>
+                    <input type="number" id="test-day" value="15" min="1" max="31">
+                </div>
+                <div class="form-group">
+                    <label>出生时辰</label>
+                    <select id="test-hour">
+                        <option value="8">辰时 (7-9点)</option>
+                        <option value="10">巳时 (9-11点)</option>
+                        <option value="12">午时 (11-13点)</option>
+                        <option value="14">未时 (13-15点)</option>
+                        <option value="16">申时 (15-17点)</option>
+                        <option value="18">酉时 (17-19点)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>出生省份</label>
+                    <input type="text" id="test-province" value="北京市" placeholder="出生省份">
+                </div>
+                <div class="form-group">
+                    <label>出生城市</label>
+                    <input type="text" id="test-city" value="北京市" placeholder="出生城市">
+                </div>
+            </div>
+            <button class="test-button" onclick="testQimingSubmit()">测试智能起名提交</button>
+            <div id="qiming-status"></div>
+        </div>
+
+        <!-- 日志区域 -->
+        <div class="test-section">
+            <div class="test-title">3. 测试日志</div>
+            <div id="test-log" class="log-area">等待测试开始...\n</div>
+            <button class="test-button" onclick="clearLog()">清空日志</button>
+        </div>
+    </div>
+
+    <!-- 引入必要的脚本 -->
+    <script src="js/bazi-calculator.js"></script>
+    <script src="js/name-calculator.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        // 测试日志函数
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            logArea.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('test-log').textContent = '日志已清空...\n';
+        }
+
+        // 测试AI配置
+        function testAIConfig() {
+            const apiUrl = document.getElementById('test-api-url').value;
+            const apiKey = document.getElementById('test-api-key').value;
+            const model = document.getElementById('test-model').value;
+            const statusDiv = document.getElementById('config-status');
+
+            log('开始测试AI配置...');
+
+            if (!apiUrl || !apiKey) {
+                const message = '请填写完整的API配置信息';
+                statusDiv.innerHTML = `<div class="status error">${message}</div>`;
+                log(message, 'error');
+                return;
+            }
+
+            // 保存配置到localStorage
+            const config = { apiUrl, apiKey, model };
+            localStorage.setItem('cyberFortune_globalConfig', JSON.stringify(config));
+            
+            const message = `AI配置已保存: ${model} @ ${apiUrl}`;
+            statusDiv.innerHTML = `<div class="status success">${message}</div>`;
+            log(message, 'success');
+
+            // 测试配置是否能被正确读取
+            const app = new CyberFortuneApp();
+            const savedConfig = app.getGlobalConfig();
+            if (savedConfig && savedConfig.apiUrl === apiUrl && savedConfig.apiKey === apiKey) {
+                log('配置读取测试通过', 'success');
+            } else {
+                log('配置读取测试失败', 'error');
+            }
+        }
+
+        // 测试智能起名提交
+        async function testQimingSubmit() {
+            const statusDiv = document.getElementById('qiming-status');
+            log('开始测试智能起名提交...');
+
+            // 检查AI配置
+            const app = new CyberFortuneApp();
+            const globalConfig = app.getGlobalConfig();
+            
+            if (!globalConfig) {
+                const message = '请先配置AI设置';
+                statusDiv.innerHTML = `<div class="status error">${message}</div>`;
+                log(message, 'error');
+                return;
+            }
+
+            log(`使用AI配置: ${globalConfig.model}`, 'success');
+
+            // 构建测试数据
+            const birthData = {
+                surname: document.getElementById('test-surname').value,
+                gender: document.getElementById('test-gender').value,
+                year: parseInt(document.getElementById('test-year').value),
+                month: parseInt(document.getElementById('test-month').value),
+                day: parseInt(document.getElementById('test-day').value),
+                hour: parseInt(document.getElementById('test-hour').value),
+                minute: 0,
+                birthProvince: document.getElementById('test-province').value,
+                birthCity: document.getElementById('test-city').value,
+                customConfig: {}
+            };
+
+            log(`测试数据: ${birthData.surname}${birthData.gender} ${birthData.year}-${birthData.month}-${birthData.day} ${birthData.hour}时`);
+
+            try {
+                statusDiv.innerHTML = `<div class="status warning">正在计算八字和生成名字建议...</div>`;
+                
+                // 计算八字
+                const baziResult = app.baziCalculator.calculate(birthData);
+                log(`八字计算完成: ${baziResult.yearPillar} ${baziResult.monthPillar} ${baziResult.dayPillar} ${baziResult.hourPillar}`, 'success');
+
+                // 生成名字建议
+                const nameSuggestions = app.nameCalculator.generateNameSuggestions(
+                    birthData.surname,
+                    birthData.gender,
+                    baziResult,
+                    birthData.customConfig
+                );
+                log(`生成了 ${nameSuggestions.length} 个名字建议`, 'success');
+
+                // 生成AI提示词
+                const aiPrompt = app.nameCalculator.generateCompleteAINamingPrompt(
+                    birthData,
+                    baziResult,
+                    nameSuggestions,
+                    birthData.customConfig
+                );
+                log(`AI提示词长度: ${aiPrompt.length} 字符`, 'success');
+
+                statusDiv.innerHTML = `<div class="status warning">正在启动AI分析...</div>`;
+                
+                // 测试AI分析自动启动
+                log('开始测试AI分析自动启动...');
+                await app.generateNamingAIAnalysis(birthData, baziResult, nameSuggestions, aiPrompt);
+                
+                statusDiv.innerHTML = `<div class="status success">智能起名测试完成！请检查AI分析是否自动开始。</div>`;
+                log('智能起名测试完成', 'success');
+
+            } catch (error) {
+                const message = `测试失败: ${error.message}`;
+                statusDiv.innerHTML = `<div class="status error">${message}</div>`;
+                log(message, 'error');
+                console.error('测试错误:', error);
+            }
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('测试页面加载完成');
+            
+            // 检查现有配置
+            const existingConfig = localStorage.getItem('cyberFortune_globalConfig');
+            if (existingConfig) {
+                try {
+                    const config = JSON.parse(existingConfig);
+                    document.getElementById('test-api-url').value = config.apiUrl || '';
+                    document.getElementById('test-api-key').value = config.apiKey || '';
+                    document.getElementById('test-model').value = config.model || 'deepseek-reasoner';
+                    log('已加载现有AI配置', 'success');
+                } catch (error) {
+                    log('加载现有配置失败', 'warning');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

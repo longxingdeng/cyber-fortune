@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能起名调试测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-panel {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .debug-title {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn.success {
+            background: #28a745;
+        }
+        .btn.danger {
+            background: #dc3545;
+        }
+        .log-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .status.warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 智能起名AI自动提交调试工具</h1>
+    
+    <!-- AI配置面板 -->
+    <div class="debug-panel">
+        <div class="debug-title">AI配置设置</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>API地址</label>
+                <input type="text" id="api-url" placeholder="https://api.deepseek.com/v1/chat/completions">
+            </div>
+            <div class="form-group">
+                <label>API密钥</label>
+                <input type="password" id="api-key" placeholder="sk-...">
+            </div>
+            <div class="form-group">
+                <label>模型</label>
+                <select id="model">
+                    <option value="deepseek-reasoner">DeepSeek-R1</option>
+                    <option value="deepseek-chat">DeepSeek-V3</option>
+                    <option value="gpt-4">GPT-4</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn" onclick="saveConfig()">保存配置</button>
+        <button class="btn" onclick="testConfig()">测试配置</button>
+        <button class="btn danger" onclick="clearConfig()">清除配置</button>
+        <div id="config-status"></div>
+    </div>
+
+    <!-- 起名测试面板 -->
+    <div class="debug-panel">
+        <div class="debug-title">智能起名测试</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>姓氏</label>
+                <input type="text" id="surname" value="李">
+            </div>
+            <div class="form-group">
+                <label>性别</label>
+                <select id="gender">
+                    <option value="男">男</option>
+                    <option value="女">女</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>年份</label>
+                <input type="number" id="year" value="1995" min="1900" max="2030">
+            </div>
+            <div class="form-group">
+                <label>月份</label>
+                <input type="number" id="month" value="8" min="1" max="12">
+            </div>
+            <div class="form-group">
+                <label>日期</label>
+                <input type="number" id="day" value="20" min="1" max="31">
+            </div>
+            <div class="form-group">
+                <label>时辰</label>
+                <select id="hour">
+                    <option value="10">巳时 (9-11点)</option>
+                    <option value="14">未时 (13-15点)</option>
+                    <option value="18">酉时 (17-19点)</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>出生省份</label>
+                <input type="text" id="province" value="广东省">
+            </div>
+            <div class="form-group">
+                <label>出生城市</label>
+                <input type="text" id="city" value="深圳市">
+            </div>
+        </div>
+        <button class="btn success" onclick="testQiming()">开始智能起名测试</button>
+        <div id="qiming-status"></div>
+    </div>
+
+    <!-- 调试日志 -->
+    <div class="debug-panel">
+        <div class="debug-title">调试日志</div>
+        <div id="debug-log" class="log-area">等待测试开始...\n</div>
+        <button class="btn" onclick="clearLog()">清空日志</button>
+        <button class="btn" onclick="exportLog()">导出日志</button>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script src="js/bazi-calculator.js"></script>
+    <script src="js/name-calculator.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        let app;
+        
+        // 日志函数
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            logArea.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+            console.log(`[DEBUG] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('debug-log').textContent = '日志已清空...\n';
+        }
+
+        function exportLog() {
+            const logContent = document.getElementById('debug-log').textContent;
+            const blob = new Blob([logContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `qiming-debug-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 配置管理
+        function saveConfig() {
+            const config = {
+                apiUrl: document.getElementById('api-url').value,
+                apiKey: document.getElementById('api-key').value,
+                model: document.getElementById('model').value
+            };
+
+            if (!config.apiUrl || !config.apiKey) {
+                showStatus('config-status', '请填写完整的配置信息', 'error');
+                log('配置保存失败：信息不完整', 'error');
+                return;
+            }
+
+            localStorage.setItem('cyberFortune_globalConfig', JSON.stringify(config));
+            showStatus('config-status', '配置已保存', 'success');
+            log(`配置已保存: ${config.model} @ ${config.apiUrl}`, 'success');
+        }
+
+        function testConfig() {
+            const config = JSON.parse(localStorage.getItem('cyberFortune_globalConfig') || '{}');
+            if (!config.apiUrl || !config.apiKey) {
+                showStatus('config-status', '请先保存配置', 'error');
+                log('配置测试失败：未找到有效配置', 'error');
+                return;
+            }
+
+            if (app) {
+                const testConfig = app.getGlobalConfig();
+                if (testConfig && testConfig.apiUrl === config.apiUrl) {
+                    showStatus('config-status', '配置测试通过', 'success');
+                    log('配置测试通过：应用可以正确读取配置', 'success');
+                } else {
+                    showStatus('config-status', '配置测试失败', 'error');
+                    log('配置测试失败：应用无法正确读取配置', 'error');
+                }
+            } else {
+                showStatus('config-status', '应用未初始化', 'warning');
+                log('配置测试警告：应用未初始化', 'warning');
+            }
+        }
+
+        function clearConfig() {
+            localStorage.removeItem('cyberFortune_globalConfig');
+            showStatus('config-status', '配置已清除', 'success');
+            log('配置已清除', 'success');
+        }
+
+        // 起名测试
+        async function testQiming() {
+            log('=== 开始智能起名测试 ===');
+            
+            if (!app) {
+                app = new CyberFortuneApp();
+                log('应用实例已创建');
+            }
+
+            // 检查配置
+            const config = app.getGlobalConfig();
+            if (!config) {
+                showStatus('qiming-status', '请先配置AI设置', 'error');
+                log('测试失败：未找到AI配置', 'error');
+                return;
+            }
+            log(`使用AI配置: ${config.model}`, 'success');
+
+            // 构建测试数据
+            const birthData = {
+                surname: document.getElementById('surname').value,
+                gender: document.getElementById('gender').value,
+                year: parseInt(document.getElementById('year').value),
+                month: parseInt(document.getElementById('month').value),
+                day: parseInt(document.getElementById('day').value),
+                hour: parseInt(document.getElementById('hour').value),
+                minute: 0,
+                birthProvince: document.getElementById('province').value,
+                birthCity: document.getElementById('city').value,
+                customConfig: {}
+            };
+
+            log(`测试数据: ${JSON.stringify(birthData)}`);
+
+            try {
+                showStatus('qiming-status', '正在计算八字...', 'warning');
+                
+                // 计算八字
+                const baziResult = app.baziCalculator.calculate(birthData);
+                log(`八字计算完成: ${baziResult.yearPillar} ${baziResult.monthPillar} ${baziResult.dayPillar} ${baziResult.hourPillar}`, 'success');
+
+                // 生成名字建议
+                const nameSuggestions = app.nameCalculator.generateNameSuggestions(
+                    birthData.surname,
+                    birthData.gender,
+                    baziResult,
+                    birthData.customConfig
+                );
+                log(`生成了 ${nameSuggestions.length} 个名字建议`, 'success');
+
+                // 生成AI提示词
+                const aiPrompt = app.nameCalculator.generateCompleteAINamingPrompt(
+                    birthData,
+                    baziResult,
+                    nameSuggestions,
+                    birthData.customConfig
+                );
+                log(`AI提示词长度: ${aiPrompt.length} 字符`, 'success');
+
+                showStatus('qiming-status', '正在启动AI分析...', 'warning');
+                
+                // 直接调用AI分析函数
+                log('直接调用generateNamingAIAnalysis函数...');
+                await app.generateNamingAIAnalysis(birthData, baziResult, nameSuggestions, aiPrompt);
+                
+                showStatus('qiming-status', '智能起名测试完成', 'success');
+                log('=== 智能起名测试完成 ===', 'success');
+
+            } catch (error) {
+                const message = `测试失败: ${error.message}`;
+                showStatus('qiming-status', message, 'error');
+                log(message, 'error');
+                console.error('测试错误:', error);
+            }
+        }
+
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('调试页面加载完成');
+            
+            // 加载现有配置
+            const existingConfig = localStorage.getItem('cyberFortune_globalConfig');
+            if (existingConfig) {
+                try {
+                    const config = JSON.parse(existingConfig);
+                    document.getElementById('api-url').value = config.apiUrl || '';
+                    document.getElementById('api-key').value = config.apiKey || '';
+                    document.getElementById('model').value = config.model || 'deepseek-reasoner';
+                    log('已加载现有AI配置', 'success');
+                } catch (error) {
+                    log('加载现有配置失败', 'warning');
+                }
+            }
+
+            // 初始化应用
+            try {
+                app = new CyberFortuneApp();
+                log('应用实例初始化成功', 'success');
+            } catch (error) {
+                log(`应用初始化失败: ${error.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
