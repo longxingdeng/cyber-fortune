@@ -1611,7 +1611,8 @@ class CyberFortune {
 
         if (!globalConfig) {
             console.error('未找到全局AI配置');
-            this.showAINamingError('请先在右上角配置AI设置');
+            // 显示更明显的配置提示
+            this.showAINamingConfigPrompt();
             return;
         }
 
@@ -1643,29 +1644,17 @@ class CyberFortune {
         this.showAINamingProcessing();
         this.showAIDebugInfo('显示处理状态...');
 
-        let analysisSuccessful = false;
-
         try {
             console.log('开始调用AI API...');
             // 调用AI API
             await this.callAINamingAPI(aiPrompt, apiKey, modelName, apiUrl);
             console.log('AI API调用完成');
-            analysisSuccessful = true;
 
         } catch (error) {
             console.error('AI起名分析失败:', error);
             this.showAINamingError(error.message);
-            // 出错时隐藏处理状态，但不显示结果区域
-            const processingDiv = document.getElementById('ai-naming-processing');
-            if (processingDiv) {
-                processingDiv.style.display = 'none';
-            }
         } finally {
-            // 只有在分析成功时才调用hideAINamingProcessing来显示结果
-            if (analysisSuccessful) {
-                console.log('分析成功，显示结果区域...');
-                this.hideAINamingProcessing();
-            }
+            this.hideAINamingProcessing();
         }
         console.log('=== AI起名分析结束 ===');
     }
@@ -1858,6 +1847,46 @@ class CyberFortune {
         // 确保结果区域显示出来
         if (resultSection) {
             resultSection.style.display = 'block';
+        }
+    }
+
+    // 显示AI配置提示
+    showAINamingConfigPrompt() {
+        console.log('显示AI配置提示');
+        const processingDiv = document.getElementById('ai-naming-processing');
+        const resultSection = document.getElementById('ai-naming-result-section');
+
+        // 隐藏处理状态
+        if (processingDiv) {
+            processingDiv.style.display = 'none';
+        }
+
+        // 显示配置提示在结果区域
+        if (resultSection) {
+            resultSection.style.display = 'block';
+            const output = document.getElementById('ai-naming-output');
+            if (output) {
+                output.innerHTML = `
+                    <div class="config-prompt">
+                        <div class="config-prompt-icon">⚙️</div>
+                        <h4>需要配置AI设置</h4>
+                        <p>要使用AI智能起名分析功能，请先配置AI设置：</p>
+                        <ol>
+                            <li>点击右上角的 <strong>⚙️ AI设置</strong> 按钮</li>
+                            <li>选择AI模型（推荐：DeepSeek-R1）</li>
+                            <li>输入API密钥和API地址</li>
+                            <li>点击"测试连接"确认配置正确</li>
+                            <li>保存配置后重新生成起名分析</li>
+                        </ol>
+                        <div class="config-prompt-note">
+                            💡 <strong>提示</strong>：本地开发环境和线上环境的配置是独立的，需要分别设置。
+                        </div>
+                        <button class="cyber-button config-prompt-button" onclick="document.getElementById('config-toggle').click()">
+                            🚀 立即配置AI设置
+                        </button>
+                    </div>
+                `;
+            }
         }
     }
 
