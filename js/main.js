@@ -1169,6 +1169,15 @@ class CyberFortune {
                 birthData.customConfig
             );
 
+            // 调试：检查名字建议数据结构
+            console.log('名字建议数据结构:', nameSuggestions);
+            if (nameSuggestions.length > 0) {
+                console.log('第一个建议的详细结构:', nameSuggestions[0]);
+                console.log('wuGe结构:', nameSuggestions[0].wuGe);
+                console.log('sanCai结构:', nameSuggestions[0].sanCai);
+                console.log('wuXingMatch结构:', nameSuggestions[0].wuXingMatch);
+            }
+
             // 生成AI分析提示词
             const aiPrompt = this.nameCalculator.generateCompleteAINamingPrompt(
                 birthData,
