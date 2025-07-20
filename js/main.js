@@ -1454,7 +1454,7 @@ class CyberFortune {
         // 自动开始AI起名分析
         setTimeout(() => {
             console.log('自动开始起名AI分析...');
-            this.generateNamingAIAnalysis(birthData, baziResult, nameSuggestions, aiPrompt);
+            this.generateAINamingAnalysis(birthData, baziResult, nameSuggestions, aiPrompt);
         }, 1000); // 延迟1秒，确保界面渲染完成
     }
 
