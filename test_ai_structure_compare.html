@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI结构对比测试</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            padding: 20px;
+            background: #0a0a0a;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .compare-section {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .compare-item {
+            flex: 1;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .test-button {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .status-info {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 AI结构对比测试</h1>
+        <p>对比测名和起名的AI结果显示结构</p>
+        
+        <div class="compare-section">
+            <!-- 测名结构 -->
+            <div class="compare-item">
+                <h3>📊 测名AI结构 (工作正常)</h3>
+                <div class="ai-naming-analysis">
+                    <div class="ai-naming-header">
+                        <h4>AI深度测名分析</h4>
+                        <p>基于八字命理、五格数理、字义内涵、音韵美学等多维度的专业分析</p>
+                    </div>
+
+                    <!-- 处理状态显示 -->
+                    <div class="processing-box" id="ceming-ai-processing" style="display: none;">
+                        <div class="processing-message" id="ceming-processing-message">正在初始化AI分析...</div>
+                        <div class="processing-steps" id="ceming-processing-steps"></div>
+                    </div>
+
+                    <!-- AI分析结果 -->
+                    <div class="ai-result-section" id="ceming-ai-result-section" style="display: none;">
+                        <h5>AI深度分析结果：</h5>
+                        <div class="ai-output" id="ceming-ai-output"></div>
+                        <div class="result-actions">
+                            <button class="cyber-button" id="copy-ceming-ai-result" style="display: none;">
+                                <span>📄 复制分析结果</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 错误信息显示 -->
+                    <div class="api-error-message" id="ceming-ai-error-message" style="display: none;"></div>
+                </div>
+                
+                <button class="test-button" onclick="testCeming()">测试测名AI显示</button>
+                <div class="status-info" id="ceming-status">等待测试...</div>
+            </div>
+
+            <!-- 起名结构 -->
+            <div class="compare-item">
+                <h3>✨ 起名AI结构 (修复后)</h3>
+                <div class="ai-naming-analysis">
+                    <div class="ai-naming-header">
+                        <h4>AI智能起名分析</h4>
+                        <p>基于八字命理、五格数理、字义内涵、音韵美学等多维度的专业分析</p>
+                    </div>
+
+                    <!-- 处理状态显示 -->
+                    <div class="processing-box" id="ai-naming-processing" style="display: none;">
+                        <div class="processing-message" id="ai-naming-processing-message">正在初始化AI分析...</div>
+                        <div class="processing-steps" id="ai-naming-processing-steps"></div>
+                    </div>
+
+                    <!-- AI分析结果 -->
+                    <div class="ai-result-section" id="ai-naming-result-section" style="display: none;">
+                        <h5>AI深度分析结果：</h5>
+                        <div class="ai-output" id="ai-naming-output"></div>
+                        <div class="result-actions">
+                            <button class="cyber-button" id="copy-ai-naming-result" style="display: none;">
+                                <span>📄 复制分析结果</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 错误信息显示 -->
+                    <div class="api-error-message" id="ai-naming-error-message" style="display: none;"></div>
+                </div>
+                
+                <button class="test-button" onclick="testQiming()">测试起名AI显示</button>
+                <div class="status-info" id="qiming-status">等待测试...</div>
+            </div>
+        </div>
+
+        <!-- 结构检查 -->
+        <div class="compare-item">
+            <h3>🔧 结构检查</h3>
+            <button class="test-button" onclick="checkStructure()">检查DOM结构</button>
+            <div class="status-info" id="structure-check">等待检查...</div>
+        </div>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script src="js/bazi-calculator.js"></script>
+    <script src="js/name-calculator.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        let app;
+
+        function updateStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const color = type === 'error' ? '#ff4444' : type === 'success' ? '#00ff88' : type === 'warning' ? '#ffc107' : '#ffffff';
+            element.innerHTML = `<div style="color: ${color}">${message}</div>`;
+        }
+
+        function checkStructure() {
+            const cemingElements = [
+                'ceming-ai-processing',
+                'ceming-processing-message', 
+                'ceming-processing-steps',
+                'ceming-ai-result-section',
+                'ceming-ai-output',
+                'copy-ceming-ai-result',
+                'ceming-ai-error-message'
+            ];
+
+            const qimingElements = [
+                'ai-naming-processing',
+                'ai-naming-processing-message',
+                'ai-naming-processing-steps', 
+                'ai-naming-result-section',
+                'ai-naming-output',
+                'copy-ai-naming-result',
+                'ai-naming-error-message'
+            ];
+
+            let result = '<strong>DOM元素检查结果：</strong><br><br>';
+            
+            result += '<strong>测名元素：</strong><br>';
+            cemingElements.forEach(id => {
+                const element = document.getElementById(id);
+                const status = element ? '✅' : '❌';
+                result += `${status} ${id}<br>`;
+            });
+
+            result += '<br><strong>起名元素：</strong><br>';
+            qimingElements.forEach(id => {
+                const element = document.getElementById(id);
+                const status = element ? '✅' : '❌';
+                result += `${status} ${id}<br>`;
+            });
+
+            updateStatus('structure-check', result, 'info');
+        }
+
+        function testCeming() {
+            updateStatus('ceming-status', '开始测试测名AI显示...', 'warning');
+            
+            // 模拟测名AI显示过程
+            const processingDiv = document.getElementById('ceming-ai-processing');
+            const resultSection = document.getElementById('ceming-ai-result-section');
+            const aiOutput = document.getElementById('ceming-ai-output');
+            const copyBtn = document.getElementById('copy-ceming-ai-result');
+
+            // 显示处理状态
+            if (processingDiv) {
+                processingDiv.style.display = 'block';
+                updateStatus('ceming-status', '✅ 处理状态已显示', 'success');
+            }
+
+            setTimeout(() => {
+                // 显示结果
+                if (resultSection) {
+                    resultSection.style.display = 'block';
+                    processingDiv.style.display = 'none';
+                }
+                
+                if (aiOutput) {
+                    aiOutput.innerHTML = `
+                        <h3>测名AI分析结果示例</h3>
+                        <p><strong>姓名评分：</strong> 92分</p>
+                        <p><strong>五行分析：</strong> 金木水火土搭配均衡</p>
+                        <p><strong>字义解析：</strong> 寓意深远，文化底蕴丰富</p>
+                        <p><strong>建议：</strong> 此名字非常适合，建议保留使用</p>
+                    `;
+                }
+                
+                if (copyBtn) {
+                    copyBtn.style.display = 'block';
+                }
+                
+                updateStatus('ceming-status', '✅ 测名AI结果显示成功！', 'success');
+            }, 1500);
+        }
+
+        function testQiming() {
+            updateStatus('qiming-status', '开始测试起名AI显示...', 'warning');
+            
+            // 模拟起名AI显示过程
+            const processingDiv = document.getElementById('ai-naming-processing');
+            const resultSection = document.getElementById('ai-naming-result-section');
+            const aiOutput = document.getElementById('ai-naming-output');
+            const copyBtn = document.getElementById('copy-ai-naming-result');
+
+            // 显示处理状态
+            if (processingDiv) {
+                processingDiv.style.display = 'block';
+                updateStatus('qiming-status', '✅ 处理状态已显示', 'success');
+            }
+
+            setTimeout(() => {
+                // 显示结果
+                if (resultSection) {
+                    resultSection.style.display = 'block';
+                    processingDiv.style.display = 'none';
+                }
+                
+                if (aiOutput) {
+                    aiOutput.innerHTML = `
+                        <h3>起名AI分析结果示例</h3>
+                        <p><strong>推荐姓名：</strong> 张明轩</p>
+                        <p><strong>传统评分：</strong> 95分</p>
+                        <p><strong>五行匹配：</strong> 火金土，平衡命理</p>
+                        <p><strong>字义分析：</strong></p>
+                        <ul>
+                            <li>"明"字出自《诗经》，寓意聪明睿智</li>
+                            <li>"轩"字意为高远，象征志向远大</li>
+                        </ul>
+                        <p><strong>综合建议：</strong> 此名字五行搭配合理，寓意美好，强烈推荐</p>
+                    `;
+                }
+                
+                if (copyBtn) {
+                    copyBtn.style.display = 'block';
+                }
+                
+                updateStatus('qiming-status', '✅ 起名AI结果显示成功！', 'success');
+            }, 1500);
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('AI结构对比测试页面加载完成');
+            
+            // 自动检查结构
+            setTimeout(checkStructure, 500);
+            
+            try {
+                app = new CyberFortuneApp();
+                console.log('应用实例初始化成功');
+            } catch (error) {
+                console.error('应用初始化失败:', error);
+            }
+        });
+    </script>
+</body>
+</html>
