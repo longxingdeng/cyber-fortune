@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>姓名分值调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+        th {
+            background: #f8f9fa;
+        }
+        .different {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .same {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>姓名分值调试工具</h1>
+        <p>专门用于调试姓名分值计算的一致性问题</p>
+        
+        <div>
+            <label>姓名: <input type="text" id="testName" value="张伟" /></label>
+            <label>出生年: <input type="number" id="testYear" value="1990" /></label>
+            <label>出生月: <input type="number" id="testMonth" value="5" /></label>
+            <label>出生日: <input type="number" id="testDay" value="15" /></label>
+            <label>出生时: <input type="number" id="testHour" value="10" /></label>
+            <button onclick="runDebugTest()">运行调试测试</button>
+            <button onclick="runBatchTest()">批量测试多个姓名</button>
+            <button onclick="clearResults()">清空结果</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script src="js/bazi-calculator.js"></script>
+    <script src="js/name-calculator.js"></script>
+    
+    <script>
+        function runDebugTest() {
+            const resultsDiv = document.getElementById('results');
+            const testName = document.getElementById('testName').value;
+            const year = parseInt(document.getElementById('testYear').value);
+            const month = parseInt(document.getElementById('testMonth').value);
+            const day = parseInt(document.getElementById('testDay').value);
+            const hour = parseInt(document.getElementById('testHour').value);
+            
+            resultsDiv.innerHTML = '<div>正在运行调试测试...</div>';
+            
+            // 创建计算器实例
+            const baziCalculator = new BaziCalculator();
+            const nameCalculator = new NameCalculator();
+            
+            const birthData = { year, month, day, hour, gender: '男' };
+            
+            // 计算八字（只计算一次，确保八字数据一致）
+            const baziResult = baziCalculator.calculate(birthData);
+            
+            console.log('八字结果:', baziResult);
+            
+            // 多次运行姓名分析
+            const iterations = 20;
+            const results = [];
+            
+            for (let i = 0; i < iterations; i++) {
+                try {
+                    const nameAnalysis = nameCalculator.analyzeName(testName, baziResult);
+                    
+                    // 获取中间计算步骤的详细信息
+                    const surname = testName[0];
+                    const firstName = testName.slice(1);
+                    const wuGe = nameCalculator.calculateWuGe(surname, firstName);
+                    const sanCai = nameCalculator.calculateSanCai(wuGe);
+                    const baseScore = nameCalculator.calculateNameScore(wuGe, sanCai);
+                    const neededWuXing = nameCalculator.analyzeBaziWuXing(baziResult);
+                    const nameWuXing = nameCalculator.getNameWuXing(firstName);
+                    const wuXingMatch = nameCalculator.calculateWuXingMatch(neededWuXing, nameWuXing);
+                    
+                    results.push({
+                        iteration: i + 1,
+                        finalScore: nameAnalysis.score,
+                        wuXingMatch: wuXingMatch,
+                        baseScore: baseScore,
+                        neededWuXing: neededWuXing.join(','),
+                        nameWuXing: JSON.stringify(nameWuXing),
+                        tianGe: wuGe.tianGe,
+                        renGe: wuGe.renGe,
+                        diGe: wuGe.diGe,
+                        waiGe: wuGe.waiGe,
+                        zongGe: wuGe.zongGe,
+                        sanCaiCode: sanCai.sanCaiCode,
+                        jiXiong: sanCai.jiXiong
+                    });
+                } catch (error) {
+                    results.push({
+                        iteration: i + 1,
+                        error: error.message
+                    });
+                }
+            }
+            
+            // 分析结果
+            const firstResult = results[0];
+            let hasInconsistency = false;
+            const inconsistentFields = new Set();
+            
+            for (let i = 1; i < results.length; i++) {
+                const current = results[i];
+                if (current.error) continue;
+                
+                Object.keys(firstResult).forEach(key => {
+                    if (key !== 'iteration' && firstResult[key] !== current[key]) {
+                        hasInconsistency = true;
+                        inconsistentFields.add(key);
+                    }
+                });
+            }
+            
+            // 生成结果表格
+            let html = `<h3>测试结果 (${testName})</h3>`;
+            
+            if (hasInconsistency) {
+                html += `<div style="color: red; font-weight: bold;">❌ 发现不一致！不一致字段: ${Array.from(inconsistentFields).join(', ')}</div>`;
+            } else {
+                html += `<div style="color: green; font-weight: bold;">✅ 所有${iterations}次计算结果一致</div>`;
+            }
+            
+            html += '<table><tr>';
+            html += '<th>次数</th><th>最终分数</th><th>五行匹配</th><th>基础分数</th><th>需要五行</th><th>姓名五行</th>';
+            html += '<th>天格</th><th>人格</th><th>地格</th><th>外格</th><th>总格</th><th>三才</th><th>吉凶</th>';
+            html += '</tr>';
+            
+            results.forEach(result => {
+                if (result.error) {
+                    html += `<tr><td>${result.iteration}</td><td colspan="12" style="color: red;">错误: ${result.error}</td></tr>`;
+                    return;
+                }
+                
+                html += '<tr>';
+                Object.keys(result).forEach(key => {
+                    if (key === 'iteration') {
+                        html += `<td>${result[key]}</td>`;
+                    } else {
+                        const isDifferent = inconsistentFields.has(key);
+                        const className = isDifferent ? 'different' : 'same';
+                        html += `<td class="${className}">${result[key]}</td>`;
+                    }
+                });
+                html += '</tr>';
+            });
+            
+            html += '</table>';
+            
+            // 显示八字信息
+            html += `<h4>八字信息</h4>`;
+            html += `<p>年柱: ${baziResult.yearPillar}, 月柱: ${baziResult.monthPillar}, 日柱: ${baziResult.dayPillar}, 时柱: ${baziResult.hourPillar}</p>`;
+            html += `<p>日主: ${baziResult.dayTianGan}</p>`;
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        function runBatchTest() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div>正在运行批量测试...</div>';
+
+            // 创建计算器实例
+            const baziCalculator = new BaziCalculator();
+            const nameCalculator = new NameCalculator();
+
+            // 测试数据
+            const testCases = [
+                { name: '张伟', birthData: { year: 1990, month: 5, day: 15, hour: 10, gender: '男' } },
+                { name: '李娜', birthData: { year: 1985, month: 8, day: 20, hour: 14, gender: '女' } },
+                { name: '王小明', birthData: { year: 1995, month: 3, day: 10, hour: 8, gender: '男' } },
+                { name: '陈美丽', birthData: { year: 1988, month: 12, day: 25, hour: 16, gender: '女' } },
+                { name: '刘强', birthData: { year: 1992, month: 7, day: 8, hour: 9, gender: '男' } }
+            ];
+
+            let html = '<h3>批量一致性测试结果</h3>';
+            let allTestsPassed = true;
+
+            testCases.forEach((testCase, caseIndex) => {
+                try {
+                    // 计算八字（只计算一次）
+                    const baziResult = baziCalculator.calculate(testCase.birthData);
+
+                    // 多次运行姓名分析
+                    const iterations = 20;
+                    const results = [];
+
+                    for (let i = 0; i < iterations; i++) {
+                        const nameAnalysis = nameCalculator.analyzeName(testCase.name, baziResult);
+                        results.push({
+                            score: nameAnalysis.score,
+                            wuXingMatch: nameAnalysis.wuXingMatch,
+                            serialized: JSON.stringify(nameAnalysis)
+                        });
+                    }
+
+                    // 检查一致性
+                    const firstResult = results[0];
+                    let isConsistent = true;
+                    const inconsistentFields = [];
+
+                    for (let i = 1; i < results.length; i++) {
+                        if (results[i].score !== firstResult.score) {
+                            isConsistent = false;
+                            inconsistentFields.push(`分数: ${firstResult.score} vs ${results[i].score}`);
+                            break;
+                        }
+                        if (results[i].wuXingMatch !== firstResult.wuXingMatch) {
+                            isConsistent = false;
+                            inconsistentFields.push(`五行匹配: ${firstResult.wuXingMatch} vs ${results[i].wuXingMatch}`);
+                            break;
+                        }
+                        if (results[i].serialized !== firstResult.serialized) {
+                            isConsistent = false;
+                            inconsistentFields.push('完整结果不一致');
+                            break;
+                        }
+                    }
+
+                    if (isConsistent) {
+                        html += `<div style="color: green; margin: 10px 0;">
+                            ✅ ${testCase.name}: 通过 - 所有${iterations}次计算结果一致 (分数: ${firstResult.score}分, 五行匹配: ${firstResult.wuXingMatch}分)
+                        </div>`;
+                    } else {
+                        html += `<div style="color: red; margin: 10px 0;">
+                            ❌ ${testCase.name}: 失败 - 计算结果不一致<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;不一致字段: ${inconsistentFields.join(', ')}
+                        </div>`;
+                        allTestsPassed = false;
+                    }
+
+                } catch (error) {
+                    html += `<div style="color: red; margin: 10px 0;">
+                        ❌ ${testCase.name}: 错误 - ${error.message}
+                    </div>`;
+                    allTestsPassed = false;
+                }
+            });
+
+            // 总结
+            if (allTestsPassed) {
+                html += `<div style="color: green; font-weight: bold; margin: 20px 0; padding: 10px; background: #e8f5e8; border-radius: 4px;">
+                    🎉 所有测试通过！姓名分值计算结果完全一致。
+                </div>`;
+            } else {
+                html += `<div style="color: red; font-weight: bold; margin: 20px 0; padding: 10px; background: #ffebee; border-radius: 4px;">
+                    ⚠️ 部分测试失败，存在计算结果不一致的问题。
+                </div>`;
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

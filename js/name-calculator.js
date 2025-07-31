@@ -352,9 +352,17 @@ class NameCalculator {
             }
         }
 
-        // 2. 找出八字中最缺的五行
+        // 2. 找出八字中最缺的五行（确保排序稳定性）
         const sortedWuXing = Object.entries(wuxingCount)
-            .sort((a, b) => a[1] - b[1])
+            .sort((a, b) => {
+                // 首先按数量排序
+                if (a[1] !== b[1]) {
+                    return a[1] - b[1];
+                }
+                // 数量相同时按五行顺序排序，确保结果一致
+                const wuxingOrder = ['木', '火', '土', '金', '水'];
+                return wuxingOrder.indexOf(a[0]) - wuxingOrder.indexOf(b[0]);
+            })
             .map(item => item[0]);
 
         // 添加最缺的1-2个五行
@@ -372,7 +380,13 @@ class NameCalculator {
             if (generateWuXing && !neededWuXing.includes(generateWuXing)) {
                 neededWuXing.push(generateWuXing);
             } else {
-                neededWuXing.push(sortedWuXing[0]);
+                // 从排序后的五行中找到第一个不在neededWuXing中的五行
+                for (const wuXing of sortedWuXing) {
+                    if (!neededWuXing.includes(wuXing)) {
+                        neededWuXing.push(wuXing);
+                        break;
+                    }
+                }
             }
         }
 
@@ -599,7 +613,7 @@ class NameCalculator {
             });
         }
 
-        // 按分数排序，自定义字优先，然后返回前10个
+        // 按分数排序，自定义字优先，然后返回前10个（确保排序稳定性）
         return suggestions
             .sort((a, b) => {
                 // 自定义字优先
@@ -613,7 +627,11 @@ class NameCalculator {
                     if (aPriority !== bPriority) return bPriority - aPriority;
                 }
                 // 分数排序
-                return b.score - a.score;
+                if (a.score !== b.score) {
+                    return b.score - a.score;
+                }
+                // 分数相同时按姓名字典序排序，确保结果一致
+                return a.fullName.localeCompare(b.fullName);
             })
             .slice(0, 10);
     }
@@ -625,8 +643,11 @@ class NameCalculator {
 
     // 获取单个字的五行属性
     getCharWuXing(char) {
-        for (const [wuXing, chars] of Object.entries(this.charWuXing)) {
-            if (chars.includes(char)) {
+        // 按固定顺序遍历五行，确保结果一致
+        const wuxingOrder = ['木', '火', '土', '金', '水'];
+        for (const wuXing of wuxingOrder) {
+            const chars = this.charWuXing[wuXing];
+            if (chars && chars.includes(char)) {
                 return wuXing;
             }
         }
@@ -639,13 +660,15 @@ class NameCalculator {
     // 计算姓名总分
     calculateNameScore(wuGe, sanCai) {
         let score = 60; // 基础分
-        
-        // 五格评分
-        Object.values(wuGe).forEach(ge => {
+
+        // 五格评分（按固定顺序遍历，确保结果一致）
+        const geOrder = ['tianGe', 'renGe', 'diGe', 'waiGe', 'zongGe'];
+        geOrder.forEach(geName => {
+            const ge = wuGe[geName];
             if (ge % 2 === 1) score += 2; // 奇数加分
             if (ge > 10 && ge < 30) score += 3; // 适中笔画加分
         });
-        
+
         // 三才配置评分
         switch (sanCai.jiXiong) {
             case '大吉': score += 20; break;
@@ -653,7 +676,7 @@ class NameCalculator {
             case '中等': score += 5; break;
             case '凶': score -= 10; break;
         }
-        
+
         return Math.min(100, Math.max(0, score));
     }
 
@@ -704,33 +727,38 @@ class NameCalculator {
         return wuXingCount;
     }
 
-    // 计算五行匹配度（改进版 - 真正的100分制）
+    // 计算五行匹配度（改进版 - 真正的100分制，避免浮点数精度问题）
     calculateWuXingMatch(needed, actual) {
         // 如果没有需要补充的五行，说明八字平衡，返回满分
         if (needed.length === 0) return 100;
 
+        // 使用整数运算避免浮点数精度问题
         let matchScore = 0;
-        const baseScore = 100 / needed.length; // 平均分配100分
+        const totalPoints = 10000; // 使用10000作为基数，最后除以100
+        const baseScore = Math.floor(totalPoints / needed.length);
 
         needed.forEach((wuXing, index) => {
             if (actual[wuXing] > 0) {
                 // 基础分数
                 let score = baseScore;
 
-                // 第一个五行（最重要的）额外加权
+                // 第一个五行（最重要的）额外加权 10%
                 if (index === 0) {
-                    score *= 1.1; // 10%加权
+                    score = Math.floor(score * 11 / 10);
                 }
 
                 // 根据字数给予小幅加分（最多5%）
-                const charBonus = Math.min(actual[wuXing] * 0.02, 0.05);
-                score *= (1 + charBonus);
+                const charCount = actual[wuXing];
+                const bonusPercent = Math.min(charCount * 2, 5); // 每个字2%，最多5%
+                score = Math.floor(score * (100 + bonusPercent) / 100);
 
                 matchScore += score;
             }
         });
 
-        return Math.round(Math.min(100, matchScore));
+        // 转换回百分制并确保不超过100
+        const finalScore = Math.floor(matchScore / 100);
+        return Math.min(100, finalScore);
     }
 
     // 获取五行匹配度等级评价
@@ -818,7 +846,7 @@ class NameCalculator {
                 prompt += `说明：这是家族辈分字，必须固定在第一个位置\n`;
             }
             if (secondChar) {
-                prompt += `指定第二个字：${secondChar}\n`;
+                prompt += `指定第二个字（辈分字）：${secondChar}\n`;
                 prompt += `说明：这个字必须固定在第二个位置\n`;
             }
             if (candidateChars.length > 0) {
