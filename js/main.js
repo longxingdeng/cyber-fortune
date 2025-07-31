@@ -2741,7 +2741,13 @@ class CyberFortune {
             processingSteps.innerHTML = '🔗 正在连接AI服务器...<br>';
             processingMessage.textContent = '建立连接中...';
 
-            console.log('API调用开始:', { apiUrl, modelName, environment: 'cloudflare-pages' });
+            console.log('API调用开始:', {
+                apiUrl,
+                modelName,
+                environment: location.hostname.includes('.pages.dev') ? 'cloudflare-pages' : 'other',
+                protocol: location.protocol,
+                hostname: location.hostname
+            });
 
             const requestBody = {
                 model: modelName,
@@ -2776,12 +2782,25 @@ class CyberFortune {
             if (!response.ok) {
                 const errorText = await response.text().catch(() => '无法读取错误信息');
                 console.error('API错误详情:', errorText);
+                console.error('响应头信息:', Object.fromEntries(response.headers.entries()));
 
                 let errorData = {};
                 try {
                     errorData = JSON.parse(errorText);
                 } catch (e) {
                     console.error('无法解析错误JSON:', e);
+                }
+
+                // 详细的错误分析
+                let errorMessage = `API调用失败 (${response.status})`;
+                if (response.status === 401) {
+                    errorMessage += ' - API密钥无效或已过期';
+                } else if (response.status === 403) {
+                    errorMessage += ' - 访问被拒绝，可能是CORS问题';
+                } else if (response.status === 429) {
+                    errorMessage += ' - 请求频率过高，请稍后重试';
+                } else if (response.status >= 500) {
+                    errorMessage += ' - API服务器错误';
                 }
 
                 throw new Error(`API错误 (${response.status}): ${errorData.error?.message || errorText || '未知错误'}`);

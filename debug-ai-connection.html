@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI连接诊断工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border-color: #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 5px;
+            border-radius: 2px;
+        }
+        .log-success { background: #d4edda; }
+        .log-error { background: #f8d7da; }
+        .log-warning { background: #fff3cd; }
+        .log-info { background: #d1ecf1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 AI连接诊断工具</h1>
+        <p>用于诊断AI配置在Cloudflare Pages上的连接问题</p>
+        
+        <!-- 环境检测 -->
+        <div class="section">
+            <h3>🌍 环境检测</h3>
+            <div id="environment-info"></div>
+            <button onclick="checkEnvironment()">检测环境</button>
+        </div>
+        
+        <!-- AI配置测试 -->
+        <div class="section">
+            <h3>⚙️ AI配置测试</h3>
+            <div>
+                <label>API地址:</label>
+                <input type="text" id="api-url" placeholder="https://api.deepseek.com/v1/chat/completions">
+                
+                <label>API密钥:</label>
+                <input type="password" id="api-key" placeholder="sk-...">
+                
+                <label>模型:</label>
+                <select id="model">
+                    <option value="deepseek-reasoner">DeepSeek-R1</option>
+                    <option value="deepseek-chat">DeepSeek-V3</option>
+                    <option value="gpt-4">GPT-4</option>
+                    <option value="gpt-3.5-turbo">GPT-3.5</option>
+                </select>
+            </div>
+            <button onclick="testAIConnection()">测试AI连接</button>
+            <button onclick="loadExistingConfig()">加载现有配置</button>
+        </div>
+        
+        <!-- 网络连接测试 -->
+        <div class="section">
+            <h3>🌐 网络连接测试</h3>
+            <button onclick="testNetworkConnectivity()">测试网络连接</button>
+            <button onclick="testCORS()">测试CORS策略</button>
+            <button onclick="testHTTPS()">测试HTTPS连接</button>
+        </div>
+        
+        <!-- 诊断日志 -->
+        <div class="section">
+            <h3>📋 诊断日志</h3>
+            <button onclick="clearLog()">清空日志</button>
+            <div id="diagnostic-log" class="log"></div>
+        </div>
+        
+        <!-- 解决方案建议 -->
+        <div class="section">
+            <h3>💡 解决方案建议</h3>
+            <div id="solutions"></div>
+        </div>
+    </div>
+
+    <script>
+        let logContainer;
+        let issues = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            logContainer = document.getElementById('diagnostic-log');
+            log('AI连接诊断工具已加载', 'info');
+            checkEnvironment();
+            loadExistingConfig();
+        });
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function clearLog() {
+            logContainer.innerHTML = '';
+            issues = [];
+        }
+        
+        function checkEnvironment() {
+            const envInfo = document.getElementById('environment-info');
+            let html = '';
+            
+            // 检测运行环境
+            const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+            const isHTTPS = location.protocol === 'https:';
+            const isCloudflarePages = location.hostname.includes('.pages.dev');
+            
+            html += `<div class="${isHTTPS ? 'success' : 'warning'}">
+                协议: ${location.protocol} ${isHTTPS ? '✅' : '⚠️ 建议使用HTTPS'}
+            </div>`;
+            
+            html += `<div class="${isLocalhost ? 'info' : 'success'}">
+                域名: ${location.hostname} ${isLocalhost ? '(本地环境)' : '(生产环境)'}
+            </div>`;
+            
+            html += `<div class="${isCloudflarePages ? 'success' : 'info'}">
+                平台: ${isCloudflarePages ? 'Cloudflare Pages ✅' : '其他平台'}
+            </div>`;
+            
+            // 检测浏览器支持
+            const hasLocalStorage = typeof(Storage) !== "undefined";
+            const hasFetch = typeof(fetch) !== "undefined";
+            
+            html += `<div class="${hasLocalStorage ? 'success' : 'error'}">
+                LocalStorage: ${hasLocalStorage ? '支持 ✅' : '不支持 ❌'}
+            </div>`;
+            
+            html += `<div class="${hasFetch ? 'success' : 'error'}">
+                Fetch API: ${hasFetch ? '支持 ✅' : '不支持 ❌'}
+            </div>`;
+            
+            envInfo.innerHTML = html;
+            
+            log(`环境检测完成: ${location.protocol}//${location.hostname}`, 'success');
+            if (!isHTTPS && !isLocalhost) {
+                log('警告: 生产环境建议使用HTTPS', 'warning');
+                issues.push('非HTTPS环境可能导致API调用失败');
+            }
+        }
+        
+        function loadExistingConfig() {
+            try {
+                const config = localStorage.getItem('cyberFortune_globalConfig');
+                if (config) {
+                    const parsedConfig = JSON.parse(config);
+                    document.getElementById('api-url').value = parsedConfig.apiUrl || '';
+                    document.getElementById('api-key').value = parsedConfig.apiKey || '';
+                    document.getElementById('model').value = parsedConfig.model || 'deepseek-reasoner';
+                    log('已加载现有AI配置', 'success');
+                } else {
+                    log('未找到现有AI配置', 'warning');
+                    issues.push('未配置AI设置');
+                }
+            } catch (error) {
+                log(`加载配置失败: ${error.message}`, 'error');
+                issues.push('配置文件损坏');
+            }
+        }
+        
+        async function testAIConnection() {
+            const apiUrl = document.getElementById('api-url').value;
+            const apiKey = document.getElementById('api-key').value;
+            const model = document.getElementById('model').value;
+            
+            if (!apiUrl || !apiKey) {
+                log('请填写完整的API配置', 'error');
+                return;
+            }
+            
+            log('开始测试AI连接...', 'info');
+            
+            try {
+                // 保存配置
+                const config = { apiUrl, apiKey, model };
+                localStorage.setItem('cyberFortune_globalConfig', JSON.stringify(config));
+                log('配置已保存到localStorage', 'success');
+                
+                // 测试API连接
+                const requestBody = {
+                    model: model,
+                    messages: [
+                        {
+                            role: "user",
+                            content: "请回复'连接测试成功'"
+                        }
+                    ],
+                    max_tokens: 50
+                };
+                
+                log(`发送测试请求到: ${apiUrl}`, 'info');
+                log(`使用模型: ${model}`, 'info');
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                log(`响应状态: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log(`错误详情: ${errorText}`, 'error');
+                    
+                    // 分析常见错误
+                    if (response.status === 401) {
+                        issues.push('API密钥无效或已过期');
+                    } else if (response.status === 403) {
+                        issues.push('API访问被拒绝，可能是CORS问题');
+                    } else if (response.status === 429) {
+                        issues.push('API调用频率限制');
+                    } else if (response.status >= 500) {
+                        issues.push('API服务器错误');
+                    }
+                } else {
+                    const result = await response.json();
+                    log('AI连接测试成功！', 'success');
+                    log(`响应内容: ${JSON.stringify(result, null, 2)}`, 'info');
+                }
+                
+            } catch (error) {
+                log(`连接测试失败: ${error.message}`, 'error');
+                
+                // 分析网络错误
+                if (error.message.includes('CORS')) {
+                    issues.push('CORS跨域问题');
+                } else if (error.message.includes('network')) {
+                    issues.push('网络连接问题');
+                } else if (error.message.includes('SSL') || error.message.includes('certificate')) {
+                    issues.push('SSL证书问题');
+                }
+            }
+            
+            updateSolutions();
+        }
+        
+        async function testNetworkConnectivity() {
+            log('测试网络连接...', 'info');
+            
+            const testUrls = [
+                'https://api.deepseek.com',
+                'https://api.openai.com',
+                'https://httpbin.org/get'
+            ];
+            
+            for (const url of testUrls) {
+                try {
+                    const response = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+                    log(`${url}: 可访问`, 'success');
+                } catch (error) {
+                    log(`${url}: 无法访问 - ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        async function testCORS() {
+            log('测试CORS策略...', 'info');
+            const apiUrl = document.getElementById('api-url').value;
+            
+            if (!apiUrl) {
+                log('请先填写API地址', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type, Authorization'
+                    }
+                });
+                
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                log(`CORS Headers: ${JSON.stringify(corsHeaders, null, 2)}`, 'info');
+                
+                if (corsHeaders['Access-Control-Allow-Origin'] === '*' || 
+                    corsHeaders['Access-Control-Allow-Origin'] === location.origin) {
+                    log('CORS策略允许当前域名访问', 'success');
+                } else {
+                    log('CORS策略可能阻止当前域名访问', 'warning');
+                    issues.push('CORS策略限制');
+                }
+                
+            } catch (error) {
+                log(`CORS测试失败: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testHTTPS() {
+            log('测试HTTPS连接...', 'info');
+            const apiUrl = document.getElementById('api-url').value;
+            
+            if (!apiUrl) {
+                log('请先填写API地址', 'warning');
+                return;
+            }
+            
+            if (!apiUrl.startsWith('https://')) {
+                log('API地址不是HTTPS，可能在Cloudflare Pages上无法访问', 'error');
+                issues.push('API地址必须使用HTTPS');
+            } else {
+                log('API地址使用HTTPS协议', 'success');
+            }
+        }
+        
+        function updateSolutions() {
+            const solutionsDiv = document.getElementById('solutions');
+            let html = '';
+            
+            if (issues.length === 0) {
+                html = '<div class="success">✅ 未发现明显问题</div>';
+            } else {
+                html = '<div class="error">发现以下问题:</div>';
+                issues.forEach((issue, index) => {
+                    html += `<div class="warning">${index + 1}. ${issue}</div>`;
+                });
+                
+                html += '<div class="info"><h4>建议的解决方案:</h4>';
+                html += '<ul>';
+                html += '<li>确保API地址使用HTTPS协议</li>';
+                html += '<li>检查API密钥是否正确且未过期</li>';
+                html += '<li>联系API服务商确认CORS设置</li>';
+                html += '<li>尝试使用不同的API服务商</li>';
+                html += '<li>检查Cloudflare Pages的网络策略</li>';
+                html += '</ul></div>';
+            }
+            
+            solutionsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
