@@ -4527,6 +4527,7 @@ class CyberFortune {
         const testConfigBtn = document.getElementById('test-global-config');
         const modelSelect = document.getElementById('global-model');
         const apiUrlInput = document.getElementById('global-api-url');
+        const loadCustomModelsBtn = document.getElementById('load-custom-models-button');
 
         // 打开配置面板
         if (configToggle) {
@@ -4588,6 +4589,13 @@ class CyberFortune {
         if (testConfigBtn) {
             testConfigBtn.addEventListener('click', () => {
                 this.testGlobalConfig();
+            });
+        }
+
+        // 加载自定义模型
+        if (loadCustomModelsBtn) {
+            loadCustomModelsBtn.addEventListener('click', () => {
+                this.loadCustomModels();
             });
         }
     }
@@ -4702,6 +4710,81 @@ class CyberFortune {
         } catch (error) {
             this.updateConfigStatus('❌', '连接失败', '#F44336');
             this.showConfigMessage(`连接失败: ${error.message}`, 'error');
+        }
+    }
+
+    // 加载自定义模型
+    async loadCustomModels() {
+        const apiUrlInput = document.getElementById('custom-api-url');
+        const apiKeyInput = document.getElementById('custom-api-key');
+        const modelSelect = document.getElementById('global-model');
+        const loadBtn = document.getElementById('load-custom-models-button');
+
+        const customApiUrl = apiUrlInput.value.trim();
+        const customApiKey = apiKeyInput.value.trim();
+
+        if (!customApiUrl) {
+            this.showConfigMessage('请输入自定义模型的API地址', 'error');
+            return;
+        }
+
+        const originalBtnText = loadBtn.querySelector('span').textContent;
+        loadBtn.querySelector('span').textContent = '加载中...';
+        loadBtn.disabled = true;
+
+        try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (customApiKey) {
+                headers['Authorization'] = `Bearer ${customApiKey}`;
+            }
+
+            const response = await fetch('/api/proxy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    targetUrl: customApiUrl,
+                    method: 'GET',
+                    headers: headers
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`API错误 (${response.status}): ${errorData.error?.message || '无法获取模型列表'}`);
+            }
+
+            const data = await response.json();
+            
+            // 假设返回的数据结构是 { data: [ { id: 'model-1' }, { id: 'model-2' } ] }
+            // 这是OpenAI等API的常见格式
+            const models = data.data;
+
+            if (!models || !Array.isArray(models) || models.length === 0) {
+                this.showConfigMessage('未从API返回有效的模型列表，请检查API地址和返回格式。', 'error');
+                return;
+            }
+
+            // 清空并填充模型下拉框
+            modelSelect.innerHTML = '';
+            models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.id;
+                option.textContent = model.id;
+                modelSelect.appendChild(option);
+            });
+
+            this.showConfigMessage(`成功加载 ${models.length} 个模型！`, 'success');
+
+        } catch (error) {
+            console.error('加载自定义模型失败:', error);
+            this.showConfigMessage(`加载失败: ${error.message}`, 'error');
+        } finally {
+            loadBtn.querySelector('span').textContent = originalBtnText;
+            loadBtn.disabled = false;
         }
     }
 
