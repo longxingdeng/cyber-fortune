@@ -2,5 +2,6 @@
     "workbench.editor.autoLockGroups": {
         "rules.augment": true,
         "workbench.input.interactive": true
-    }
+    },
+    "DockerRun.DisableDockerrc": true
 }

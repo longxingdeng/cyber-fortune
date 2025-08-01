@@ -86,20 +86,18 @@
         <div class="section">
             <h3>⚙️ AI配置测试</h3>
             <div>
-                <label>API地址:</label>
-                <input type="text" id="api-url" placeholder="https://api.deepseek.com/v1/chat/completions">
-                
+                <label>API地址 (Base URL):</label>
+                <input type="text" id="api-url-input" value="https://newapi.wegpt.top" placeholder="https://api.openai.com">
+
                 <label>API密钥:</label>
-                <input type="password" id="api-key" placeholder="sk-...">
-                
+                <input type="password" id="api-key-input" placeholder="sk-...">
+
                 <label>模型:</label>
-                <select id="model">
-                    <option value="deepseek-reasoner">DeepSeek-R1</option>
-                    <option value="deepseek-chat">DeepSeek-V3</option>
-                    <option value="gpt-4">GPT-4</option>
-                    <option value="gpt-3.5-turbo">GPT-3.5</option>
+                <select id="model-select" aria-label="Model Selection">
+                    <option value="">--请先加载模型--</option>
                 </select>
             </div>
+            <button id="load-models-button">加载模型</button>
             <button onclick="testAIConnection()">测试AI连接</button>
             <button onclick="loadExistingConfig()">加载现有配置</button>
         </div>
@@ -199,9 +197,9 @@
                 const config = localStorage.getItem('cyberFortune_globalConfig');
                 if (config) {
                     const parsedConfig = JSON.parse(config);
-                    document.getElementById('api-url').value = parsedConfig.apiUrl || '';
-                    document.getElementById('api-key').value = parsedConfig.apiKey || '';
-                    document.getElementById('model').value = parsedConfig.model || 'deepseek-reasoner';
+                    document.getElementById('api-url-input').value = parsedConfig.apiUrl || '';
+                    document.getElementById('api-key-input').value = parsedConfig.apiKey || '';
+                    document.getElementById('model-select').value = parsedConfig.model || 'deepseek-reasoner';
                     log('已加载现有AI配置', 'success');
                 } else {
                     log('未找到现有AI配置', 'warning');
@@ -214,9 +212,9 @@
         }
         
         async function testAIConnection() {
-            const apiUrl = document.getElementById('api-url').value;
-            const apiKey = document.getElementById('api-key').value;
-            const model = document.getElementById('model').value;
+            const apiUrl = document.getElementById('api-url-input').value;
+            const apiKey = document.getElementById('api-key-input').value;
+            const model = document.getElementById('model-select').value;
             
             if (!apiUrl || !apiKey) {
                 log('请填写完整的API配置', 'error');
@@ -246,13 +244,20 @@
                 log(`发送测试请求到: ${apiUrl}`, 'info');
                 log(`使用模型: ${model}`, 'info');
                 
-                const response = await fetch(apiUrl, {
+                const response = await fetch('/api/proxy', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify({
+                        targetUrl: new URL('/v1/chat/completions', apiUrl).href,
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: requestBody
+                    })
                 });
                 
                 log(`响应状态: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
@@ -295,19 +300,29 @@
         
         async function testNetworkConnectivity() {
             log('测试网络连接...', 'info');
-            
+
             const testUrls = [
-                'https://api.deepseek.com',
+                'https://newapi.wegpt.top',
                 'https://api.openai.com',
+                'https://api.deepseek.com',
                 'https://httpbin.org/get'
             ];
-            
+
             for (const url of testUrls) {
                 try {
                     const response = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
                     log(`${url}: 可访问`, 'success');
                 } catch (error) {
                     log(`${url}: 无法访问 - ${error.message}`, 'error');
+
+                    // 特别针对 newapi.wegpt.top 的分析
+                    if (url.includes('newapi.wegpt.top')) {
+                        log('newapi.wegpt.top 连接失败可能原因:', 'warning');
+                        log('1. 该API服务可能不支持从Cloudflare Pages访问', 'warning');
+                        log('2. 可能存在地域限制或防火墙阻拦', 'warning');
+                        log('3. CORS策略可能不允许跨域访问', 'warning');
+                        issues.push('newapi.wegpt.top 连接问题');
+                    }
                 }
             }
         }
@@ -392,6 +407,57 @@
             
             solutionsDiv.innerHTML = html;
         }
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadModelsButton = document.getElementById('load-models-button');
+            const apiUrlInput = document.getElementById('api-url-input');
+            const apiKeyInput = document.getElementById('api-key-input');
+            const modelSelect = document.getElementById('model-select');
+
+            if (loadModelsButton) {
+                loadModelsButton.addEventListener('click', async () => {
+                    const targetUrl = apiUrlInput.value.trim();
+                    const apiKey = apiKeyInput.value.trim();
+                
+                    if (!targetUrl || !apiKey) {
+                        alert('请输入 API URL 和 API Key。');
+                        return;
+                    }
+                
+                    try {
+                        const response = await fetch(`/api/models?targetUrl=${encodeURIComponent(targetUrl)}&apiKey=${encodeURIComponent(apiKey)}`);
+                        
+                        if (!response.ok) {
+                            console.error('加载模型失败，响应状态:', response.status, response.statusText);
+                            let errorMessage;
+                            try {
+                                const errorData = await response.json();
+                                console.error('从服务器收到的错误JSON:', errorData);
+                                errorMessage = errorData.error?.message || errorData.error || JSON.stringify(errorData);
+                            } catch (e) {
+                                const errorText = await response.text();
+                                console.error('从服务器收到的非JSON错误响应:', errorText);
+                                errorMessage = errorText;
+                            }
+                            throw new Error(errorMessage);
+                        }
+                
+                        const models = await response.json();
+                        console.log('成功接收到模型列表响应:', models);
+                        modelSelect.innerHTML = '<option value="">选择一个模型</option>';
+                        models.data.forEach(model => {
+                            const option = document.createElement('option');
+                            option.value = model.id;
+                            option.textContent = model.id;
+                            modelSelect.appendChild(option);
+                        });
+                        alert('模型加载成功！');
+                    } catch (error) {
+                        console.error('Error loading models:', error);
+                        alert(`加载模型失败: ${error.message}`);
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
