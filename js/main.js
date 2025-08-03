@@ -1721,20 +1721,13 @@ class CyberFortune {
                 requestBody.max_tokens = 4000;
             }
 
-            const response = await fetch('/api/proxy', {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify({
-                    targetUrl: apiUrl,
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: requestBody
-                })
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
@@ -2363,20 +2356,13 @@ class CyberFortune {
                 requestBody.max_tokens = 4000;
             }
 
-            const response = await fetch('/api/proxy', {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify({
-                    targetUrl: apiUrl,
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: requestBody
-                })
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
@@ -2452,20 +2438,13 @@ class CyberFortune {
             // 尝试非流式调用作为备选方案
             try {
                 const nonStreamRequestBody = { ...requestBody, stream: false };
-                const nonStreamResponse = await fetch('/api/proxy', {
+                const nonStreamResponse = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
                     },
-                    body: JSON.stringify({
-                        targetUrl: apiUrl,
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiKey}`
-                        },
-                        body: nonStreamRequestBody
-                    })
+                    body: JSON.stringify(nonStreamRequestBody)
                 });
 
                 if (!nonStreamResponse.ok) {
@@ -2782,20 +2761,13 @@ class CyberFortune {
 
             console.log('发送请求体:', JSON.stringify(requestBody, null, 2));
 
-            const response = await fetch('/api/proxy', {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify({
-                    targetUrl: apiUrl,
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: requestBody
-                })
+                body: JSON.stringify(requestBody)
             });
 
             console.log('API响应状态:', response.status, response.statusText);
@@ -4932,37 +4904,7 @@ class CyberFortune {
         }
     }
 
-    // 检查API是否可用
-    async checkAPIAvailability(apiUrl, apiKey) {
-        try {
-            const testRequest = {
-                model: 'gpt-3.5-turbo',
-                messages: [{ role: 'user', content: 'test' }],
-                max_tokens: 1
-            };
 
-            const response = await fetch('/api/proxy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    targetUrl: apiUrl,
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: testRequest
-                })
-            });
-
-            return response.ok || response.status === 429; // 429表示限流但API可用
-        } catch (error) {
-            console.error('API可用性检查失败:', error);
-            return false;
-        }
-    }
 
     // ==================== 合婚AI分析相关函数 ====================
 
@@ -5212,20 +5154,13 @@ class CyberFortune {
             processingSteps.innerHTML += '📡 发送分析请求...<br>';
             processingMessage.textContent = '正在发送请求...';
 
-            const response = await fetch('/api/proxy', {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify({
-                    targetUrl: apiUrl,
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: requestBody
-                })
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
