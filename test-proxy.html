@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代理服务器测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .test-section {
+            background: #16213e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid #0f3460;
+        }
+        button {
+            background: linear-gradient(45deg, #00d4ff, #ff00ff);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .result {
+            background: #0f3460;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: #0f3460;
+            color: white;
+            border: 1px solid #00d4ff;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 代理服务器测试工具</h1>
+    
+    <div class="test-section">
+        <h2>1. 基础连通性测试</h2>
+        <button onclick="testBasicConnectivity()">测试代理服务器连通性</button>
+        <div id="basic-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. API转发测试</h2>
+        <input type="text" id="test-api-url" placeholder="输入API地址，例如：https://api.deepseek.com/v1/chat/completions" value="https://api.deepseek.com/v1/chat/completions">
+        <input type="text" id="test-api-key" placeholder="输入API密钥">
+        <button onclick="testAPIForwarding()">测试API转发</button>
+        <div id="api-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 错误处理测试</h2>
+        <button onclick="testErrorHandling()">测试错误处理</button>
+        <div id="error-result" class="result"></div>
+    </div>
+
+    <script>
+        async function testBasicConnectivity() {
+            const resultDiv = document.getElementById('basic-result');
+            resultDiv.textContent = '正在测试代理服务器连通性...';
+            
+            try {
+                const response = await fetch('/api/proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        targetUrl: 'https://httpbin.org/post',
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: { test: 'proxy connectivity' }
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.text();
+                    resultDiv.textContent = `✅ 代理服务器工作正常！\n响应状态: ${response.status}\n响应内容: ${data.substring(0, 500)}...`;
+                } else {
+                    resultDiv.textContent = `❌ 代理服务器响应错误\n状态码: ${response.status}\n状态文本: ${response.statusText}`;
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ 连接失败: ${error.message}`;
+            }
+        }
+
+        async function testAPIForwarding() {
+            const resultDiv = document.getElementById('api-result');
+            const apiUrl = document.getElementById('test-api-url').value;
+            const apiKey = document.getElementById('test-api-key').value;
+            
+            if (!apiUrl || !apiKey) {
+                resultDiv.textContent = '❌ 请输入API地址和密钥';
+                return;
+            }
+
+            resultDiv.textContent = '正在测试API转发...';
+            
+            try {
+                const response = await fetch('/api/proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        targetUrl: apiUrl,
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: {
+                            model: 'deepseek-chat',
+                            messages: [
+                                { role: 'user', content: '测试消息' }
+                            ],
+                            max_tokens: 10,
+                            stream: false
+                        }
+                    })
+                });
+
+                const data = await response.text();
+                if (response.ok) {
+                    resultDiv.textContent = `✅ API转发成功！\n响应状态: ${response.status}\n响应内容: ${data.substring(0, 500)}...`;
+                } else {
+                    resultDiv.textContent = `❌ API转发失败\n状态码: ${response.status}\n响应内容: ${data}`;
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ API转发失败: ${error.message}`;
+            }
+        }
+
+        async function testErrorHandling() {
+            const resultDiv = document.getElementById('error-result');
+            resultDiv.textContent = '正在测试错误处理...';
+            
+            try {
+                // 测试缺少targetUrl的情况
+                const response = await fetch('/api/proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        // 故意不提供targetUrl
+                        method: 'POST',
+                        headers: {},
+                        body: {}
+                    })
+                });
+
+                const data = await response.text();
+                if (response.status === 400) {
+                    resultDiv.textContent = `✅ 错误处理正常！\n状态码: ${response.status}\n错误信息: ${data}`;
+                } else {
+                    resultDiv.textContent = `❌ 错误处理异常\n期望状态码: 400\n实际状态码: ${response.status}\n响应: ${data}`;
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ 错误处理测试失败: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
