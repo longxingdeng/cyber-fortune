@@ -2155,8 +2155,7 @@ class CyberFortune {
         // 绑定AI分析事件
         this.bindCemingAIEvents(testData, nameAnalysis, baziResult, aiPrompt);
 
-        // 绑定模型切换事件
-        this.bindCemingModelSwitchEvents();
+
 
         // 绑定PDF下载事件
         this.bindCemingDownloadEvents(testData, nameAnalysis, baziResult);
@@ -2280,31 +2279,7 @@ class CyberFortune {
         }
     }
 
-    // 绑定测名模型切换事件
-    bindCemingModelSwitchEvents() {
-        const modelSelect = document.getElementById('ceming-model');
-        const apiUrlInput = document.getElementById('ceming-api-url');
 
-        if (modelSelect && apiUrlInput) {
-            modelSelect.addEventListener('change', (e) => {
-                const selectedModel = e.target.value;
-                const apiUrls = {
-                    'deepseek-r1': 'https://api.deepseek.com/v1/chat/completions',
-                    'deepseek-chat': 'https://api.deepseek.com/v1/chat/completions',
-                    'gpt-4': 'https://api.openai.com/v1/chat/completions',
-                    'gpt-3.5-turbo': 'https://api.openai.com/v1/chat/completions',
-                    'claude-3-sonnet': 'https://api.anthropic.com/v1/messages',
-                    'claude-3-haiku': 'https://api.anthropic.com/v1/messages',
-                    'qwen-max': 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation',
-                    'glm-4': 'https://open.bigmodel.cn/api/paas/v4/chat/completions'
-                };
-
-                if (apiUrls[selectedModel]) {
-                    apiUrlInput.value = apiUrls[selectedModel];
-                }
-            });
-        }
-    }
 
     // 生成测名AI分析
     async generateCemingAIAnalysis(testData, nameAnalysis, baziResult, aiPrompt) {
