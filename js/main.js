@@ -2322,15 +2322,8 @@ class CyberFortune {
 
         let fullResponse = '';
 
-        try {
-            // 显示连接状态
-            processingSteps.innerHTML = '🔗 正在连接AI服务器...<br>';
-            processingMessage.textContent = '建立连接中...';
-
-            console.log('测名AI分析开始:', { apiUrl, modelName, promptLength: prompt.length });
-
-            // 构建请求体，针对不同模型进行优化
-            const requestBody = {
+        // 构建请求体，针对不同模型进行优化
+        const requestBody = {
                 model: modelName,
                 messages: [
                     {
@@ -2345,21 +2338,28 @@ class CyberFortune {
                 stream: true
             };
 
-            // 针对不同模型设置不同参数
-            if (modelName.includes('deepseek-r1')) {
-                requestBody.temperature = 0.3;
-                requestBody.max_tokens = 8000;
-                requestBody.reasoning_effort = "high";
-            } else if (modelName.includes('deepseek')) {
-                requestBody.temperature = 0.5;
-                requestBody.max_tokens = 6000;
-            } else if (modelName.includes('gpt')) {
-                requestBody.temperature = 0.7;
-                requestBody.max_tokens = 4000;
-            } else {
-                requestBody.temperature = 0.6;
-                requestBody.max_tokens = 4000;
-            }
+        // 针对不同模型设置不同参数
+        if (modelName.includes('deepseek-r1')) {
+            requestBody.temperature = 0.3;
+            requestBody.max_tokens = 8000;
+            requestBody.reasoning_effort = "high";
+        } else if (modelName.includes('deepseek')) {
+            requestBody.temperature = 0.5;
+            requestBody.max_tokens = 6000;
+        } else if (modelName.includes('gpt')) {
+            requestBody.temperature = 0.7;
+            requestBody.max_tokens = 4000;
+        } else {
+            requestBody.temperature = 0.6;
+            requestBody.max_tokens = 4000;
+        }
+
+        try {
+            // 显示连接状态
+            processingSteps.innerHTML = '🔗 正在连接AI服务器...<br>';
+            processingMessage.textContent = '建立连接中...';
+
+            console.log('测名AI分析开始:', { apiUrl, modelName, promptLength: prompt.length });
 
             const response = await fetch('/api/proxy', {
                 method: 'POST',
