@@ -761,8 +761,8 @@ class CyberFortune {
 
     // 生成AI分析
     async generateAIAnalysis(birthData, baziResult, prompt, ziweiResult) {
-        // 使用全局配置
-        const globalConfig = this.getGlobalConfig();
+        // 使用验证的全局配置
+        const globalConfig = await this.getValidatedGlobalConfig();
         if (!globalConfig) {
             this.showAIError('请先在右上角配置AI设置');
             return;
@@ -771,6 +771,12 @@ class CyberFortune {
         const apiUrl = globalConfig.apiUrl;
         const apiKey = globalConfig.apiKey;
         const modelName = globalConfig.model;
+
+        // 检查是否需要重新检测模型
+        if (globalConfig.needsModelDetection) {
+            this.showAIError('请先检测可用模型并选择一个模型');
+            return;
+        }
         const includeZiwei = document.getElementById('add-ziwei-analysis').checked;
 
         // 验证输入
@@ -1605,9 +1611,9 @@ class CyberFortune {
             promptLength: aiPrompt?.length || 0
         });
 
-        // 使用全局配置
-        const globalConfig = this.getGlobalConfig();
-        console.log('获取全局配置:', globalConfig);
+        // 使用验证的全局配置
+        const globalConfig = await this.getValidatedGlobalConfig();
+        console.log('获取验证的全局配置:', globalConfig);
 
         if (!globalConfig) {
             console.error('未找到全局AI配置');
@@ -1619,6 +1625,12 @@ class CyberFortune {
         const apiUrl = globalConfig.apiUrl;
         const apiKey = globalConfig.apiKey;
         const modelName = globalConfig.model;
+
+        // 检查是否需要重新检测模型
+        if (globalConfig.needsModelDetection) {
+            this.showAINamingError('请先检测可用模型并选择一个模型');
+            return;
+        }
 
         console.log('AI配置详情:', {
             apiUrl: apiUrl ? `${apiUrl.substring(0, 30)}...` : '未设置',
@@ -5175,9 +5187,9 @@ class CyberFortune {
     async generateMarriageAIAnalysis(marriageData, marriageResult, aiPrompt) {
         console.log('开始生成合婚AI分析');
 
-        // 使用全局配置
-        const globalConfig = this.getGlobalConfig();
-        console.log('获取到的AI配置:', globalConfig);
+        // 使用验证的全局配置
+        const globalConfig = await this.getValidatedGlobalConfig();
+        console.log('获取到的验证AI配置:', globalConfig);
 
         if (!globalConfig) {
             console.error('未找到AI配置');
@@ -5188,6 +5200,12 @@ class CyberFortune {
         const apiUrl = globalConfig.apiUrl;
         const apiKey = globalConfig.apiKey;
         const modelName = globalConfig.model;
+
+        // 检查是否需要重新检测模型
+        if (globalConfig.needsModelDetection) {
+            this.showMarriageAIError('请先检测可用模型并选择一个模型');
+            return;
+        }
 
         // 验证输入
         if (!apiKey) {
