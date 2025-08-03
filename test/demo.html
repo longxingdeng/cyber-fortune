@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>起名计算模块演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .demo-section h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .demo-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .demo-item h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .demo-result {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .score {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 5px;
+        }
+        
+        .wuxing {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 15px;
+            margin: 2px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .wuxing.木 { background: #28a745; color: white; }
+        .wuxing.火 { background: #dc3545; color: white; }
+        .wuxing.土 { background: #ffc107; color: black; }
+        .wuxing.金 { background: #6c757d; color: white; }
+        .wuxing.水 { background: #007bff; color: white; }
+        
+        .name-suggestion {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .name-suggestion h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.3em;
+        }
+        
+        .wuge-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .wuge-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 起名计算模块演示</h1>
+        
+        <div id="loading" class="loading">
+            正在初始化起名计算模块...
+        </div>
+        
+        <div id="demo-content" style="display: none;">
+            <!-- 基础功能演示 -->
+            <div class="demo-section">
+                <h2>📝 基础功能演示</h2>
+                <div class="demo-grid">
+                    <div class="demo-item">
+                        <h3>汉字笔画数计算</h3>
+                        <div id="stroke-demo" class="demo-result"></div>
+                    </div>
+                    <div class="demo-item">
+                        <h3>五行属性判断</h3>
+                        <div id="wuxing-demo" class="demo-result"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 五格数理演示 -->
+            <div class="demo-section">
+                <h2>📊 五格数理演示</h2>
+                <div id="wuge-demo"></div>
+            </div>
+            
+            <!-- 起名建议演示 -->
+            <div class="demo-section">
+                <h2>🎯 智能起名演示</h2>
+                <div id="naming-demo"></div>
+            </div>
+            
+            <!-- 姓名分析演示 -->
+            <div class="demo-section">
+                <h2>🔍 姓名分析演示</h2>
+                <div id="analysis-demo"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/name-calculator.js"></script>
+    <script>
+        let nameCalculator;
+        
+        // 页面加载完成后运行演示
+        window.addEventListener('load', function() {
+            try {
+                nameCalculator = new NameCalculator();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('demo-content').style.display = 'block';
+                runAllDemos();
+            } catch (error) {
+                document.getElementById('loading').innerHTML = 
+                    '<div class="status error">初始化失败: ' + error.message + '</div>';
+            }
+        });
+        
+        function runAllDemos() {
+            runStrokeDemo();
+            runWuXingDemo();
+            runWuGeDemo();
+            runNamingDemo();
+            runAnalysisDemo();
+        }
+        
+        // 笔画数演示
+        function runStrokeDemo() {
+            const testChars = ['王', '李', '张', '刘', '陈', '杨', '赵', '黄', '周', '吴'];
+            let result = '常见姓氏笔画数：\n\n';
+            
+            testChars.forEach(char => {
+                const strokes = nameCalculator.getCharStrokes(char);
+                result += `${char}: ${strokes}画\n`;
+            });
+            
+            document.getElementById('stroke-demo').textContent = result;
+        }
+        
+        // 五行属性演示
+        function runWuXingDemo() {
+            const testChars = ['林', '火', '土', '金', '水', '明', '华', '强', '美', '丽'];
+            let result = '常用字五行属性：\n\n';
+            
+            testChars.forEach(char => {
+                const wuxing = nameCalculator.getCharWuXing(char);
+                result += `${char}: `;
+                result += `<span class="wuxing ${wuxing}">${wuxing}</span>\n`;
+            });
+            
+            document.getElementById('wuxing-demo').innerHTML = result;
+        }
+        
+        // 五格数理演示
+        function runWuGeDemo() {
+            const testNames = [
+                ['王', '小明'],
+                ['李', '华'],
+                ['张', '伟强'],
+                ['刘', '美丽']
+            ];
+            
+            let html = '';
+            testNames.forEach(([surname, firstName]) => {
+                const wuge = nameCalculator.calculateWuGe(surname, firstName);
+                const sanCai = nameCalculator.calculateSanCai(wuge);
+                const score = nameCalculator.calculateNameScore(wuge, sanCai);
+                
+                html += `
+                <div class="demo-item">
+                    <h3>${surname}${firstName} <span class="score">${score}分</span></h3>
+                    <div class="wuge-grid">
+                        <div class="wuge-item">天格<br>${wuge.tianGe}</div>
+                        <div class="wuge-item">人格<br>${wuge.renGe}</div>
+                        <div class="wuge-item">地格<br>${wuge.diGe}</div>
+                        <div class="wuge-item">外格<br>${wuge.waiGe}</div>
+                        <div class="wuge-item">总格<br>${wuge.zongGe}</div>
+                    </div>
+                    <div>三才配置: <span class="wuxing ${sanCai.tianWuXing}">${sanCai.tianWuXing}</span><span class="wuxing ${sanCai.renWuXing}">${sanCai.renWuXing}</span><span class="wuxing ${sanCai.diWuXing}">${sanCai.diWuXing}</span> (${sanCai.jiXiong})</div>
+                </div>
+                `;
+            });
+            
+            document.getElementById('wuge-demo').innerHTML = '<div class="demo-grid">' + html + '</div>';
+        }
+        
+        // 起名建议演示
+        function runNamingDemo() {
+            // 模拟八字结果
+            const mockBaziResult = {
+                dayTianGan: '戊',
+                wuxingInfo: {
+                    year: { tianGan: '木', diZhi: '水' },
+                    month: { tianGan: '火', diZhi: '火' },
+                    day: { tianGan: '土', diZhi: '金' },
+                    hour: { tianGan: '水', diZhi: '土' }
+                }
+            };
+            
+            const suggestions = nameCalculator.generateNameSuggestions('李', '男', mockBaziResult);
+            
+            let html = '<div class="status success">为李先生生成的起名建议：</div>';
+            
+            suggestions.slice(0, 5).forEach((suggestion, index) => {
+                html += `
+                <div class="name-suggestion">
+                    <h4>${index + 1}. ${suggestion.fullName} <span class="score">${suggestion.score}分</span></h4>
+                    <div class="wuge-grid">
+                        <div class="wuge-item">天${suggestion.wuGe.tianGe}</div>
+                        <div class="wuge-item">人${suggestion.wuGe.renGe}</div>
+                        <div class="wuge-item">地${suggestion.wuGe.diGe}</div>
+                        <div class="wuge-item">外${suggestion.wuGe.waiGe}</div>
+                        <div class="wuge-item">总${suggestion.wuGe.zongGe}</div>
+                    </div>
+                    <div>三才: <span class="wuxing ${suggestion.sanCai.tianWuXing}">${suggestion.sanCai.tianWuXing}</span><span class="wuxing ${suggestion.sanCai.renWuXing}">${suggestion.sanCai.renWuXing}</span><span class="wuxing ${suggestion.sanCai.diWuXing}">${suggestion.sanCai.diWuXing}</span> (${suggestion.sanCai.jiXiong})</div>
+                    <div>五行匹配: ${suggestion.wuXingMatch.map(w => `<span class="wuxing ${w}">${w}</span>`).join('')}</div>
+                    <div>推荐类型: ${suggestion.customType}</div>
+                </div>
+                `;
+            });
+            
+            document.getElementById('naming-demo').innerHTML = html;
+        }
+        
+        // 姓名分析演示
+        function runAnalysisDemo() {
+            const testNames = ['王小明', '李华', '张伟强', '刘美丽'];
+            
+            // 模拟八字结果
+            const mockBaziResult = {
+                dayTianGan: '戊',
+                wuxingInfo: {
+                    year: { tianGan: '木', diZhi: '水' },
+                    month: { tianGan: '火', diZhi: '火' },
+                    day: { tianGan: '土', diZhi: '金' },
+                    hour: { tianGan: '水', diZhi: '土' }
+                }
+            };
+            
+            let html = '';
+            testNames.forEach(fullName => {
+                const analysis = nameCalculator.analyzeName(fullName, mockBaziResult);
+                
+                html += `
+                <div class="demo-item">
+                    <h3>${analysis.fullName} <span class="score">${analysis.score}分</span></h3>
+                    <div class="demo-result">
+姓氏: ${analysis.surname}
+名字: ${analysis.firstName}
+五行匹配度: ${analysis.wuXingMatch}分
+
+需要的五行: ${analysis.neededWuXing.map(w => `<span class="wuxing ${w}">${w}</span>`).join('')}
+
+姓名五行分布:
+${Object.entries(analysis.nameWuXing).map(([wuxing, count]) => 
+    count > 0 ? `<span class="wuxing ${wuxing}">${wuxing}: ${count}个</span>` : ''
+).filter(s => s).join(' ')}
+                    </div>
+                </div>
+                `;
+            });
+            
+            document.getElementById('analysis-demo').innerHTML = '<div class="demo-grid">' + html + '</div>';
+        }
+    </script>
+</body>
+</html>

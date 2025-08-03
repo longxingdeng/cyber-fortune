@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>起名计算模块测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        .test-section h2 {
+            color: #4a5568;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .test-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2d3748;
+        }
+        input, select, textarea {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .result {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            border-color: #48bb78;
+            background-color: #f0fff4;
+        }
+        .error {
+            border-color: #f56565;
+            background-color: #fff5f5;
+            color: #c53030;
+        }
+        .name-suggestion {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .name-suggestion h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+        .wuge-info {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .wuge-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 起名计算模块测试</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('basic')">基础功能测试</div>
+            <div class="tab" onclick="switchTab('naming')">起名功能测试</div>
+            <div class="tab" onclick="switchTab('analysis')">姓名分析测试</div>
+            <div class="tab" onclick="switchTab('batch')">批量测试</div>
+        </div>
+
+        <!-- 基础功能测试 -->
+        <div id="basic" class="tab-content active">
+            <div class="test-section">
+                <h2>📝 笔画数计算测试</h2>
+                <div class="test-form">
+                    <div class="form-group">
+                        <label for="strokeChar">输入汉字：</label>
+                        <input type="text" id="strokeChar" placeholder="例如：王" maxlength="1">
+                    </div>
+                </div>
+                <button onclick="testStrokes()">测试笔画数</button>
+                <div id="strokeResult" class="result"></div>
+            </div>
+
+            <div class="test-section">
+                <h2>🔥 五行属性测试</h2>
+                <div class="test-form">
+                    <div class="form-group">
+                        <label for="wuxingChar">输入汉字：</label>
+                        <input type="text" id="wuxingChar" placeholder="例如：林" maxlength="1">
+                    </div>
+                </div>
+                <button onclick="testWuXing()">测试五行属性</button>
+                <div id="wuxingResult" class="result"></div>
+            </div>
+
+            <div class="test-section">
+                <h2>📊 五格数理测试</h2>
+                <div class="test-form">
+                    <div class="form-group">
+                        <label for="wugeSurname">姓氏：</label>
+                        <input type="text" id="wugeSurname" placeholder="例如：王">
+                    </div>
+                    <div class="form-group">
+                        <label for="wugeFirstName">名字：</label>
+                        <input type="text" id="wugeFirstName" placeholder="例如：小明">
+                    </div>
+                </div>
+                <button onclick="testWuGe()">测试五格数理</button>
+                <div id="wugeResult" class="result"></div>
+            </div>
+        </div>
+
+        <!-- 起名功能测试 -->
+        <div id="naming" class="tab-content">
+            <div class="test-section">
+                <h2>🎯 智能起名测试</h2>
+                <div class="test-form">
+                    <div class="form-group">
+                        <label for="namingSurname">姓氏：</label>
+                        <input type="text" id="namingSurname" placeholder="例如：李" value="李">
+                    </div>
+                    <div class="form-group">
+                        <label for="namingGender">性别：</label>
+                        <select id="namingGender">
+                            <option value="男">男</option>
+                            <option value="女">女</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="namingYear">出生年：</label>
+                        <input type="number" id="namingYear" placeholder="例如：2024" value="2024" min="1900" max="2030">
+                    </div>
+                    <div class="form-group">
+                        <label for="namingMonth">出生月：</label>
+                        <input type="number" id="namingMonth" placeholder="例如：6" value="6" min="1" max="12">
+                    </div>
+                    <div class="form-group">
+                        <label for="namingDay">出生日：</label>
+                        <input type="number" id="namingDay" placeholder="例如：15" value="15" min="1" max="31">
+                    </div>
+                    <div class="form-group">
+                        <label for="namingHour">出生时辰：</label>
+                        <select id="namingHour">
+                            <option value="子时">子时 (23:00-01:00)</option>
+                            <option value="丑时">丑时 (01:00-03:00)</option>
+                            <option value="寅时">寅时 (03:00-05:00)</option>
+                            <option value="卯时">卯时 (05:00-07:00)</option>
+                            <option value="辰时">辰时 (07:00-09:00)</option>
+                            <option value="巳时">巳时 (09:00-11:00)</option>
+                            <option value="午时" selected>午时 (11:00-13:00)</option>
+                            <option value="未时">未时 (13:00-15:00)</option>
+                            <option value="申时">申时 (15:00-17:00)</option>
+                            <option value="酉时">酉时 (17:00-19:00)</option>
+                            <option value="戌时">戌时 (19:00-21:00)</option>
+                            <option value="亥时">亥时 (21:00-23:00)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="test-form">
+                    <div class="form-group">
+                        <label for="customFirstChar">指定第一个字（可选）：</label>
+                        <input type="text" id="customFirstChar" placeholder="例如：志" maxlength="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="customSecondChar">指定第二个字（可选）：</label>
+                        <input type="text" id="customSecondChar" placeholder="例如：明" maxlength="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="candidateChars">候选字库（可选）：</label>
+                        <input type="text" id="candidateChars" placeholder="例如：志,明,华,强,伟">
+                    </div>
+                </div>
+                <button onclick="testNaming()">开始起名</button>
+                <div id="namingResult" class="result"></div>
+            </div>
+        </div>
+
+        <!-- 姓名分析测试 -->
+        <div id="analysis" class="tab-content">
+            <div class="test-section">
+                <h2>🔍 姓名分析测试</h2>
+                <div class="test-form">
+                    <div class="form-group">
+                        <label for="analysisName">完整姓名：</label>
+                        <input type="text" id="analysisName" placeholder="例如：王小明" value="王小明">
+                    </div>
+                </div>
+                <button onclick="testAnalysis()">分析姓名</button>
+                <div id="analysisResult" class="result"></div>
+            </div>
+        </div>
+
+        <!-- 批量测试 -->
+        <div id="batch" class="tab-content">
+            <div class="test-section">
+                <h2>⚡ 批量功能测试</h2>
+                <button onclick="runAllTests()">运行所有测试</button>
+                <div id="batchResult" class="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/name-calculator.js"></script>
+    <script>
+        // 初始化起名计算器
+        const nameCalculator = new NameCalculator();
+        
+        // 标签页切换
+        function switchTab(tabName) {
+            // 隐藏所有标签内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选中的标签内容
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // 测试笔画数计算
+        function testStrokes() {
+            const char = document.getElementById('strokeChar').value.trim();
+            const resultDiv = document.getElementById('strokeResult');
+            
+            if (!char) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '请输入一个汉字';
+                return;
+            }
+            
+            try {
+                const strokes = nameCalculator.getCharStrokes(char);
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `字符 "${char}" 的笔画数：${strokes}画`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `错误：${error.message}`;
+            }
+        }
+        
+        // 测试五行属性
+        function testWuXing() {
+            const char = document.getElementById('wuxingChar').value.trim();
+            const resultDiv = document.getElementById('wuxingResult');
+            
+            if (!char) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '请输入一个汉字';
+                return;
+            }
+            
+            try {
+                const wuxing = nameCalculator.getCharWuXing(char);
+                const isInDict = Object.values(nameCalculator.charWuXing).some(chars => chars.includes(char));
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `字符 "${char}" 的五行属性：${wuxing}\n` +
+                    `是否在字典中：${isInDict ? '是' : '否（根据笔画推算）'}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `错误：${error.message}`;
+            }
+        }
+        
+        // 测试五格数理
+        function testWuGe() {
+            const surname = document.getElementById('wugeSurname').value.trim();
+            const firstName = document.getElementById('wugeFirstName').value.trim();
+            const resultDiv = document.getElementById('wugeResult');
+
+            if (!surname || !firstName) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '请输入完整的姓氏和名字';
+                return;
+            }
+
+            try {
+                const wuge = nameCalculator.calculateWuGe(surname, firstName);
+                const sanCai = nameCalculator.calculateSanCai(wuge);
+                const score = nameCalculator.calculateNameScore(wuge, sanCai);
+
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+<strong>姓名：${surname}${firstName}</strong>
+
+五格数理：
+- 天格：${wuge.tianGe}
+- 人格：${wuge.renGe}
+- 地格：${wuge.diGe}
+- 外格：${wuge.waiGe}
+- 总格：${wuge.zongGe}
+
+三才配置：
+- 天才：${sanCai.tianWuXing}
+- 人才：${sanCai.renWuXing}
+- 地才：${sanCai.diWuXing}
+- 配置代码：${sanCai.sanCaiCode}
+- 吉凶：${sanCai.jiXiong}
+
+综合评分：${score}分
+                `;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `错误：${error.message}`;
+            }
+        }
+
+        // 测试起名功能
+        function testNaming() {
+            const surname = document.getElementById('namingSurname').value.trim();
+            const gender = document.getElementById('namingGender').value;
+            const year = parseInt(document.getElementById('namingYear').value);
+            const month = parseInt(document.getElementById('namingMonth').value);
+            const day = parseInt(document.getElementById('namingDay').value);
+            const hour = document.getElementById('namingHour').value;
+            const firstChar = document.getElementById('customFirstChar').value.trim();
+            const secondChar = document.getElementById('customSecondChar').value.trim();
+            const candidateCharsStr = document.getElementById('candidateChars').value.trim();
+
+            const resultDiv = document.getElementById('namingResult');
+
+            if (!surname || !year || !month || !day) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '请填写完整的基本信息';
+                return;
+            }
+
+            try {
+                // 模拟八字结果（实际应用中需要调用八字计算模块）
+                const mockBaziResult = {
+                    yearPillar: '甲子',
+                    monthPillar: '丙午',
+                    dayPillar: '戊申',
+                    hourPillar: '壬戌',
+                    dayTianGan: '戊',
+                    yearTenGod: '正印',
+                    monthTenGod: '伤官',
+                    hourTenGod: '正财',
+                    wuxingInfo: {
+                        year: { tianGan: '木', diZhi: '水' },
+                        month: { tianGan: '火', diZhi: '火' },
+                        day: { tianGan: '土', diZhi: '金' },
+                        hour: { tianGan: '水', diZhi: '土' }
+                    }
+                };
+
+                // 处理候选字
+                const candidateChars = candidateCharsStr ?
+                    candidateCharsStr.split(/[,，、\s]+/).filter(char => char.length === 1) : [];
+
+                const customConfig = {
+                    firstChar: firstChar || undefined,
+                    secondChar: secondChar || undefined,
+                    candidateChars
+                };
+
+                const suggestions = nameCalculator.generateNameSuggestions(
+                    surname, gender, mockBaziResult, customConfig
+                );
+
+                resultDiv.className = 'result success';
+                let html = `<strong>为 ${surname}${gender === '男' ? '先生' : '女士'} 推荐的姓名：</strong>\n\n`;
+
+                suggestions.forEach((suggestion, index) => {
+                    html += `${index + 1}. ${suggestion.fullName} (${suggestion.score}分)\n`;
+                    html += `   五格：天${suggestion.wuGe.tianGe} 人${suggestion.wuGe.renGe} 地${suggestion.wuGe.diGe} 外${suggestion.wuGe.waiGe} 总${suggestion.wuGe.zongGe}\n`;
+                    html += `   三才：${suggestion.sanCai.tianWuXing}${suggestion.sanCai.renWuXing}${suggestion.sanCai.diWuXing} (${suggestion.sanCai.jiXiong})\n`;
+                    html += `   五行：${suggestion.wuXingMatch.join('、')}\n`;
+                    html += `   类型：${suggestion.customType}\n\n`;
+                });
+
+                resultDiv.textContent = html;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `错误：${error.message}`;
+            }
+        }
+
+        // 测试姓名分析
+        function testAnalysis() {
+            const fullName = document.getElementById('analysisName').value.trim();
+            const resultDiv = document.getElementById('analysisResult');
+
+            if (!fullName || fullName.length < 2) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '请输入完整的姓名（至少2个字）';
+                return;
+            }
+
+            try {
+                // 模拟八字结果
+                const mockBaziResult = {
+                    yearPillar: '甲子',
+                    monthPillar: '丙午',
+                    dayPillar: '戊申',
+                    hourPillar: '壬戌',
+                    dayTianGan: '戊',
+                    wuxingInfo: {
+                        year: { tianGan: '木', diZhi: '水' },
+                        month: { tianGan: '火', diZhi: '火' },
+                        day: { tianGan: '土', diZhi: '金' },
+                        hour: { tianGan: '水', diZhi: '土' }
+                    }
+                };
+
+                const analysis = nameCalculator.analyzeName(fullName, mockBaziResult);
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `
+姓名分析报告：${analysis.fullName}
+
+基本信息：
+- 姓氏：${analysis.surname}
+- 名字：${analysis.firstName}
+
+五格数理：
+- 天格：${analysis.wuGe.tianGe}
+- 人格：${analysis.wuGe.renGe}
+- 地格：${analysis.wuGe.diGe}
+- 外格：${analysis.wuGe.waiGe}
+- 总格：${analysis.wuGe.zongGe}
+
+三才配置：
+- ${analysis.sanCai.tianWuXing}${analysis.sanCai.renWuXing}${analysis.sanCai.diWuXing} (${analysis.sanCai.jiXiong})
+
+综合评分：${analysis.score}分
+五行匹配度：${analysis.wuXingMatch}分
+
+需要的五行：${analysis.neededWuXing.join('、')}
+
+姓名五行分布：
+${Object.entries(analysis.nameWuXing).map(([wuxing, count]) => `- ${wuxing}：${count}个`).join('\n')}
+
+详细分析：
+${analysis.analysis}
+                `;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `错误：${error.message}`;
+            }
+        }
+
+        // 批量测试所有功能
+        function runAllTests() {
+            const resultDiv = document.getElementById('batchResult');
+            resultDiv.className = 'result';
+            resultDiv.textContent = '正在运行批量测试...\n\n';
+
+            const tests = [
+                {
+                    name: '笔画数计算测试',
+                    test: () => {
+                        const testChars = ['王', '李', '张', '刘', '陈', '杨', '赵', '黄', '周', '吴'];
+                        const results = testChars.map(char => {
+                            const strokes = nameCalculator.getCharStrokes(char);
+                            return `${char}: ${strokes}画`;
+                        });
+                        return results.join(', ');
+                    }
+                },
+                {
+                    name: '五行属性测试',
+                    test: () => {
+                        const testChars = ['林', '火', '土', '金', '水', '明', '华', '强', '美', '丽'];
+                        const results = testChars.map(char => {
+                            const wuxing = nameCalculator.getCharWuXing(char);
+                            return `${char}: ${wuxing}`;
+                        });
+                        return results.join(', ');
+                    }
+                },
+                {
+                    name: '五格数理测试',
+                    test: () => {
+                        const testNames = [
+                            ['王', '小明'],
+                            ['李', '华'],
+                            ['张', '伟强'],
+                            ['刘', '美丽']
+                        ];
+                        const results = testNames.map(([surname, firstName]) => {
+                            const wuge = nameCalculator.calculateWuGe(surname, firstName);
+                            const sanCai = nameCalculator.calculateSanCai(wuge);
+                            const score = nameCalculator.calculateNameScore(wuge, sanCai);
+                            return `${surname}${firstName}: ${score}分`;
+                        });
+                        return results.join(', ');
+                    }
+                }
+            ];
+
+            let output = '';
+            tests.forEach((testCase, index) => {
+                try {
+                    const result = testCase.test();
+                    output += `✅ ${testCase.name}:\n${result}\n\n`;
+                } catch (error) {
+                    output += `❌ ${testCase.name}:\n错误: ${error.message}\n\n`;
+                }
+            });
+
+            output += '批量测试完成！';
+            resultDiv.textContent = output;
+            resultDiv.className = 'result success';
+        }
+</script>
+</body>
+</html>

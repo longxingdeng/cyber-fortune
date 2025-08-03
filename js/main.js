@@ -1169,6 +1169,15 @@ class CyberFortune {
                 birthData.customConfig
             );
 
+            // 调试：检查名字建议数据结构
+            console.log('名字建议数据结构:', nameSuggestions);
+            if (nameSuggestions.length > 0) {
+                console.log('第一个建议的详细结构:', nameSuggestions[0]);
+                console.log('wuGe结构:', nameSuggestions[0].wuGe);
+                console.log('sanCai结构:', nameSuggestions[0].sanCai);
+                console.log('wuXingMatch结构:', nameSuggestions[0].wuXingMatch);
+            }
+
             // 生成AI分析提示词
             const aiPrompt = this.nameCalculator.generateCompleteAINamingPrompt(
                 birthData,
@@ -1387,7 +1396,7 @@ class CyberFortune {
             </div>
 
             <!-- AI分析区域 -->
-            <div class="ai-naming-section">
+            <div class="ai-naming-analysis">
                 <div class="ai-naming-header">
                     <h4>AI智能起名分析</h4>
                     <p>基于八字命理、五格数理、字义内涵、音韵美学等多维度的专业分析</p>
@@ -1399,16 +1408,16 @@ class CyberFortune {
 
                 <!-- AI分析自动开始，无需手动按钮 -->
 
-                <!-- AI分析处理状态 -->
-                <div class="ai-naming-processing" id="ai-naming-processing" style="display: none;">
+                <!-- 处理状态显示 -->
+                <div class="processing-box" id="ai-naming-processing" style="display: none;">
                     <div class="processing-message" id="ai-naming-processing-message">正在初始化AI分析...</div>
                     <div class="processing-steps" id="ai-naming-processing-steps"></div>
                 </div>
 
                 <!-- AI分析结果 -->
-                <div class="ai-naming-result-section" id="ai-naming-result-section" style="display: none;">
-                    <h5>AI分析结果：</h5>
-                    <div class="ai-naming-output" id="ai-naming-output"></div>
+                <div class="ai-result-section" id="ai-naming-result-section" style="display: none;">
+                    <h5>AI深度分析结果：</h5>
+                    <div class="ai-output" id="ai-naming-output"></div>
                     <div class="result-actions">
                         <button class="cyber-button" id="copy-ai-naming-result" style="display: none;">
                             <span>📄 复制分析结果</span>
@@ -1416,6 +1425,9 @@ class CyberFortune {
                         </button>
                     </div>
                 </div>
+
+                <!-- 错误信息显示 -->
+                <div class="api-error-message" id="ai-naming-error-message" style="display: none;"></div>
 
                 <!-- 提示词已隐藏，保护商业机密 -->
             </div>
@@ -1454,7 +1466,7 @@ class CyberFortune {
         // 自动开始AI起名分析
         setTimeout(() => {
             console.log('自动开始起名AI分析...');
-            this.generateNamingAIAnalysis(birthData, baziResult, nameSuggestions, aiPrompt);
+            this.generateAINamingAnalysis(birthData, baziResult, nameSuggestions, aiPrompt);
         }, 1000); // 延迟1秒，确保界面渲染完成
     }
 
@@ -1585,10 +1597,22 @@ class CyberFortune {
 
     // 生成AI起名分析
     async generateAINamingAnalysis(birthData, baziResult, nameSuggestions, aiPrompt) {
+        console.log('=== 开始AI起名分析 ===');
+        console.log('参数检查:', {
+            hasBirthData: !!birthData,
+            hasBaziResult: !!baziResult,
+            nameSuggestionsCount: nameSuggestions?.length || 0,
+            promptLength: aiPrompt?.length || 0
+        });
+
         // 使用全局配置
         const globalConfig = this.getGlobalConfig();
+        console.log('获取全局配置:', globalConfig);
+
         if (!globalConfig) {
-            this.showAINamingError('请先在右上角配置AI设置');
+            console.error('未找到全局AI配置');
+            // 显示更明显的配置提示
+            this.showAINamingConfigPrompt();
             return;
         }
 
@@ -1596,28 +1620,56 @@ class CyberFortune {
         const apiKey = globalConfig.apiKey;
         const modelName = globalConfig.model;
 
+        console.log('AI配置详情:', {
+            apiUrl: apiUrl ? `${apiUrl.substring(0, 30)}...` : '未设置',
+            hasApiKey: !!apiKey,
+            apiKeyLength: apiKey ? apiKey.length : 0,
+            modelName: modelName || '未设置'
+        });
+
         // 验证输入
         if (!apiKey) {
+            console.error('API密钥未设置');
             this.showAINamingError('请输入API密钥');
             return;
         }
         if (!apiUrl) {
+            console.error('API地址未设置');
             this.showAINamingError('请输入API地址');
             return;
         }
 
+        console.log('开始显示处理状态...');
         // 显示处理状态
         this.showAINamingProcessing();
+        this.showAIDebugInfo('显示处理状态...');
 
         try {
+            console.log('开始调用AI API...');
             // 调用AI API
             await this.callAINamingAPI(aiPrompt, apiKey, modelName, apiUrl);
+            console.log('AI API调用完成');
 
         } catch (error) {
             console.error('AI起名分析失败:', error);
             this.showAINamingError(error.message);
         } finally {
             this.hideAINamingProcessing();
+        }
+        console.log('=== AI起名分析结束 ===');
+    }
+
+    // 显示AI调试信息
+    showAIDebugInfo(message) {
+        const debugDiv = document.getElementById('ai-debug-info');
+        const debugText = document.getElementById('ai-debug-text');
+        if (debugDiv && debugText) {
+            debugDiv.style.display = 'block';
+            const timestamp = new Date().toLocaleTimeString();
+            debugText.innerHTML += `<br>[${timestamp}] ${message}`;
+            console.log(`[AI调试] ${message}`);
+        } else {
+            console.log(`[AI调试] 调试元素未找到: ${message}`);
         }
     }
 
@@ -1669,13 +1721,20 @@ class CyberFortune {
                 requestBody.max_tokens = 4000;
             }
 
-            const response = await fetch(apiUrl, {
+            const response = await fetch('/api/proxy', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify({
+                    targetUrl: apiUrl,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: requestBody
+                })
             });
 
             if (!response.ok) {
@@ -1692,6 +1751,7 @@ class CyberFortune {
             const aiOutput = document.getElementById('qiming-ai-result');
             if (aiResultContainer) aiResultContainer.style.display = 'block';
             if (aiOutput) aiOutput.innerHTML = '';
+            console.log('AI结果区域已设置为显示');
 
             // 处理流式响应
             const reader = response.body.getReader();
@@ -1733,6 +1793,7 @@ class CyberFortune {
             // 分析完成
             processingSteps.innerHTML += '✅ AI起名分析完成<br>';
             processingMessage.textContent = '分析完成！';
+            console.log('AI分析完成，响应长度:', fullResponse.length);
 
             // 显示复制按钮
             if (fullResponse.trim()) {
@@ -1741,6 +1802,19 @@ class CyberFortune {
 
                 // 强制移除滚动条
                 this.removeAINamingOutputScrollbar();
+
+                // 调试信息
+                const app = this;
+                app.showAIDebugInfo(`✅ AI分析完成，响应长度: ${fullResponse.length}`);
+
+                // 确认结果区域最终状态
+                setTimeout(() => {
+                    const resultSection = document.getElementById('ai-naming-result-section');
+                    const output = document.getElementById('ai-naming-output');
+                    app.showAIDebugInfo(`最终状态 - 结果区域: ${resultSection?.style.display}, 输出内容: ${output?.innerHTML.length || 0}字符`);
+                }, 200);
+            } else {
+                this.showAIDebugInfo('⚠️ AI响应为空');
             }
 
         } catch (error) {
@@ -1764,37 +1838,76 @@ class CyberFortune {
     // 隐藏AI起名处理状态
     hideAINamingProcessing() {
         const processingDiv = document.getElementById('ai-naming-processing');
+        const resultSection = document.getElementById('ai-naming-result-section');
+
         if (processingDiv) {
             processingDiv.style.display = 'none';
+        }
+
+        // 确保结果区域显示出来
+        if (resultSection) {
+            resultSection.style.display = 'block';
+        }
+    }
+
+    // 显示AI配置提示
+    showAINamingConfigPrompt() {
+        console.log('显示AI配置提示');
+        const processingDiv = document.getElementById('ai-naming-processing');
+        const resultSection = document.getElementById('ai-naming-result-section');
+
+        // 隐藏处理状态
+        if (processingDiv) {
+            processingDiv.style.display = 'none';
+        }
+
+        // 显示配置提示在结果区域
+        if (resultSection) {
+            resultSection.style.display = 'block';
+            const output = document.getElementById('ai-naming-output');
+            if (output) {
+                output.innerHTML = `
+                    <div class="config-prompt">
+                        <div class="config-prompt-icon">⚙️</div>
+                        <h4>需要配置AI设置</h4>
+                        <p>要使用AI智能起名分析功能，请先配置AI设置：</p>
+                        <ol>
+                            <li>点击右上角的 <strong>⚙️ AI设置</strong> 按钮</li>
+                            <li>选择AI模型（推荐：DeepSeek-R1）</li>
+                            <li>输入API密钥和API地址</li>
+                            <li>点击"测试连接"确认配置正确</li>
+                            <li>保存配置后重新生成起名分析</li>
+                        </ol>
+                        <div class="config-prompt-note">
+                            💡 <strong>提示</strong>：本地开发环境和线上环境的配置是独立的，需要分别设置。
+                        </div>
+                        <button class="cyber-button config-prompt-button" onclick="document.getElementById('config-toggle').click()">
+                            🚀 立即配置AI设置
+                        </button>
+                    </div>
+                `;
+            }
         }
     }
 
     // 显示AI起名错误信息
     showAINamingError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'api-error-message';
-        errorDiv.textContent = `❌ ${message}`;
-        errorDiv.style.cssText = `
-            background: rgba(255, 0, 0, 0.1);
-            border: 1px solid #ff4444;
-            color: #ff4444;
-            padding: 1rem;
-            border-radius: 4px;
-            margin: 1rem 0;
-            text-align: center;
-        `;
+        console.log('显示AI起名错误:', message);
+        const errorMessage = document.getElementById('ai-naming-error-message');
+        if (errorMessage) {
+            errorMessage.textContent = `❌ ${message}`;
+            errorMessage.style.display = 'block';
+            console.log('错误信息已显示在页面上');
 
-        const processingDiv = document.getElementById('ai-naming-processing');
-        if (processingDiv) {
-            processingDiv.style.display = 'none';
-            processingDiv.parentNode.insertBefore(errorDiv, processingDiv.nextSibling);
-
-            // 3秒后自动移除错误信息
+            // 5秒后自动隐藏错误信息
             setTimeout(() => {
-                if (errorDiv.parentNode) {
-                    errorDiv.parentNode.removeChild(errorDiv);
-                }
-            }, 3000);
+                errorMessage.style.display = 'none';
+                console.log('错误信息已自动隐藏');
+            }, 5000);
+        } else {
+            console.error('未找到错误消息元素');
+            // 作为备选方案，显示alert
+            alert(`AI起名分析错误: ${message}`);
         }
     }
 
@@ -2250,13 +2363,20 @@ class CyberFortune {
                 requestBody.max_tokens = 4000;
             }
 
-            const response = await fetch(apiUrl, {
+            const response = await fetch('/api/proxy', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify({
+                    targetUrl: apiUrl,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: requestBody
+                })
             });
 
             if (!response.ok) {
@@ -2332,13 +2452,20 @@ class CyberFortune {
             // 尝试非流式调用作为备选方案
             try {
                 const nonStreamRequestBody = { ...requestBody, stream: false };
-                const nonStreamResponse = await fetch(apiUrl, {
+                const nonStreamResponse = await fetch('/api/proxy', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
                     },
-                    body: JSON.stringify(nonStreamRequestBody)
+                    body: JSON.stringify({
+                        targetUrl: apiUrl,
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: nonStreamRequestBody
+                    })
                 });
 
                 if (!nonStreamResponse.ok) {
@@ -2628,7 +2755,13 @@ class CyberFortune {
             processingSteps.innerHTML = '🔗 正在连接AI服务器...<br>';
             processingMessage.textContent = '建立连接中...';
 
-            console.log('API调用开始:', { apiUrl, modelName, environment: 'cloudflare-pages' });
+            console.log('API调用开始:', {
+                apiUrl,
+                modelName,
+                environment: location.hostname.includes('.pages.dev') ? 'cloudflare-pages' : 'other',
+                protocol: location.protocol,
+                hostname: location.hostname
+            });
 
             const requestBody = {
                 model: modelName,
@@ -2649,13 +2782,20 @@ class CyberFortune {
 
             console.log('发送请求体:', JSON.stringify(requestBody, null, 2));
 
-            const response = await fetch(apiUrl, {
+            const response = await fetch('/api/proxy', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify({
+                    targetUrl: apiUrl,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: requestBody
+                })
             });
 
             console.log('API响应状态:', response.status, response.statusText);
@@ -2663,12 +2803,25 @@ class CyberFortune {
             if (!response.ok) {
                 const errorText = await response.text().catch(() => '无法读取错误信息');
                 console.error('API错误详情:', errorText);
+                console.error('响应头信息:', Object.fromEntries(response.headers.entries()));
 
                 let errorData = {};
                 try {
                     errorData = JSON.parse(errorText);
                 } catch (e) {
                     console.error('无法解析错误JSON:', e);
+                }
+
+                // 详细的错误分析
+                let errorMessage = `API调用失败 (${response.status})`;
+                if (response.status === 401) {
+                    errorMessage += ' - API密钥无效或已过期';
+                } else if (response.status === 403) {
+                    errorMessage += ' - 访问被拒绝，可能是CORS问题';
+                } else if (response.status === 429) {
+                    errorMessage += ' - 请求频率过高，请稍后重试';
+                } else if (response.status >= 500) {
+                    errorMessage += ' - API服务器错误';
                 }
 
                 throw new Error(`API错误 (${response.status}): ${errorData.error?.message || errorText || '未知错误'}`);
@@ -4368,6 +4521,7 @@ class CyberFortune {
         const detectModelsBtn = document.getElementById('detect-models-btn');
         const modelSelect = document.getElementById('global-model');
         const apiUrlInput = document.getElementById('global-api-url');
+        const loadCustomModelsBtn = document.getElementById('load-custom-models-button');
 
         // 打开配置面板
         if (configToggle) {
@@ -4514,21 +4668,28 @@ class CyberFortune {
         this.updateConfigStatus('🔄', '测试中...', '#FFC107');
 
         try {
-            const response = await fetch(apiUrl, {
+            const response = await fetch('/api/proxy', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: model,
-                    messages: [
-                        {
-                            role: "user",
-                            content: "测试连接"
-                        }
-                    ],
-                    max_tokens: 10
+                    targetUrl: apiUrl,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: {
+                        model: model,
+                        messages: [
+                            {
+                                role: "user",
+                                content: "测试连接"
+                            }
+                        ],
+                        max_tokens: 10
+                    }
                 })
             });
 
@@ -4543,6 +4704,81 @@ class CyberFortune {
         } catch (error) {
             this.updateConfigStatus('❌', '连接失败', '#F44336');
             this.showConfigMessage(`连接失败: ${error.message}`, 'error');
+        }
+    }
+
+    // 加载自定义模型
+    async loadCustomModels() {
+        const apiUrlInput = document.getElementById('custom-api-url');
+        const apiKeyInput = document.getElementById('custom-api-key');
+        const modelSelect = document.getElementById('global-model');
+        const loadBtn = document.getElementById('load-custom-models-button');
+
+        const customApiUrl = apiUrlInput.value.trim();
+        const customApiKey = apiKeyInput.value.trim();
+
+        if (!customApiUrl) {
+            this.showConfigMessage('请输入自定义模型的API地址', 'error');
+            return;
+        }
+
+        const originalBtnText = loadBtn.querySelector('span').textContent;
+        loadBtn.querySelector('span').textContent = '加载中...';
+        loadBtn.disabled = true;
+
+        try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (customApiKey) {
+                headers['Authorization'] = `Bearer ${customApiKey}`;
+            }
+
+            const response = await fetch('/api/proxy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    targetUrl: customApiUrl,
+                    method: 'GET',
+                    headers: headers
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`API错误 (${response.status}): ${errorData.error?.message || '无法获取模型列表'}`);
+            }
+
+            const data = await response.json();
+            
+            // 假设返回的数据结构是 { data: [ { id: 'model-1' }, { id: 'model-2' } ] }
+            // 这是OpenAI等API的常见格式
+            const models = data.data;
+
+            if (!models || !Array.isArray(models) || models.length === 0) {
+                this.showConfigMessage('未从API返回有效的模型列表，请检查API地址和返回格式。', 'error');
+                return;
+            }
+
+            // 清空并填充模型下拉框
+            modelSelect.innerHTML = '';
+            models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.id;
+                option.textContent = model.id;
+                modelSelect.appendChild(option);
+            });
+
+            this.showConfigMessage(`成功加载 ${models.length} 个模型！`, 'success');
+
+        } catch (error) {
+            console.error('加载自定义模型失败:', error);
+            this.showConfigMessage(`加载失败: ${error.message}`, 'error');
+        } finally {
+            loadBtn.querySelector('span').textContent = originalBtnText;
+            loadBtn.disabled = false;
         }
     }
 
@@ -4801,6 +5037,38 @@ class CyberFortune {
         }
     }
 
+    // 检查API是否可用
+    async checkAPIAvailability(apiUrl, apiKey) {
+        try {
+            const testRequest = {
+                model: 'gpt-3.5-turbo',
+                messages: [{ role: 'user', content: 'test' }],
+                max_tokens: 1
+            };
+
+            const response = await fetch('/api/proxy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    targetUrl: apiUrl,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: testRequest
+                })
+            });
+
+            return response.ok || response.status === 429; // 429表示限流但API可用
+        } catch (error) {
+            console.error('API可用性检查失败:', error);
+            return false;
+        }
+    }
+
     // ==================== 合婚AI分析相关函数 ====================
 
     // 绑定合婚AI分析事件
@@ -5049,13 +5317,20 @@ class CyberFortune {
             processingSteps.innerHTML += '📡 发送分析请求...<br>';
             processingMessage.textContent = '正在发送请求...';
 
-            const response = await fetch(apiUrl, {
+            const response = await fetch('/api/proxy', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify({
+                    targetUrl: apiUrl,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: requestBody
+                })
             });
 
             if (!response.ok) {
@@ -5460,7 +5735,7 @@ class CyberFortune {
         });
 
         // AI分析结果
-        const aiOutput = document.getElementById('naming-ai-output');
+        const aiOutput = document.getElementById('ai-naming-output');
         if (aiOutput && aiOutput.textContent.trim()) {
             report += 'AI深度分析\n';
             report += '-'.repeat(30) + '\n';
@@ -5494,7 +5769,7 @@ class CyberFortune {
 
     // 生成起名报告HTML（用于长图生成）
     generateNamingReportHTML(birthData, baziResult, nameSuggestions) {
-        const aiOutput = document.getElementById('naming-ai-output');
+        const aiOutput = document.getElementById('ai-naming-output');
         const aiAnalysis = aiOutput ? aiOutput.innerHTML : '';
 
         return `
@@ -5589,7 +5864,7 @@ class CyberFortune {
 
     // 生成起名可打印HTML
     generateNamingPrintableHTML(birthData, baziResult, nameSuggestions) {
-        const aiOutput = document.getElementById('naming-ai-output');
+        const aiOutput = document.getElementById('ai-naming-output');
         const aiAnalysis = aiOutput ? aiOutput.innerHTML : '';
 
         return `
@@ -6425,3 +6700,4 @@ window.addEventListener('load', function() {
         }
     }
 });
+
