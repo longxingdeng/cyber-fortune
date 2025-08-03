@@ -4675,42 +4675,41 @@ class CyberFortune {
         this.updateConfigStatus('🔄', '测试中...', '#FFC107');
 
         try {
-            const response = await fetch('/api/proxy', {
+            // 直接调用API进行测试
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    targetUrl: apiUrl,
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: {
-                        model: model,
-                        messages: [
-                            {
-                                role: "user",
-                                content: "测试连接"
-                            }
-                        ],
-                        max_tokens: 10
-                    }
+                    model: model,
+                    messages: [
+                        {
+                            role: "user",
+                            content: "测试连接"
+                        }
+                    ],
+                    max_tokens: 10,
+                    stream: false
                 })
             });
 
             if (response.ok) {
+                const data = await response.json();
                 this.updateConfigStatus('✅', '连接成功', '#4CAF50');
                 this.showConfigMessage('API连接测试成功！', 'success');
+                console.log('测试响应:', data);
             } else {
                 const errorData = await response.json().catch(() => ({}));
                 this.updateConfigStatus('❌', '连接失败', '#F44336');
-                this.showConfigMessage(`连接失败: ${errorData.error?.message || '未知错误'}`, 'error');
+                this.showConfigMessage(`连接失败 (${response.status}): ${errorData.error?.message || errorData.message || '未知错误'}`, 'error');
+                console.error('测试失败:', errorData);
             }
         } catch (error) {
             this.updateConfigStatus('❌', '连接失败', '#F44336');
             this.showConfigMessage(`连接失败: ${error.message}`, 'error');
+            console.error('测试异常:', error);
         }
     }
 
