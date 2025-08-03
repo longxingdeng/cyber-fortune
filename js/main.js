@@ -2276,8 +2276,8 @@ class CyberFortune {
 
     // 生成测名AI分析
     async generateCemingAIAnalysis(testData, nameAnalysis, baziResult, aiPrompt) {
-        // 使用全局配置
-        const globalConfig = this.getGlobalConfig();
+        // 使用验证的全局配置
+        const globalConfig = await this.getValidatedGlobalConfig();
         if (!globalConfig) {
             this.showCemingAIError('请先在右上角配置AI设置');
             return;
@@ -2286,6 +2286,12 @@ class CyberFortune {
         const apiUrl = globalConfig.apiUrl;
         const apiKey = globalConfig.apiKey;
         const modelName = globalConfig.model;
+
+        // 检查是否需要重新检测模型
+        if (globalConfig.needsModelDetection) {
+            this.showCemingAIError('请先检测可用模型并选择一个模型');
+            return;
+        }
 
         // 验证输入
         if (!apiKey) {
@@ -4862,12 +4868,20 @@ class CyberFortune {
         const baseUrl = apiUrl.replace(/\/chat\/completions.*$/, '');
         const modelsUrl = `${baseUrl}/models`;
 
-        const response = await fetch(modelsUrl, {
-            method: 'GET',
+        // 使用代理调用，确保与AI分析调用一致
+        const response = await fetch('/api/proxy', {
+            method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({
+                targetUrl: modelsUrl,
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            })
         });
 
         if (!response.ok) {
@@ -4928,6 +4942,65 @@ class CyberFortune {
             console.error('获取全局配置失败:', error);
             return null;
         }
+    }
+
+    // 验证模型是否可用
+    async validateModel(apiUrl, apiKey, modelName) {
+        try {
+            // 发送一个简单的测试请求来验证模型
+            const response = await fetch('/api/proxy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    targetUrl: apiUrl,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: {
+                        model: modelName,
+                        messages: [
+                            { role: 'user', content: '测试' }
+                        ],
+                        max_tokens: 1,
+                        stream: false
+                    }
+                })
+            });
+
+            if (response.ok) {
+                return true;
+            } else {
+                const errorData = await response.text();
+                console.warn('模型验证失败:', errorData);
+                return false;
+            }
+        } catch (error) {
+            console.warn('模型验证出错:', error);
+            return false;
+        }
+    }
+
+    // 获取并验证全局配置
+    async getValidatedGlobalConfig() {
+        const config = this.getGlobalConfig();
+        if (!config) {
+            return null;
+        }
+
+        // 如果模型名称为空或是默认提示文本，尝试重新检测
+        if (!config.model || config.model === '' || config.model === '请先检测可用模型') {
+            console.warn('模型未配置，建议重新检测可用模型');
+            return {
+                ...config,
+                needsModelDetection: true
+            };
+        }
+
+        return config;
     }
 
 
