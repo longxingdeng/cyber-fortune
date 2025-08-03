@@ -1557,7 +1557,13 @@ class CyberFortune {
     // 绑定AI起名分析相关事件
     bindAINamingEvents(birthData, baziResult, nameSuggestions, aiPrompt) {
         // AI分析现在自动开始，无需手动按钮
-        // 复制功能已集成到AI分析容器中
+        const copyBtn = document.getElementById('copy-ai-naming-result');
+
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                this.copyAINamingResult();
+            });
+        }
     }
 
     // 生成AI起名分析
@@ -1646,43 +1652,30 @@ class CyberFortune {
 
     // 调用AI起名API
     async callAINamingAPI(prompt, apiKey, modelName, apiUrl) {
-        // 使用HTML中预定义的AI分析容器
-        const aiOutput = document.getElementById('qiming-ai-result');
-        const aiResultContainer = document.getElementById('qiming-ai-result-container');
-
-        // 创建处理状态显示元素（如果不存在）
-        let processingDiv = document.getElementById('qiming-ai-processing');
-        if (!processingDiv) {
-            processingDiv = document.createElement('div');
-            processingDiv.id = 'qiming-ai-processing';
-            processingDiv.className = 'processing-box';
-            processingDiv.style.display = 'none';
-            processingDiv.innerHTML = `
-                <div class="processing-message" id="qiming-ai-processing-message">正在初始化AI分析...</div>
-                <div class="processing-steps" id="qiming-ai-processing-steps"></div>
-            `;
-            aiResultContainer.insertBefore(processingDiv, aiOutput);
-        }
-
-        const processingSteps = document.getElementById('qiming-ai-processing-steps');
-        const processingMessage = document.getElementById('qiming-ai-processing-message');
+        // 使用起名结果HTML中的AI分析元素
+        const processingSteps = document.getElementById('ai-naming-processing-steps');
+        const processingMessage = document.getElementById('ai-naming-processing-message');
+        const aiOutput = document.getElementById('ai-naming-output');
+        const aiResultSection = document.getElementById('ai-naming-result-section');
+        const copyBtn = document.getElementById('copy-ai-naming-result');
+        const processingBox = document.getElementById('ai-naming-processing');
 
         // 调试信息：确认元素是否正确找到
         console.log('AI输出元素检查:', {
             aiOutput: !!aiOutput,
             aiOutputId: aiOutput?.id,
-            aiResultContainer: !!aiResultContainer,
-            aiResultContainerId: aiResultContainer?.id,
+            aiResultSection: !!aiResultSection,
+            aiResultSectionId: aiResultSection?.id,
             processingSteps: !!processingSteps,
-            processingMessage: !!processingMessage
+            processingMessage: !!processingMessage,
+            copyBtn: !!copyBtn
         });
 
         let fullResponse = '';
 
         try {
             // 显示处理状态
-            if (processingDiv) processingDiv.style.display = 'block';
-            if (aiResultContainer) aiResultContainer.style.display = 'block';
+            if (processingBox) processingBox.style.display = 'block';
 
             // 显示连接状态
             if (processingSteps) processingSteps.innerHTML = '🔗 正在连接AI服务器...<br>';
@@ -1746,6 +1739,8 @@ class CyberFortune {
             if (processingSteps) processingSteps.innerHTML += '🤖 AI正在分析起名方案...<br>';
             if (processingMessage) processingMessage.textContent = '正在生成分析结果...';
 
+            // 显示结果区域
+            if (aiResultSection) aiResultSection.style.display = 'block';
             console.log('AI结果区域已设置为显示');
 
             // 处理流式响应
@@ -1791,10 +1786,11 @@ class CyberFortune {
             console.log('AI分析完成，响应长度:', fullResponse.length);
 
             // 隐藏处理状态
-            if (processingDiv) processingDiv.style.display = 'none';
+            if (processingBox) processingBox.style.display = 'none';
 
-            // 保存结果
+            // 显示复制按钮
             if (fullResponse.trim()) {
+                if (copyBtn) copyBtn.style.display = 'block';
                 this.fullAINamingResponse = fullResponse;
 
                 // 强制移除滚动条
@@ -2095,6 +2091,43 @@ class CyberFortune {
 
                 <!-- 错误信息显示 -->
                 <div class="api-error-message" id="ceming-ai-error-message" style="display: none;"></div>
+
+                <!-- 提示词已隐藏，保护商业机密 -->
+            </div>
+
+            <!-- AI深度分析区域 -->
+            <div class="ai-naming-analysis">
+                <div class="ai-naming-header">
+                    <h4>AI智能起名分析</h4>
+                    <p>基于八字命理、五格数理、字义内涵、音韵美学等多维度的专业分析</p>
+                    <div class="model-recommendation">
+                        <span class="rec-icon">💡</span>
+                        <span class="rec-text">推荐使用 <strong>DeepSeek-R1</strong>：具备强大的推理能力，能深入分析字义内涵和诗词典故</span>
+                    </div>
+                </div>
+
+                <!-- AI分析自动开始，无需手动按钮 -->
+
+                <!-- 处理状态显示 -->
+                <div class="processing-box" id="ai-naming-processing" style="display: none;">
+                    <div class="processing-message" id="ai-naming-processing-message">正在初始化AI分析...</div>
+                    <div class="processing-steps" id="ai-naming-processing-steps"></div>
+                </div>
+
+                <!-- AI分析结果 -->
+                <div class="ai-result-section" id="ai-naming-result-section" style="display: none;">
+                    <h5>AI深度分析结果：</h5>
+                    <div class="ai-output" id="ai-naming-output"></div>
+                    <div class="result-actions">
+                        <button class="cyber-button" id="copy-ai-naming-result" style="display: none;">
+                            <span>📄 复制分析结果</span>
+                            <div class="button-glow"></div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 错误信息显示 -->
+                <div class="api-error-message" id="ai-naming-error-message" style="display: none;"></div>
 
                 <!-- 提示词已隐藏，保护商业机密 -->
             </div>
