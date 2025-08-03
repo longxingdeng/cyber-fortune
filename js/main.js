@@ -4813,21 +4813,13 @@ class CyberFortune {
 
             let models = [];
 
-            if (provider === 'openai' || provider === 'deepseek' || provider === 'compatible') {
-                // OpenAI兼容的API
+            // 统一使用动态检测，尝试OpenAI兼容的API格式
+            try {
                 models = await this.fetchOpenAICompatibleModels(apiUrl, apiKey);
-            } else if (provider === 'anthropic') {
-                // Anthropic Claude API
-                models = this.getAnthropicModels();
-            } else if (provider === 'alibaba') {
-                // 阿里云通义千问
-                models = this.getAlibabaModels();
-            } else if (provider === 'zhipu') {
-                // 智谱AI
-                models = this.getZhipuModels();
-            } else {
-                // 未知提供商，尝试通用检测
-                models = await this.fetchOpenAICompatibleModels(apiUrl, apiKey);
+            } catch (error) {
+                console.warn(`动态检测失败，提供商: ${provider}，错误:`, error.message);
+                // 如果动态检测失败，提供一个通用的提示
+                throw new Error(`无法从API获取模型列表: ${error.message}`);
             }
 
             if (models.length > 0) {
@@ -4897,32 +4889,7 @@ class CyberFortune {
         }
     }
 
-    // 获取Anthropic模型列表（预定义）
-    getAnthropicModels() {
-        return [
-            { id: 'claude-3-5-sonnet-20241022', name: 'Claude-3.5 Sonnet', provider: 'anthropic' },
-            { id: 'claude-3-sonnet-20240229', name: 'Claude-3 Sonnet', provider: 'anthropic' },
-            { id: 'claude-3-haiku-20240307', name: 'Claude-3 Haiku', provider: 'anthropic' }
-        ];
-    }
 
-    // 获取阿里云模型列表（预定义）
-    getAlibabaModels() {
-        return [
-            { id: 'qwen-max', name: '通义千问-Max', provider: 'alibaba' },
-            { id: 'qwen-plus', name: '通义千问-Plus', provider: 'alibaba' },
-            { id: 'qwen-turbo', name: '通义千问-Turbo', provider: 'alibaba' }
-        ];
-    }
-
-    // 获取智谱AI模型列表（预定义）
-    getZhipuModels() {
-        return [
-            { id: 'glm-4', name: '智谱GLM-4', provider: 'zhipu' },
-            { id: 'glm-4v', name: '智谱GLM-4V', provider: 'zhipu' },
-            { id: 'glm-3-turbo', name: '智谱GLM-3 Turbo', provider: 'zhipu' }
-        ];
-    }
 
     // 更新模型选择选项
     updateModelOptions(models) {
