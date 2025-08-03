@@ -1423,7 +1423,7 @@ class CyberFortune {
                 <!-- AI分析结果 -->
                 <div class="ai-result-section" id="ai-naming-result-section" style="display: none;">
                     <h5>AI深度分析结果：</h5>
-                    <div class="ai-output" id="ai-naming-output"></div>
+                    <div class="ai-output" id="qiming-ai-result"></div>
                     <div class="result-actions">
                         <button class="cyber-button" id="copy-ai-naming-result" style="display: none;">
                             <span>📄 复制分析结果</span>
