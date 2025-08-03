@@ -4592,6 +4592,13 @@ class CyberFortune {
                 this.detectAvailableModels();
             });
         }
+
+        // 加载自定义模型
+        if (loadCustomModelsBtn) {
+            loadCustomModelsBtn.addEventListener('click', () => {
+                this.loadCustomModels();
+            });
+        }
     }
 
     // 加载全局配置
@@ -4727,6 +4734,10 @@ class CyberFortune {
         loadBtn.disabled = true;
 
         try {
+            // 构建models endpoint
+            const baseUrl = customApiUrl.replace(/\/chat\/completions.*$/, '');
+            const modelsUrl = `${baseUrl}/models`;
+
             const headers = {
                 'Content-Type': 'application/json'
             };
@@ -4734,16 +4745,9 @@ class CyberFortune {
                 headers['Authorization'] = `Bearer ${customApiKey}`;
             }
 
-            const response = await fetch('/api/proxy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    targetUrl: customApiUrl,
-                    method: 'GET',
-                    headers: headers
-                })
+            const response = await fetch(modelsUrl, {
+                method: 'GET',
+                headers: headers
             });
 
             if (!response.ok) {
@@ -4752,26 +4756,64 @@ class CyberFortune {
             }
 
             const data = await response.json();
-            
-            // 假设返回的数据结构是 { data: [ { id: 'model-1' }, { id: 'model-2' } ] }
-            // 这是OpenAI等API的常见格式
-            const models = data.data;
 
-            if (!models || !Array.isArray(models) || models.length === 0) {
+            // 处理不同的API响应格式
+            let models = [];
+            if (data.data && Array.isArray(data.data)) {
+                // OpenAI格式: { data: [ { id: 'model-1' }, { id: 'model-2' } ] }
+                models = data.data.map(model => ({
+                    id: model.id,
+                    name: model.id
+                }));
+            } else if (Array.isArray(data)) {
+                // 直接数组格式: [ { id: 'model-1' }, { id: 'model-2' } ]
+                models = data.map(model => ({
+                    id: model.id || model.name || model,
+                    name: model.name || model.id || model
+                }));
+            } else if (data.models && Array.isArray(data.models)) {
+                // 其他格式: { models: [ ... ] }
+                models = data.models.map(model => ({
+                    id: model.id || model.name || model,
+                    name: model.name || model.id || model
+                }));
+            }
+
+            if (models.length === 0) {
                 this.showConfigMessage('未从API返回有效的模型列表，请检查API地址和返回格式。', 'error');
                 return;
             }
+
+            // 保存当前选择的模型
+            const currentValue = modelSelect.value;
 
             // 清空并填充模型下拉框
             modelSelect.innerHTML = '';
             models.forEach(model => {
                 const option = document.createElement('option');
                 option.value = model.id;
-                option.textContent = model.id;
+                option.textContent = model.name;
                 modelSelect.appendChild(option);
             });
 
-            this.showConfigMessage(`成功加载 ${models.length} 个模型！`, 'success');
+            // 尝试保持之前的选择
+            if (currentValue && models.find(m => m.id === currentValue)) {
+                modelSelect.value = currentValue;
+            } else if (models.length > 0) {
+                modelSelect.value = models[0].id;
+            }
+
+            // 同时更新主配置区域的API地址和密钥
+            const mainApiUrlInput = document.getElementById('global-api-url');
+            const mainApiKeyInput = document.getElementById('global-api-key');
+            if (mainApiUrlInput) {
+                mainApiUrlInput.value = customApiUrl;
+            }
+            if (mainApiKeyInput && customApiKey) {
+                mainApiKeyInput.value = customApiKey;
+            }
+
+            this.showConfigMessage(`成功加载 ${models.length} 个模型！配置已同步到主设置`, 'success');
 
         } catch (error) {
             console.error('加载自定义模型失败:', error);
