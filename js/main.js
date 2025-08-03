@@ -1688,8 +1688,10 @@ class CyberFortune {
             processingMessage.textContent = '正在生成分析结果...';
 
             // 显示结果区域
-            aiResultSection.style.display = 'block';
-            aiOutput.innerHTML = '';
+            const aiResultContainer = document.getElementById('qiming-ai-result-container');
+            const aiOutput = document.getElementById('qiming-ai-result');
+            if (aiResultContainer) aiResultContainer.style.display = 'block';
+            if (aiOutput) aiOutput.innerHTML = '';
 
             // 处理流式响应
             const reader = response.body.getReader();
@@ -4363,6 +4365,7 @@ class CyberFortune {
         const configClose = document.getElementById('config-close');
         const saveConfigBtn = document.getElementById('save-global-config');
         const testConfigBtn = document.getElementById('test-global-config');
+        const detectModelsBtn = document.getElementById('detect-models-btn');
         const modelSelect = document.getElementById('global-model');
         const apiUrlInput = document.getElementById('global-api-url');
 
@@ -4426,6 +4429,13 @@ class CyberFortune {
         if (testConfigBtn) {
             testConfigBtn.addEventListener('click', () => {
                 this.testGlobalConfig();
+            });
+        }
+
+        // 检测可用模型
+        if (detectModelsBtn) {
+            detectModelsBtn.addEventListener('click', () => {
+                this.detectAvailableModels();
             });
         }
     }
@@ -4550,10 +4560,33 @@ class CyberFortune {
 
     // 显示配置消息
     showConfigMessage(message, type) {
+        // 同时在模型检测状态区域显示
+        const statusElement = document.getElementById('model-detection-status');
+        if (statusElement) {
+            statusElement.textContent = message;
+            statusElement.className = `model-detection-status ${type}`;
+        }
+
         // 创建消息提示
         const messageDiv = document.createElement('div');
         messageDiv.className = `config-message ${type}`;
         messageDiv.textContent = message;
+
+        let backgroundColor;
+        switch(type) {
+            case 'success':
+                backgroundColor = '#4CAF50';
+                break;
+            case 'error':
+                backgroundColor = '#F44336';
+                break;
+            case 'info':
+                backgroundColor = '#00d4ff';
+                break;
+            default:
+                backgroundColor = '#666';
+        }
+
         messageDiv.style.cssText = `
             position: fixed;
             top: 100px;
@@ -4566,7 +4599,7 @@ class CyberFortune {
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             transform: translateX(100%);
             transition: transform 0.3s ease;
-            background: ${type === 'success' ? '#4CAF50' : '#F44336'};
+            background: ${backgroundColor};
         `;
 
         document.body.appendChild(messageDiv);
@@ -4590,6 +4623,171 @@ class CyberFortune {
         // 由于各模块已移除独立配置，现在直接使用全局配置
         // 各模块的AI分析函数会自动调用getGlobalConfig()获取配置
         console.log('全局配置已保存，各模块将自动使用全局配置');
+    }
+
+    // 检测可用模型
+    async detectAvailableModels() {
+        const apiUrl = document.getElementById('global-api-url').value.trim();
+        const apiKey = document.getElementById('global-api-key').value.trim();
+        const modelSelect = document.getElementById('global-model');
+        const detectBtn = document.getElementById('detect-models-btn');
+
+        if (!apiUrl || !apiKey) {
+            this.showConfigMessage('请先填写API地址和密钥', 'error');
+            return;
+        }
+
+        // 禁用按钮并显示检测状态
+        detectBtn.disabled = true;
+        detectBtn.textContent = '🔍 检测中...';
+        this.showConfigMessage('正在检测可用模型...', 'info');
+
+        try {
+            // 根据API URL判断服务提供商
+            const provider = this.detectAPIProvider(apiUrl);
+            console.log('检测到API提供商:', provider);
+
+            let models = [];
+
+            if (provider === 'openai' || provider === 'deepseek' || provider === 'compatible') {
+                // OpenAI兼容的API
+                models = await this.fetchOpenAICompatibleModels(apiUrl, apiKey);
+            } else if (provider === 'anthropic') {
+                // Anthropic Claude API
+                models = this.getAnthropicModels();
+            } else if (provider === 'alibaba') {
+                // 阿里云通义千问
+                models = this.getAlibabaModels();
+            } else if (provider === 'zhipu') {
+                // 智谱AI
+                models = this.getZhipuModels();
+            } else {
+                // 未知提供商，尝试通用检测
+                models = await this.fetchOpenAICompatibleModels(apiUrl, apiKey);
+            }
+
+            if (models.length > 0) {
+                this.updateModelOptions(models);
+                this.showConfigMessage(`检测到 ${models.length} 个可用模型`, 'success');
+            } else {
+                this.showConfigMessage('未检测到可用模型，请检查API配置', 'error');
+            }
+
+        } catch (error) {
+            console.error('模型检测失败:', error);
+            this.showConfigMessage(`模型检测失败: ${error.message}`, 'error');
+        } finally {
+            // 恢复按钮状态
+            detectBtn.disabled = false;
+            detectBtn.textContent = '🔍 检测模型';
+        }
+    }
+
+    // 检测API提供商
+    detectAPIProvider(apiUrl) {
+        const url = apiUrl.toLowerCase();
+
+        if (url.includes('api.openai.com')) {
+            return 'openai';
+        } else if (url.includes('api.deepseek.com')) {
+            return 'deepseek';
+        } else if (url.includes('api.anthropic.com')) {
+            return 'anthropic';
+        } else if (url.includes('dashscope.aliyuncs.com')) {
+            return 'alibaba';
+        } else if (url.includes('open.bigmodel.cn')) {
+            return 'zhipu';
+        } else {
+            return 'compatible'; // OpenAI兼容
+        }
+    }
+
+    // 获取OpenAI兼容API的模型列表
+    async fetchOpenAICompatibleModels(apiUrl, apiKey) {
+        // 构建models endpoint
+        const baseUrl = apiUrl.replace(/\/chat\/completions.*$/, '');
+        const modelsUrl = `${baseUrl}/models`;
+
+        const response = await fetch(modelsUrl, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`API请求失败: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (data.data && Array.isArray(data.data)) {
+            return data.data.map(model => ({
+                id: model.id,
+                name: model.id,
+                provider: this.detectAPIProvider(apiUrl)
+            }));
+        } else {
+            throw new Error('API返回格式不正确');
+        }
+    }
+
+    // 获取Anthropic模型列表（预定义）
+    getAnthropicModels() {
+        return [
+            { id: 'claude-3-5-sonnet-20241022', name: 'Claude-3.5 Sonnet', provider: 'anthropic' },
+            { id: 'claude-3-sonnet-20240229', name: 'Claude-3 Sonnet', provider: 'anthropic' },
+            { id: 'claude-3-haiku-20240307', name: 'Claude-3 Haiku', provider: 'anthropic' }
+        ];
+    }
+
+    // 获取阿里云模型列表（预定义）
+    getAlibabaModels() {
+        return [
+            { id: 'qwen-max', name: '通义千问-Max', provider: 'alibaba' },
+            { id: 'qwen-plus', name: '通义千问-Plus', provider: 'alibaba' },
+            { id: 'qwen-turbo', name: '通义千问-Turbo', provider: 'alibaba' }
+        ];
+    }
+
+    // 获取智谱AI模型列表（预定义）
+    getZhipuModels() {
+        return [
+            { id: 'glm-4', name: '智谱GLM-4', provider: 'zhipu' },
+            { id: 'glm-4v', name: '智谱GLM-4V', provider: 'zhipu' },
+            { id: 'glm-3-turbo', name: '智谱GLM-3 Turbo', provider: 'zhipu' }
+        ];
+    }
+
+    // 更新模型选择选项
+    updateModelOptions(models) {
+        const modelSelect = document.getElementById('global-model');
+        const currentValue = modelSelect.value;
+
+        // 清空现有选项
+        modelSelect.innerHTML = '';
+
+        // 添加检测到的模型
+        models.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.name;
+            if (model.provider) {
+                option.textContent += ` (${model.provider})`;
+            }
+            modelSelect.appendChild(option);
+        });
+
+        // 尝试保持之前的选择
+        if (currentValue && models.find(m => m.id === currentValue)) {
+            modelSelect.value = currentValue;
+        } else if (models.length > 0) {
+            // 选择第一个模型
+            modelSelect.value = models[0].id;
+        }
+
+        console.log(`已更新模型选项，共 ${models.length} 个模型`);
     }
 
     // 获取全局配置

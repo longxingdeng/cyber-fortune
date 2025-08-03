@@ -61,16 +61,22 @@
                 <div class="config-row">
                     <div class="config-item">
                         <label for="global-model">模型:</label>
-                        <select id="global-model">
-                            <option value="deepseek-r1" selected>DeepSeek-R1 (推荐)</option>
-                            <option value="deepseek-chat">DeepSeek-Chat</option>
-                            <option value="gpt-4">GPT-4</option>
-                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                            <option value="claude-3-sonnet">Claude-3 Sonnet</option>
-                            <option value="claude-3-haiku">Claude-3 Haiku</option>
-                            <option value="qwen-max">通义千问-Max</option>
-                            <option value="glm-4">智谱GLM-4</option>
-                        </select>
+                        <div class="model-selection">
+                            <select id="global-model">
+                                <option value="deepseek-r1" selected>DeepSeek-R1 (推荐)</option>
+                                <option value="deepseek-chat">DeepSeek-Chat</option>
+                                <option value="gpt-4">GPT-4</option>
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                <option value="claude-3-sonnet">Claude-3 Sonnet</option>
+                                <option value="claude-3-haiku">Claude-3 Haiku</option>
+                                <option value="qwen-max">通义千问-Max</option>
+                                <option value="glm-4">智谱GLM-4</option>
+                            </select>
+                            <button type="button" class="detect-models-btn" id="detect-models-btn" title="自动检测可用模型">
+                                🔍 检测模型
+                            </button>
+                        </div>
+                        <div class="model-detection-status" id="model-detection-status"></div>
                     </div>
                     <div class="config-item">
                         <label>状态:</label>
@@ -156,21 +162,21 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>出生年份</label>
-                                <select name="birthYear" required>
+                                <select name="birthYear" required aria-label="出生年份">
                                     <option value="">选择年份</option>
                                     <!-- 动态生成年份选项 -->
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>出生月份</label>
-                                <select name="birthMonth" required>
+                                <select name="birthMonth" required aria-label="出生月份">
                                     <option value="">选择月份</option>
                                     <!-- 动态生成月份选项 -->
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>出生日期</label>
-                                <select name="birthDay" required>
+                                <select name="birthDay" required aria-label="出生日期">
                                     <option value="">选择日期</option>
                                     <!-- 动态生成日期选项 -->
                                 </select>
@@ -178,7 +184,7 @@
                             <div class="form-group">
                                 <label>出生时间</label>
                                 <div class="time-input-group">
-                                    <select name="birthHour" required>
+                                    <select name="birthHour" required aria-label="出生小时">
                                         <option value="">时</option>
                                         <option value="0">00时</option>
                                         <option value="1">01时</option>
@@ -205,7 +211,7 @@
                                         <option value="22">22时</option>
                                         <option value="23">23时</option>
                                     </select>
-                                    <select name="birthMinute" required>
+                                    <select name="birthMinute" required aria-label="出生分钟">
                                         <option value="">分</option>
                                         <option value="0">00分</option>
                                         <option value="5">05分</option>
@@ -228,14 +234,14 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>出生省份</label>
-                                <select name="birthProvince" required>
+                                <select name="birthProvince" required aria-label="出生省份">
                                     <option value="">选择省份</option>
                                     <!-- 动态生成省份选项 -->
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>出生城市</label>
-                                <select name="birthCity" required>
+                                <select name="birthCity" required aria-label="出生城市">
                                     <option value="">选择城市</option>
                                     <!-- 动态生成城市选项 -->
                                 </select>
@@ -284,26 +290,26 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>出生年份</label>
-                                <select name="birthYear" required>
+                                <select name="birthYear" required aria-label="出生年份">
                                     <option value="">选择年份</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>出生月份</label>
-                                <select name="birthMonth" required>
+                                <select name="birthMonth" required aria-label="出生月份">
                                     <option value="">选择月份</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>出生日期</label>
-                                <select name="birthDay" required>
+                                <select name="birthDay" required aria-label="出生日期">
                                     <option value="">选择日期</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>出生时间</label>
                                 <div class="time-input-group">
-                                    <select name="birthHour" required>
+                                    <select name="birthHour" required aria-label="出生小时">
                                         <option value="">时</option>
                                         <option value="0">00时</option>
                                         <option value="1">01时</option>
@@ -330,7 +336,7 @@
                                         <option value="22">22时</option>
                                         <option value="23">23时</option>
                                     </select>
-                                    <select name="birthMinute" required>
+                                    <select name="birthMinute" required aria-label="出生分钟">
                                         <option value="">分</option>
                                         <option value="0">00分</option>
                                         <option value="5">05分</option>
@@ -353,13 +359,13 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>出生省份</label>
-                                <select name="birthProvince" required>
+                                <select name="birthProvince" required aria-label="出生省份">
                                     <option value="">选择省份</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>出生城市</label>
-                                <select name="birthCity" required>
+                                <select name="birthCity" required aria-label="出生城市">
                                     <option value="">选择城市</option>
                                 </select>
                             </div>
@@ -397,6 +403,14 @@
                     <div class="result-content">
                         <!-- 起名结果将在这里显示 -->
                     </div>
+                    <div class="ai-analysis-container" id="qiming-ai-result-container" style="display: none;">
+                        <div class="ai-analysis-header">
+                            <h3>🤖 AI智能分析</h3>
+                        </div>
+                        <div class="ai-analysis-content" id="qiming-ai-result">
+                            <!-- AI分析结果将在这里显示 -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -428,26 +442,26 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>出生年份</label>
-                                <select name="birthYear" required>
+                                <select name="birthYear" required aria-label="出生年份">
                                     <option value="">选择年份</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>出生月份</label>
-                                <select name="birthMonth" required>
+                                <select name="birthMonth" required aria-label="出生月份">
                                     <option value="">选择月份</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>出生日期</label>
-                                <select name="birthDay" required>
+                                <select name="birthDay" required aria-label="出生日期">
                                     <option value="">选择日期</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>出生时间</label>
                                 <div class="time-input-group">
-                                    <select name="birthHour" required>
+                                    <select name="birthHour" required aria-label="出生小时">
                                         <option value="">时</option>
                                         <option value="0">00时</option>
                                         <option value="1">01时</option>
@@ -474,7 +488,7 @@
                                         <option value="22">22时</option>
                                         <option value="23">23时</option>
                                     </select>
-                                    <select name="birthMinute" required>
+                                    <select name="birthMinute" required aria-label="出生分钟">
                                         <option value="">分</option>
                                         <option value="0">00分</option>
                                         <option value="5">05分</option>
@@ -497,13 +511,13 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>出生省份</label>
-                                <select name="birthProvince" required>
+                                <select name="birthProvince" required aria-label="出生省份">
                                     <option value="">选择省份</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>出生城市</label>
-                                <select name="birthCity" required>
+                                <select name="birthCity" required aria-label="出生城市">
                                     <option value="">选择城市</option>
                                 </select>
                             </div>
@@ -543,26 +557,26 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>出生年份</label>
-                                    <select name="maleBirthYear" required>
+                                    <select name="maleBirthYear" required aria-label="男方出生年份">
                                         <option value="">选择年份</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>出生月份</label>
-                                    <select name="maleBirthMonth" required>
+                                    <select name="maleBirthMonth" required aria-label="男方出生月份">
                                         <option value="">选择月份</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>出生日期</label>
-                                    <select name="maleBirthDay" required>
+                                    <select name="maleBirthDay" required aria-label="男方出生日期">
                                         <option value="">选择日期</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>出生时间</label>
                                     <div class="time-input-group">
-                                        <select name="maleBirthHour" required>
+                                        <select name="maleBirthHour" required aria-label="男方出生小时">
                                             <option value="">时</option>
                                             <option value="0">00时</option>
                                             <option value="1">01时</option>
@@ -589,7 +603,7 @@
                                             <option value="22">22时</option>
                                             <option value="23">23时</option>
                                         </select>
-                                        <select name="maleBirthMinute" required>
+                                        <select name="maleBirthMinute" required aria-label="男方出生分钟">
                                             <option value="">分</option>
                                             <option value="0">00分</option>
                                             <option value="5">05分</option>
@@ -612,14 +626,14 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>出生省份</label>
-                                    <select name="maleBirthProvince" required>
+                                    <select name="maleBirthProvince" required aria-label="男方出生省份">
                                         <option value="">选择省份</option>
                                         <!-- 动态生成省份选项 -->
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>出生城市</label>
-                                    <select name="maleBirthCity" required>
+                                    <select name="maleBirthCity" required aria-label="男方出生城市">
                                         <option value="">选择城市</option>
                                         <!-- 动态生成城市选项 -->
                                     </select>
@@ -637,26 +651,26 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>出生年份</label>
-                                    <select name="femaleBirthYear" required>
+                                    <select name="femaleBirthYear" required aria-label="女方出生年份">
                                         <option value="">选择年份</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>出生月份</label>
-                                    <select name="femaleBirthMonth" required>
+                                    <select name="femaleBirthMonth" required aria-label="女方出生月份">
                                         <option value="">选择月份</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>出生日期</label>
-                                    <select name="femaleBirthDay" required>
+                                    <select name="femaleBirthDay" required aria-label="女方出生日期">
                                         <option value="">选择日期</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>出生时间</label>
                                     <div class="time-input-group">
-                                        <select name="femaleBirthHour" required>
+                                        <select name="femaleBirthHour" required aria-label="女方出生小时">
                                             <option value="">时</option>
                                             <option value="0">00时</option>
                                             <option value="1">01时</option>
@@ -683,7 +697,7 @@
                                             <option value="22">22时</option>
                                             <option value="23">23时</option>
                                         </select>
-                                        <select name="femaleBirthMinute" required>
+                                        <select name="femaleBirthMinute" required aria-label="女方出生分钟">
                                             <option value="">分</option>
                                             <option value="0">00分</option>
                                             <option value="5">05分</option>
@@ -706,14 +720,14 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>出生省份</label>
-                                    <select name="femaleBirthProvince" required>
+                                    <select name="femaleBirthProvince" required aria-label="女方出生省份">
                                         <option value="">选择省份</option>
                                         <!-- 动态生成省份选项 -->
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>出生城市</label>
-                                    <select name="femaleBirthCity" required>
+                                    <select name="femaleBirthCity" required aria-label="女方出生城市">
                                         <option value="">选择城市</option>
                                         <!-- 动态生成城市选项 -->
                                     </select>

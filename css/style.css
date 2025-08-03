@@ -1887,6 +1887,69 @@ body {
     box-shadow: 0 0 5px rgba(0, 212, 255, 0.3);
 }
 
+/* 模型选择容器 */
+.model-selection {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex: 1;
+}
+
+.model-selection select {
+    flex: 1;
+    margin: 0;
+}
+
+/* 检测模型按钮 */
+.detect-models-btn {
+    padding: 0.5rem 0.8rem;
+    background: linear-gradient(135deg, #00d4ff, #0099cc);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 80px;
+}
+
+.detect-models-btn:hover {
+    background: linear-gradient(135deg, #0099cc, #007399);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 212, 255, 0.3);
+}
+
+.detect-models-btn:active {
+    transform: translateY(0);
+}
+
+.detect-models-btn:disabled {
+    background: rgba(128, 128, 128, 0.5);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 模型检测状态 */
+.model-detection-status {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.3rem;
+}
+
+.model-detection-status.detecting {
+    color: #00d4ff;
+}
+
+.model-detection-status.success {
+    color: #4CAF50;
+}
+
+.model-detection-status.error {
+    color: #f44336;
+}
+
 .ai-naming-processing {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 4px;
