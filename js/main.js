@@ -1677,7 +1677,7 @@ class CyberFortune {
     async callAINamingAPI(prompt, apiKey, modelName, apiUrl) {
         const processingSteps = document.getElementById('ai-naming-processing-steps');
         const processingMessage = document.getElementById('ai-naming-processing-message');
-        const aiOutput = document.getElementById('ai-naming-output');
+        const aiOutput = document.getElementById('qiming-ai-result');
         const aiResultSection = document.getElementById('ai-naming-result-section');
         const copyBtn = document.getElementById('copy-ai-naming-result');
 
@@ -1748,9 +1748,7 @@ class CyberFortune {
 
             // 显示结果区域
             const aiResultContainer = document.getElementById('qiming-ai-result-container');
-            const aiOutput = document.getElementById('qiming-ai-result');
             if (aiResultContainer) aiResultContainer.style.display = 'block';
-            if (aiOutput) aiOutput.innerHTML = '';
             console.log('AI结果区域已设置为显示');
 
             // 处理流式响应
@@ -1809,8 +1807,8 @@ class CyberFortune {
 
                 // 确认结果区域最终状态
                 setTimeout(() => {
-                    const resultSection = document.getElementById('ai-naming-result-section');
-                    const output = document.getElementById('ai-naming-output');
+                    const resultSection = document.getElementById('qiming-ai-result-container');
+                    const output = document.getElementById('qiming-ai-result');
                     app.showAIDebugInfo(`最终状态 - 结果区域: ${resultSection?.style.display}, 输出内容: ${output?.innerHTML.length || 0}字符`);
                 }, 200);
             } else {
@@ -1864,7 +1862,7 @@ class CyberFortune {
         // 显示配置提示在结果区域
         if (resultSection) {
             resultSection.style.display = 'block';
-            const output = document.getElementById('ai-naming-output');
+            const output = document.getElementById('qiming-ai-result');
             if (output) {
                 output.innerHTML = `
                     <div class="config-prompt">
@@ -1937,8 +1935,8 @@ class CyberFortune {
 
     // 强制移除AI起名输出区域的滚动条
     removeAINamingOutputScrollbar() {
-        const aiOutput = document.getElementById('ai-naming-output');
-        const aiResultSection = document.getElementById('ai-naming-result-section');
+        const aiOutput = document.getElementById('qiming-ai-result');
+        const aiResultSection = document.getElementById('qiming-ai-result-container');
 
         if (aiOutput) {
             aiOutput.style.maxHeight = 'none';
@@ -5600,7 +5598,7 @@ class CyberFortune {
         });
 
         // AI分析结果
-        const aiOutput = document.getElementById('ai-naming-output');
+        const aiOutput = document.getElementById('qiming-ai-result');
         if (aiOutput && aiOutput.textContent.trim()) {
             report += 'AI深度分析\n';
             report += '-'.repeat(30) + '\n';
@@ -5634,7 +5632,7 @@ class CyberFortune {
 
     // 生成起名报告HTML（用于长图生成）
     generateNamingReportHTML(birthData, baziResult, nameSuggestions) {
-        const aiOutput = document.getElementById('ai-naming-output');
+        const aiOutput = document.getElementById('qiming-ai-result');
         const aiAnalysis = aiOutput ? aiOutput.innerHTML : '';
 
         return `
@@ -5729,7 +5727,7 @@ class CyberFortune {
 
     // 生成起名可打印HTML
     generateNamingPrintableHTML(birthData, baziResult, nameSuggestions) {
-        const aiOutput = document.getElementById('ai-naming-output');
+        const aiOutput = document.getElementById('qiming-ai-result');
         const aiAnalysis = aiOutput ? aiOutput.innerHTML : '';
 
         return `
