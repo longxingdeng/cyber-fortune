@@ -1603,7 +1603,7 @@ class CyberFortune {
 
     // 生成AI起名分析
     async generateAINamingAnalysis(birthData, baziResult, nameSuggestions, aiPrompt) {
-        console.log('=== 开始AI起名分析 ===');
+        console.log('=== 开始AI起名分析 === [版本: 606cf52-fix]');
         console.log('参数检查:', {
             hasBirthData: !!birthData,
             hasBaziResult: !!baziResult,
@@ -1692,6 +1692,14 @@ class CyberFortune {
         const aiOutput = document.getElementById('qiming-ai-result');
         const aiResultSection = document.getElementById('ai-naming-result-section');
         const copyBtn = document.getElementById('copy-ai-naming-result');
+
+        // 调试信息：确认元素是否正确找到
+        console.log('AI输出元素检查:', {
+            aiOutput: !!aiOutput,
+            aiOutputId: aiOutput?.id,
+            aiResultSection: !!aiResultSection,
+            aiResultSectionId: aiResultSection?.id
+        });
 
         let fullResponse = '';
 
