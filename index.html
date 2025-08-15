@@ -50,8 +50,7 @@
                 <div class="config-row">
                     <div class="config-item">
                         <label for="global-api-url">API地址:</label>
-                        <input type="text" id="global-api-url" placeholder="https://api.deepseek.com/v1/chat/completions"
-                               value="https://api.deepseek.com/v1/chat/completions">
+                        <input type="text" id="global-api-url" placeholder="例如: https://api.deepseek.com/v1">
                     </div>
                     <div class="config-item">
                         <label for="global-api-key">API密钥:</label>
@@ -59,17 +58,18 @@
                     </div>
                 </div>
                 <div class="config-row">
+                    <div class="config-item" style="width: 100%;">
+                        <button id="load-models-button" class="cyber-button secondary" style="width: 100%;">
+                            <span>加载模型</span>
+                        </button>
+                        <small class="recommendation" style="display: block; margin-top: 8px; color: #888;">推荐使用 deepseek-r1 模型。</small>
+                    </div>
+                </div>
+                <div class="config-row">
                     <div class="config-item">
                         <label for="global-model">模型:</label>
                         <select id="global-model">
-                            <option value="deepseek-r1" selected>DeepSeek-R1 (推荐)</option>
-                            <option value="deepseek-chat">DeepSeek-Chat</option>
-                            <option value="gpt-4">GPT-4</option>
-                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                            <option value="claude-3-sonnet">Claude-3 Sonnet</option>
-                            <option value="claude-3-haiku">Claude-3 Haiku</option>
-                            <option value="qwen-max">通义千问-Max</option>
-                            <option value="glm-4">智谱GLM-4</option>
+                            <option value="">请先加载模型</option>
                         </select>
                     </div>
                     <div class="config-item">
