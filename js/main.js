@@ -4562,7 +4562,7 @@ class CyberFortune {
         const modelSelect = document.getElementById('global-model');
         const apiUrlInput = document.getElementById('global-api-url');
         const loadModelsBtn = document.getElementById('load-models-button');
-        const loadCustomModelsBtn = document.getElementById('load-custom-models-button');
+        
 
         // 打开配置面板
         if (configToggle) {
@@ -4634,12 +4634,6 @@ class CyberFortune {
             });
         }
 
-        // 加载自定义模型
-        if (loadCustomModelsBtn) {
-            loadCustomModelsBtn.addEventListener('click', () => {
-                this.loadCustomModels();
-            });
-        }
     }
 
     // 加载全局配置
@@ -4819,80 +4813,6 @@ class CyberFortune {
         } finally {
             loadBtn.disabled = false;
             loadBtn.innerHTML = '<span>加载模型</span>';
-        }
-    }
-    // 加载自定义模型
-    async loadCustomModels() {
-        const apiUrlInput = document.getElementById('custom-api-url');
-        const apiKeyInput = document.getElementById('custom-api-key');
-        const modelSelect = document.getElementById('global-model');
-        const loadBtn = document.getElementById('load-custom-models-button');
-
-        const customApiUrl = apiUrlInput.value.trim();
-        const customApiKey = apiKeyInput.value.trim();
-
-        if (!customApiUrl) {
-            this.showConfigMessage('请输入自定义模型的API地址', 'error');
-            return;
-        }
-
-        const originalBtnText = loadBtn.querySelector('span').textContent;
-        loadBtn.querySelector('span').textContent = '加载中...';
-        loadBtn.disabled = true;
-
-        try {
-            const headers = {
-                'Content-Type': 'application/json'
-            };
-            if (customApiKey) {
-                headers['Authorization'] = `Bearer ${customApiKey}`;
-            }
-
-            const response = await fetch('/api/proxy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    targetUrl: customApiUrl,
-                    method: 'GET',
-                    headers: headers
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`API错误 (${response.status}): ${errorData.error?.message || '无法获取模型列表'}`);
-            }
-
-            const data = await response.json();
-            
-            // 假设返回的数据结构是 { data: [ { id: 'model-1' }, { id: 'model-2' } ] }
-            // 这是OpenAI等API的常见格式
-            const models = data.data;
-
-            if (!models || !Array.isArray(models) || models.length === 0) {
-                this.showConfigMessage('未从API返回有效的模型列表，请检查API地址和返回格式。', 'error');
-                return;
-            }
-
-            // 清空并填充模型下拉框
-            modelSelect.innerHTML = '';
-            models.forEach(model => {
-                const option = document.createElement('option');
-                option.value = model.id;
-                option.textContent = model.id;
-                modelSelect.appendChild(option);
-            });
-
-            this.showConfigMessage(`成功加载 ${models.length} 个模型！`, 'success');
-
-        } catch (error) {
-            console.error('加载自定义模型失败:', error);
-            this.showConfigMessage(`加载失败: ${error.message}`, 'error');
-        } finally {
-            loadBtn.querySelector('span').textContent = originalBtnText;
-            loadBtn.disabled = false;
         }
     }
 
@@ -5297,8 +5217,27 @@ const processingSteps = document.getElementById('ai-marriage-processing-steps');
                                     // 实时更新显示
                                     if (output) {
                                         output.innerHTML = this.formatMarriageAIResponse(fullResponse);
-} catch (error) {
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            // 忽略解析错误
+                        }
+                    }
+                }
+            }
+
+            // 分析完成
+            processingSteps.innerHTML += '✅ AI合婚分析完成<br>';
+
+            // 显示复制按钮
+            if (copyBtn && fullResponse.trim()) {
+                copyBtn.style.display = 'block';
+            }
+
+        } catch (error) {
             console.error('流式API调用失败，尝试非流式调用:', error);
+            
             // 尝试非流式调用作为备选方案
             try {
                 const nonStreamRequestBody = {
@@ -5366,197 +5305,7 @@ const processingSteps = document.getElementById('ai-marriage-processing-steps');
             this.hideMarriageAIProcessing();
         }
     }
-                                    }
-                                }
-                            }
-                        } catch (e) {
-                            // 忽略解析错误
-                        }
-                    }
-                }
-            }
 
-            // 分析完成
-            processingSteps.innerHTML += '✅ AI合婚分析完成<br>';
-
-            // 显示复制按钮
-            if (copyBtn && fullResponse.trim()) {
-                copyBtn.style.display = 'block';
-            }
-        } catch (error) {
-            console.error('AI合婚分析失败:', error);
-
-            // 尝试非流式调用作为备选方案
-            try {
-                const nonStreamRequestBody = { ...requestBody, stream: false };
-                const nonStreamResponse = await fetch('/api/proxy', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        targetUrl: apiUrl,
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiKey}`
-                        },
-                        body: JSON.stringify(nonStreamRequestBody)
-                    })
-                });
-
-                if (!nonStreamResponse.ok) {
-                    const errorData = await nonStreamResponse.json().catch(() => ({}));
-                    throw new Error(`API错误 (${nonStreamResponse.status}): ${errorData.error?.message || '未知错误'}`);
-                }
-
-                const nonStreamData = await nonStreamResponse.json();
-                if (nonStreamData && nonStreamData.choices && nonStreamData.choices[0]) {
-                    aiOutputDiv.innerHTML = nonStreamData.choices[0].message.content;
-                    this.removeAIOutputScrollbar();
-                    console.log('非流式API调用成功');
-                } else {
-                    throw new Error('API返回的数据格式不正确');
-                }
-            } catch (fallbackError) {
-                throw new Error(`API通信失败: ${fallbackError.message}`);
-            }
-        }
-        
-        // 根据模型设置特定参数
-        if (modelName.includes('deepseek-r1')) {
-            requestBody.temperature = 0.3; // 降低随机性，提高推理准确性
-            requestBody.max_tokens = 8000; // 增加输出长度，支持详细推理
-            console.log('使用 DeepSeek-R1 推理模型配置');
-        } else if (modelName.includes('deepseek')) {
-            requestBody.temperature = 0.5;
-            requestBody.max_tokens = 6000;
-        } else if (modelName.includes('gpt')) {
-            requestBody.temperature = 0.7;
-            requestBody.max_tokens = 4000;
-        } else {
-            requestBody.temperature = 0.6;
-            requestBody.max_tokens = 4000;
-        }
-        const processingMessage = document.getElementById('ai-marriage-processing-message');
-
-        try {
-            // 显示连接状态
-            processingSteps.innerHTML = '🔗 正在连接AI服务器...<br>';
-            processingMessage.textContent = '建立连接中...';
-
-            console.log('合婚AI分析开始:', { apiUrl, modelName, promptLength: prompt.length });
-
-            // 构建请求体
-            const requestBody = {
-                model: modelName,
-                messages: [
-                    {
-                        role: "system",
-                        content: "你是精通中国传统合婚理论和现代情感心理学的专家，擅长结合传统命理与现代心理学为情侣提供深入的合婚分析和情感指导。"
-                    },
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
-                stream: true
-            };
-
-            // 根据模型调整参数
-            if (modelName.includes('gpt')) {
-                requestBody.temperature = 0.7;
-                requestBody.max_tokens = 4000;
-            } else if (modelName.includes('claude')) {
-                requestBody.max_tokens = 4000;
-            }
-
-            processingSteps.innerHTML += '📡 发送分析请求...<br>';
-            processingMessage.textContent = '正在发送请求...';
-
-            const response = await fetch('/api/proxy', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    targetUrl: apiUrl,
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: requestBody
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(`API错误 (${response.status}): ${errorData.error?.message || '未知错误'}`);
-            }
-
-            processingSteps.innerHTML += '🧠 AI正在分析中...<br>';
-            processingMessage.textContent = '正在生成分析结果...';
-
-            // 处理流式响应
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let fullResponse = '';
-
-            // 显示结果区域
-            const resultSection = document.getElementById('ai-marriage-result-section');
-            const output = document.getElementById('ai-marriage-output');
-            const copyBtn = document.getElementById('copy-ai-marriage-result');
-
-            if (resultSection) {
-                resultSection.style.display = 'block';
-                output.innerHTML = '<div class="ai-response-streaming">正在生成分析...</div>';
-            }
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value);
-                const lines = chunk.split('\n');
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const data = line.slice(6);
-                        if (data === '[DONE]') continue;
-
-                        try {
-                            const parsed = JSON.parse(data);
-                            const content = parsed.choices?.[0]?.delta?.content || '';
-                            if (content) {
-                                fullResponse += content;
-                                // 实时更新显示
-                                if (output) {
-                                    output.innerHTML = this.formatMarriageAIResponse(fullResponse);
-                                }
-                            }
-                        } catch (e) {
-                            // 忽略解析错误
-                        }
-                    }
-                }
-            }
-
-            processingSteps.innerHTML += '✅ 分析完成！<br>';
-            processingMessage.textContent = '分析完成';
-
-            // 显示复制按钮
-            if (copyBtn && fullResponse.trim()) {
-                copyBtn.style.display = 'inline-block';
-            }
-
-            console.log('合婚AI分析完成');
-
-        } catch (error) {
-            console.error('合婚AI API调用失败:', error);
-            throw error;
-        }
-    }
 
     // 显示合婚AI处理状态
     showMarriageAIProcessing() {
