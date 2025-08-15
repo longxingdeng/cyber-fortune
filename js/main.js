@@ -2782,10 +2782,25 @@ class CyberFortune {
                         content: prompt
                     }
                 ],
-                stream: true,
-                temperature: 0.7,
-                max_tokens: 4000
+                stream: true
             };
+
+            // 根据模型设置特定参数
+            if (modelName.includes('deepseek-r1')) {
+                // DeepSeek-R1 推理模型的特殊配置
+                requestBody.temperature = 0.3; // 降低随机性，提高推理准确性
+                requestBody.max_tokens = 8000; // 增加输出长度，支持详细推理
+                console.log('使用 DeepSeek-R1 推理模型配置');
+            } else if (modelName.includes('deepseek')) {
+                requestBody.temperature = 0.5;
+                requestBody.max_tokens = 6000;
+            } else if (modelName.includes('gpt')) {
+                requestBody.temperature = 0.7;
+                requestBody.max_tokens = 4000;
+            } else {
+                requestBody.temperature = 0.6;
+                requestBody.max_tokens = 4000;
+            }
 
             console.log('发送请求体:', JSON.stringify(requestBody, null, 2));
 
@@ -2893,24 +2908,43 @@ class CyberFortune {
             }
 
         } catch (error) {
-            console.error('API调用失败:', error);
+            console.error('流式API调用失败，尝试非流式调用:', error);
 
-            // 检查是否是网络或CORS错误
-            if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                throw new Error('网络连接失败，可能的原因：\n1. 网络连接问题\n2. API地址不正确\n3. CORS跨域限制\n4. 防火墙或代理阻止\n\n请检查网络连接和API配置。');
+            // 尝试非流式调用作为备选方案
+            try {
+                const nonStreamRequestBody = { ...requestBody, stream: false };
+                const nonStreamResponse = await fetch('/api/proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        targetUrl: apiUrl,
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify(nonStreamRequestBody)
+                    })
+                });
+
+                if (!nonStreamResponse.ok) {
+                    const errorData = await nonStreamResponse.json().catch(() => ({}));
+                    throw new Error(`API错误 (${nonStreamResponse.status}): ${errorData.error?.message || '未知错误'}`);
+                }
+
+                const nonStreamData = await nonStreamResponse.json();
+                if (nonStreamData && nonStreamData.choices && nonStreamData.choices[0]) {
+                    aiOutputDiv.innerHTML = nonStreamData.choices[0].message.content;
+                    this.removeAIOutputScrollbar();
+                    console.log('非流式API调用成功');
+                } else {
+                    throw new Error('API返回的数据格式不正确');
+                }
+            } catch (fallbackError) {
+                throw new Error(`API通信失败: ${fallbackError.message}`);
             }
-
-            // 检查是否是API密钥错误
-            if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-                throw new Error('API密钥验证失败，请检查：\n1. API密钥是否正确\n2. API密钥是否有效\n3. 是否有足够的API配额');
-            }
-
-            // 检查是否是模型不存在错误
-            if (error.message.includes('404') || error.message.includes('model')) {
-                throw new Error('模型不存在或不可用，请检查：\n1. 模型名称是否正确\n2. 该模型是否在您的API账户中可用\n3. 尝试切换到其他模型');
-            }
-
-            throw new Error(`API通信失败: ${error.message}`);
         }
     }
 
@@ -4527,6 +4561,7 @@ class CyberFortune {
         const testConfigBtn = document.getElementById('test-global-config');
         const modelSelect = document.getElementById('global-model');
         const apiUrlInput = document.getElementById('global-api-url');
+        const loadModelsBtn = document.getElementById('load-models-button');
         const loadCustomModelsBtn = document.getElementById('load-custom-models-button');
 
         // 打开配置面板
@@ -4589,6 +4624,13 @@ class CyberFortune {
         if (testConfigBtn) {
             testConfigBtn.addEventListener('click', () => {
                 this.testGlobalConfig();
+            });
+        }
+
+        // 加载模型
+        if (loadModelsBtn) {
+            loadModelsBtn.addEventListener('click', () => {
+                this.loadModels();
             });
         }
 
@@ -4713,6 +4755,72 @@ class CyberFortune {
         }
     }
 
+// 加载主要模型
+    async loadModels() {
+        const apiUrlInput = document.getElementById('global-api-url');
+        const apiKeyInput = document.getElementById('global-api-key');
+        const modelSelect = document.getElementById('global-model');
+        const loadBtn = document.getElementById('load-models-button');
+
+        const apiUrl = apiUrlInput.value.trim();
+        const apiKey = apiKeyInput.value.trim();
+
+        if (!apiUrl) {
+            this.showMessage('请输入API地址', 'error');
+            return;
+        }
+
+        loadBtn.disabled = true;
+        loadBtn.innerHTML = '<span>加载中...</span>';
+
+        try {
+            const modelsUrl = apiUrl.endsWith('/') ? `${apiUrl}models` : `${apiUrl}/models`;
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (apiKey) {
+                headers['Authorization'] = `Bearer ${apiKey}`;
+            }
+
+            const response = await fetch(modelsUrl, {
+                method: 'GET',
+                headers: headers
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            
+            if (!data.data || !Array.isArray(data.data)) {
+                throw new Error('无效的API响应格式');
+            }
+
+            // 清空现有选项（保留第一个默认选项）
+            modelSelect.innerHTML = '<option value="">请选择模型</option>';
+
+            // 添加模型选项
+            data.data.forEach(model => {
+                if (model.id) {
+                    const option = document.createElement('option');
+                    option.value = model.id;
+                    option.textContent = model.id;
+                    modelSelect.appendChild(option);
+                }
+            });
+
+            this.showMessage(`成功加载 ${data.data.length} 个模型`, 'success');
+            
+        } catch (error) {
+            console.error('加载模型失败:', error);
+            this.showMessage(`加载模型失败: ${error.message}`, 'error');
+        } finally {
+            loadBtn.disabled = false;
+            loadBtn.innerHTML = '<span>加载模型</span>';
+        }
+    }
     // 加载自定义模型
     async loadCustomModels() {
         const apiUrlInput = document.getElementById('custom-api-url');
@@ -5098,7 +5206,238 @@ class CyberFortune {
 
     // 调用合婚AI API
     async callMarriageAIAPI(prompt, apiKey, modelName, apiUrl) {
-        const processingSteps = document.getElementById('ai-marriage-processing-steps');
+const processingSteps = document.getElementById('ai-marriage-processing-steps');
+        const aiResultSection = document.getElementById('ai-marriage-result-section');
+        const output = document.getElementById('ai-marriage-output');
+        const copyBtn = document.getElementById('copy-ai-marriage-result');
+        let fullResponse = '';
+
+        try {
+            // 显示连接状态
+            processingSteps.innerHTML = '🔗 正在连接AI服务器...<br>';
+            
+            console.log('API调用参数:', {
+                modelName,
+                apiUrl,
+                apiKeyPrefix: apiKey?.substring(0, 10) + '...'
+            });
+
+            // 构建请求体，针对不同模型进行优化
+            const requestBody = {
+                model: modelName,
+                messages: [
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                stream: true,
+                temperature: 0.7,
+                max_tokens: 4000
+            };
+
+            // 针对不同模型设置不同参数
+            if (modelName.includes('deepseek-r1')) {
+                requestBody.temperature = 0.3; // 降低随机性，提高推理准确性
+                requestBody.max_tokens = 8000; // 增加输出长度，支持详细推理
+                console.log('使用 DeepSeek-R1 推理模型配置');
+            } else if (modelName.includes('deepseek')) {
+                requestBody.temperature = 0.5;
+                requestBody.max_tokens = 6000;
+            } else if (modelName.includes('gpt-4')) {
+                requestBody.temperature = 0.6;
+                requestBody.max_tokens = 6000;
+            } else if (modelName.includes('gpt-3.5')) {
+                requestBody.temperature = 0.7;
+                requestBody.max_tokens = 4000;
+            } else {
+                requestBody.temperature = 0.7;
+                requestBody.max_tokens = 4000;
+            }
+
+            const response = await fetch('/api/proxy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`,
+                    'X-API-URL': apiUrl
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API调用失败: ${response.status} - ${errorText}`);
+            }
+
+            // 显示分析状态
+            processingSteps.innerHTML += '🤖 AI正在分析合婚方案...<br>';
+
+            // 显示结果区域
+            aiResultSection.style.display = 'block';
+
+            // 处理流式响应
+            const reader = response.body.getReader();
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = new TextDecoder().decode(value);
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.choices && data.choices[0] && data.choices[0].delta) {
+                                const content = data.choices[0].delta.content;
+                                if (content) {
+                                    fullResponse += content;
+                                    // 实时更新显示
+                                    if (output) {
+                                        output.innerHTML = this.formatMarriageAIResponse(fullResponse);
+} catch (error) {
+            console.error('流式API调用失败，尝试非流式调用:', error);
+            // 尝试非流式调用作为备选方案
+            try {
+                const nonStreamRequestBody = {
+                    model: modelName,
+                    messages: [
+                        {
+                            role: "user",
+                            content: prompt
+                        }
+                    ],
+                    stream: false,
+                    temperature: 0.7,
+                    max_tokens: 4000
+                };
+
+                // 根据模型设置特定参数
+                if (modelName.includes('deepseek-r1')) {
+                    nonStreamRequestBody.temperature = 0.3;
+                    nonStreamRequestBody.max_tokens = 8000;
+                } else if (modelName.includes('deepseek')) {
+                    nonStreamRequestBody.temperature = 0.5;
+                    nonStreamRequestBody.max_tokens = 6000;
+                } else if (modelName.includes('gpt-4')) {
+                    nonStreamRequestBody.temperature = 0.6;
+                    nonStreamRequestBody.max_tokens = 6000;
+                } else if (modelName.includes('gpt-3.5')) {
+                    nonStreamRequestBody.temperature = 0.7;
+                    nonStreamRequestBody.max_tokens = 4000;
+                }
+
+                const nonStreamResponse = await fetch('/api/proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                        'X-API-URL': apiUrl
+                    },
+                    body: JSON.stringify(nonStreamRequestBody)
+                });
+
+                if (!nonStreamResponse.ok) {
+                    throw new Error(`非流式API调用失败: ${nonStreamResponse.status}`);
+                }
+
+                const nonStreamData = await nonStreamResponse.json();
+                const content = nonStreamData.choices?.[0]?.message?.content || '无法获取AI分析结果';
+                
+                fullResponse = content;
+                if (output) {
+                    output.innerHTML = this.formatMarriageAIResponse(content);
+                }
+
+                // 显示复制按钮
+                if (copyBtn && fullResponse.trim()) {
+                    copyBtn.style.display = 'block';
+                }
+
+                processingSteps.innerHTML += '✅ AI合婚分析完成（备选方案）<br>';
+
+            } catch (fallbackError) {
+                console.error('非流式调用也失败:', fallbackError);
+                this.showMarriageAIError(`AI分析失败: ${fallbackError.message}`);
+            }
+        } finally {
+            this.hideMarriageAIProcessing();
+        }
+    }
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            // 忽略解析错误
+                        }
+                    }
+                }
+            }
+
+            // 分析完成
+            processingSteps.innerHTML += '✅ AI合婚分析完成<br>';
+
+            // 显示复制按钮
+            if (copyBtn && fullResponse.trim()) {
+                copyBtn.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('AI合婚分析失败:', error);
+
+            // 尝试非流式调用作为备选方案
+            try {
+                const nonStreamRequestBody = { ...requestBody, stream: false };
+                const nonStreamResponse = await fetch('/api/proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        targetUrl: apiUrl,
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify(nonStreamRequestBody)
+                    })
+                });
+
+                if (!nonStreamResponse.ok) {
+                    const errorData = await nonStreamResponse.json().catch(() => ({}));
+                    throw new Error(`API错误 (${nonStreamResponse.status}): ${errorData.error?.message || '未知错误'}`);
+                }
+
+                const nonStreamData = await nonStreamResponse.json();
+                if (nonStreamData && nonStreamData.choices && nonStreamData.choices[0]) {
+                    aiOutputDiv.innerHTML = nonStreamData.choices[0].message.content;
+                    this.removeAIOutputScrollbar();
+                    console.log('非流式API调用成功');
+                } else {
+                    throw new Error('API返回的数据格式不正确');
+                }
+            } catch (fallbackError) {
+                throw new Error(`API通信失败: ${fallbackError.message}`);
+            }
+        }
+        
+        // 根据模型设置特定参数
+        if (modelName.includes('deepseek-r1')) {
+            requestBody.temperature = 0.3; // 降低随机性，提高推理准确性
+            requestBody.max_tokens = 8000; // 增加输出长度，支持详细推理
+            console.log('使用 DeepSeek-R1 推理模型配置');
+        } else if (modelName.includes('deepseek')) {
+            requestBody.temperature = 0.5;
+            requestBody.max_tokens = 6000;
+        } else if (modelName.includes('gpt')) {
+            requestBody.temperature = 0.7;
+            requestBody.max_tokens = 4000;
+        } else {
+            requestBody.temperature = 0.6;
+            requestBody.max_tokens = 4000;
+        }
         const processingMessage = document.getElementById('ai-marriage-processing-message');
 
         try {
