@@ -7,9 +7,15 @@ class ApiClient {
 
     // 检测是否为本地开发环境
     detectLocalDevelopment() {
-        return window.location.hostname === 'localhost' || 
+        return window.location.hostname === 'localhost' ||
                window.location.hostname === '127.0.0.1' ||
                window.location.port === '3000';
+    }
+
+    // 检测是否在 Cloudflare Pages 环境
+    detectCloudflarePages() {
+        return window.location.hostname.includes('.pages.dev') ||
+               window.location.hostname.includes('workers.dev');
     }
 
     // 获取可用模型列表
@@ -42,6 +48,9 @@ class ApiClient {
             if (this.isLocalDevelopment) {
                 // 本地开发环境：使用代理服务器
                 return await this.loadModelsViaProxy(modelsUrl, apiKey);
+            } else if (this.detectCloudflarePages()) {
+                // Cloudflare Pages环境：使用CORS代理
+                return await this.loadModelsViaCORSProxy(modelsUrl, apiKey);
             } else {
                 // 生产环境：直接调用API
                 return await this.loadModelsDirectly(modelsUrl, apiKey);
@@ -68,6 +77,29 @@ class ApiClient {
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        // 使用标准化方法处理模型数据
+        return this.normalizeModelsData(data);
+    }
+
+    // 通过CORS代理加载模型（用于Cloudflare Pages）
+    async loadModelsViaCORSProxy(modelsUrl, apiKey) {
+        // 使用公共CORS代理服务
+        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+        const response = await fetch(proxyUrl + modelsUrl, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(`API请求失败: ${response.status} ${response.statusText}\n${errorData}`);
         }
 
         const data = await response.json();
@@ -114,6 +146,9 @@ class ApiClient {
             if (this.isLocalDevelopment) {
                 // 本地开发环境：使用代理服务器
                 return await this.sendViaProxy(apiUrl, apiKey, requestBody);
+            } else if (this.detectCloudflarePages()) {
+                // Cloudflare Pages环境：使用CORS代理
+                return await this.sendViaCORSProxy(apiUrl, apiKey, requestBody);
             } else {
                 // 生产环境：直接调用API
                 return await this.sendDirectly(apiUrl, apiKey, requestBody);
@@ -170,6 +205,23 @@ class ApiClient {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(requestPayload)
+        });
+
+        return await this.handleResponse(response);
+    }
+
+    // 通过CORS代理发送请求（用于Cloudflare Pages）
+    async sendViaCORSProxy(apiUrl, apiKey, requestBody) {
+        // 使用公共CORS代理服务
+        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+        const response = await fetch(proxyUrl + apiUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(requestBody)
         });
 
         return await this.handleResponse(response);
