@@ -86,25 +86,116 @@ class ApiClient {
 
     // 通过CORS代理加载模型（用于Cloudflare Pages）
     async loadModelsViaCORSProxy(modelsUrl, apiKey) {
-        // 使用公共CORS代理服务
-        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-        const response = await fetch(proxyUrl + modelsUrl, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+        // 尝试多个代理服务
+        const proxyServices = [
+            // 优先使用我们自己的Cloudflare Workers代理
+            {
+                name: 'Custom Worker',
+                url: this.getWorkerProxyUrl(),
+                useCustomFormat: true
+            },
+            // 公共代理服务作为备选
+            {
+                name: 'CORS Anywhere',
+                url: 'https://cors-anywhere.herokuapp.com/',
+                useCustomFormat: false
+            },
+            {
+                name: 'CORS Proxy',
+                url: 'https://corsproxy.io/?',
+                useCustomFormat: false
+            },
+            {
+                name: 'AllOrigins',
+                url: 'https://api.allorigins.win/raw?url=',
+                useCustomFormat: false
             }
-        });
+        ];
 
-        if (!response.ok) {
-            const errorData = await response.text();
-            throw new Error(`API请求失败: ${response.status} ${response.statusText}\n${errorData}`);
+        let lastError;
+        
+        for (const service of proxyServices) {
+            try {
+                console.log(`尝试使用代理服务: ${service.name}`);
+                
+                let finalUrl;
+                let response;
+                
+                if (service.useCustomFormat) {
+                    // 使用我们自己的Worker代理
+                    response = await fetch(service.url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            targetUrl: modelsUrl,
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${apiKey}`,
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                    });
+                } else {
+                    // 使用公共代理服务
+                    if (service.url.includes('allorigins')) {
+                        // allorigins需要编码URL
+                        finalUrl = service.url + encodeURIComponent(modelsUrl);
+                    } else {
+                        finalUrl = service.url + modelsUrl;
+                    }
+                    
+                    response = await fetch(finalUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log(`成功使用代理服务 ${service.name} 获取数据`);
+                // 使用标准化方法处理模型数据
+                return this.normalizeModelsData(data);
+            } catch (error) {
+                console.warn(`代理服务 ${service.name} 失败:`, error.message);
+                lastError = error;
+                continue;
+            }
         }
+        
+        // 所有代理服务都失败，尝试直接请求（可能会被CORS阻止）
+        console.warn('所有代理服务失败，尝试直接请求...');
+        try {
+            return await this.loadModelsDirectly(modelsUrl, apiKey);
+        } catch (directError) {
+            throw new Error(`所有代理服务和直接请求都失败。最后错误: ${lastError.message}\n直接请求错误: ${directError.message}`);
+        }
+    }
 
-        const data = await response.json();
-        // 使用标准化方法处理模型数据
-        return this.normalizeModelsData(data);
+    // 获取Worker代理URL
+    getWorkerProxyUrl() {
+        // 根据当前环境确定Worker URL
+        const hostname = window.location.hostname;
+        
+        if (hostname.includes('.pages.dev')) {
+            // Cloudflare Pages环境
+            const workerName = hostname.split('.')[0] + '-api-proxy';
+            return `https://${workerName}.workers.dev/api/proxy`;
+        } else if (hostname.includes('workers.dev')) {
+            // 已经在Worker环境中
+            return '/api/proxy';
+        } else {
+            // 本地开发环境
+            return 'http://localhost:8787/api/proxy';
+        }
     }
 
     // 直接调用API加载模型
@@ -212,19 +303,85 @@ class ApiClient {
 
     // 通过CORS代理发送请求（用于Cloudflare Pages）
     async sendViaCORSProxy(apiUrl, apiKey, requestBody) {
-        // 使用公共CORS代理服务
-        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-        const response = await fetch(proxyUrl + apiUrl, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+        // 尝试多个代理服务
+        const proxyServices = [
+            // 优先使用我们自己的Cloudflare Workers代理
+            {
+                name: 'Custom Worker',
+                url: this.getWorkerProxyUrl(),
+                useCustomFormat: true
             },
-            body: JSON.stringify(requestBody)
-        });
+            // 公共代理服务作为备选
+            {
+                name: 'CORS Anywhere',
+                url: 'https://cors-anywhere.herokuapp.com/',
+                useCustomFormat: false
+            },
+            {
+                name: 'CORS Proxy',
+                url: 'https://corsproxy.io/?',
+                useCustomFormat: false
+            }
+        ];
 
-        return await this.handleResponse(response);
+        let lastError;
+        
+        for (const service of proxyServices) {
+            try {
+                console.log(`尝试使用代理服务发送请求: ${service.name}`);
+                
+                let response;
+                
+                if (service.useCustomFormat) {
+                    // 使用我们自己的Worker代理
+                    response = await fetch(service.url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            targetUrl: apiUrl,
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${apiKey}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: requestBody
+                        })
+                    });
+                } else {
+                    // 使用公共代理服务
+                    response = await fetch(service.url + apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                console.log(`成功使用代理服务 ${service.name} 发送请求`);
+                return await this.handleResponse(response);
+            } catch (error) {
+                console.warn(`代理服务 ${service.name} 失败:`, error.message);
+                lastError = error;
+                continue;
+            }
+        }
+        
+        // 所有代理服务都失败，尝试直接请求（可能会被CORS阻止）
+        console.warn('所有代理服务失败，尝试直接请求...');
+        try {
+            return await this.sendDirectly(apiUrl, apiKey, requestBody);
+        } catch (directError) {
+            throw new Error(`所有代理服务和直接请求都失败。最后错误: ${lastError.message}\n直接请求错误: ${directError.message}`);
+        }
     }
 
     // 直接调用API发送请求
