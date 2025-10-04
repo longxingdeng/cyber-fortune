@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模型加载测试</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .model-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .model-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .model-item:last-child {
+            border-bottom: none;
+        }
+        .provider-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            background-color: #007bff;
+            color: white;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>模型加载测试</h1>
+        
+        <div class="form-group">
+            <label for="provider-select">API提供商:</label>
+            <select id="provider-select">
+                <option value="deepseek">DeepSeek</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="alibaba">阿里云</option>
+                <option value="zhipu">智谱AI</option>
+                <option value="custom">自定义</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="api-url">API地址:</label>
+            <input type="text" id="api-url" placeholder="例如: https://api.deepseek.com">
+        </div>
+        
+        <div class="form-group">
+            <label for="api-key">API密钥:</label>
+            <input type="password" id="api-key" placeholder="输入您的API密钥">
+        </div>
+        
+        <button id="load-models-btn">加载模型列表</button>
+        <button id="test-config-btn">测试配置</button>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="form-group">
+            <label for="model-select">选择模型:</label>
+            <select id="model-select">
+                <option value="">请先加载模型列表</option>
+            </select>
+        </div>
+        
+        <div id="model-list" class="model-list" style="display: none;">
+            <h3>可用模型列表:</h3>
+            <div id="model-items"></div>
+        </div>
+    </div>
+
+    <!-- 引入必要的模块 -->
+    <script src="js/config/config-manager.js"></script>
+    <script src="js/config/api-client.js"></script>
+    <script src="js/config/ai-config.js"></script>
+
+    <script>
+        // 等待所有模块加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查模块是否正确加载
+            if (typeof ConfigManager === 'undefined' || 
+                typeof ApiClient === 'undefined' || 
+                typeof AIConfig === 'undefined') {
+                showStatus('错误: 模块未正确加载', 'error');
+                return;
+            }
+            
+            // 初始化配置
+            const configManager = new ConfigManager();
+            const apiClient = new ApiClient();
+            const aiConfig = new AIConfig();
+            
+            // 获取DOM元素
+            const providerSelect = document.getElementById('provider-select');
+            const apiUrlInput = document.getElementById('api-url');
+            const apiKeyInput = document.getElementById('api-key');
+            const loadModelsBtn = document.getElementById('load-models-btn');
+            const testConfigBtn = document.getElementById('test-config-btn');
+            const modelSelect = document.getElementById('model-select');
+            const statusDiv = document.getElementById('status');
+            const modelListDiv = document.getElementById('model-list');
+            const modelItemsDiv = document.getElementById('model-items');
+            
+            // 显示状态消息
+            function showStatus(message, type) {
+                statusDiv.textContent = message;
+                statusDiv.className = `status ${type}`;
+                statusDiv.style.display = 'block';
+                
+                // 3秒后自动隐藏成功和消息消息
+                if (type === 'success' || type === 'info') {
+                    setTimeout(() => {
+                        statusDiv.style.display = 'none';
+                    }, 3000);
+                }
+            }
+            
+            // 更新提供商选择
+            function updateProviderSelection() {
+                const provider = providerSelect.value;
+                const config = configManager.getProviderConfig(provider);
+                
+                if (provider !== 'custom' && config.baseUrl) {
+                    apiUrlInput.value = config.baseUrl;
+                }
+            }
+            
+            // 加载模型列表
+            async function loadModels() {
+                const provider = providerSelect.value;
+                const baseUrl = apiUrlInput.value.trim();
+                const apiKey = apiKeyInput.value.trim();
+                
+                if (!baseUrl || !apiKey) {
+                    showStatus('请填写API地址和密钥', 'error');
+                    return;
+                }
+                
+                loadModelsBtn.disabled = true;
+                loadModelsBtn.textContent = '加载中...';
+                showStatus('正在加载模型列表...', 'info');
+                
+                try {
+                    // 使用配置管理器获取模型列表URL
+                    const modelsUrl = configManager.getModelsUrl(provider, baseUrl);
+                    console.log('模型列表URL:', modelsUrl);
+                    
+                    // 使用API客户端加载模型
+                    const models = await apiClient.getAvailableModels(modelsUrl, apiKey);
+                    console.log('加载的模型:', models);
+                    
+                    if (models && models.length > 0) {
+                        // 更新模型选择下拉框
+                        modelSelect.innerHTML = '';
+                        models.forEach(model => {
+                            const option = document.createElement('option');
+                            option.value = model.id;
+                            option.textContent = model.name;
+                            modelSelect.appendChild(option);
+                        });
+                        
+                        // 显示模型列表
+                        modelItemsDiv.innerHTML = '';
+                        models.forEach(model => {
+                            const item = document.createElement('div');
+                            item.className = 'model-item';
+                            item.innerHTML = `
+                                <strong>${model.name}</strong>
+                                <span class="provider-badge">${model.provider || 'unknown'}</span>
+                                <br>
+                                <small>ID: ${model.id}</small>
+                            `;
+                            modelItemsDiv.appendChild(item);
+                        });
+                        
+                        modelListDiv.style.display = 'block';
+                        showStatus(`成功加载 ${models.length} 个模型`, 'success');
+                    } else {
+                        showStatus('未找到可用模型', 'error');
+                        modelListDiv.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('加载模型失败:', error);
+                    showStatus(`加载模型失败: ${error.message}`, 'error');
+                    modelListDiv.style.display = 'none';
+                } finally {
+                    loadModelsBtn.disabled = false;
+                    loadModelsBtn.textContent = '加载模型列表';
+                }
+            }
+            
+            // 测试配置
+            async function testConfig() {
+                const provider = providerSelect.value;
+                const baseUrl = apiUrlInput.value.trim();
+                const apiKey = apiKeyInput.value.trim();
+                
+                if (!baseUrl || !apiKey) {
+                    showStatus('请填写API地址和密钥', 'error');
+                    return;
+                }
+                
+                testConfigBtn.disabled = true;
+                testConfigBtn.textContent = '测试中...';
+                showStatus('正在测试连接...', 'info');
+                
+                try {
+                    const result = await configManager.validateConfig(baseUrl, apiKey, provider);
+                    
+                    if (result.valid) {
+                        showStatus('连接测试成功', 'success');
+                    } else {
+                        showStatus(`连接测试失败: ${result.error}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('测试配置失败:', error);
+                    showStatus(`测试配置失败: ${error.message}`, 'error');
+                } finally {
+                    testConfigBtn.disabled = false;
+                    testConfigBtn.textContent = '测试配置';
+                }
+            }
+            
+            // 绑定事件
+            providerSelect.addEventListener('change', updateProviderSelection);
+            loadModelsBtn.addEventListener('click', loadModels);
+            testConfigBtn.addEventListener('click', testConfig);
+            
+            // 初始化
+            updateProviderSelection();
+        });
+    </script>
+</body>
+</html>

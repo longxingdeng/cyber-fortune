@@ -4466,8 +4466,317 @@ class CyberFortune {
 
     // 初始化全局配置
     initGlobalConfig() {
+        // 初始化新的配置系统
+        this.initNewConfigSystem();
         this.loadGlobalConfig();
         this.bindGlobalConfigEvents();
+    }
+    
+    // 初始化新的配置系统
+    initNewConfigSystem() {
+        // 检查配置系统是否可用
+        if (typeof ConfigManager !== 'undefined' && typeof AiConfig !== 'undefined') {
+            console.log('初始化新的AI配置系统...');
+            
+            // 创建配置管理器实例
+            this.configManager = new ConfigManager();
+            
+            // 创建AI配置实例
+            this.aiConfig = new AiConfig({
+                onSave: (config) => {
+                    // 当配置保存时，更新全局配置
+                    this.updateGlobalConfigFromNewSystem(config);
+                },
+                onLoad: () => {
+                    // 返回当前配置
+                    return this.getGlobalConfig();
+                }
+            });
+            
+            // 初始化AI配置
+            this.aiConfig.init();
+            
+            // 设置模型加载按钮事件
+            this.setupModelLoadingEvents();
+            
+            console.log('新配置系统初始化完成');
+        } else {
+            console.warn('新配置系统不可用，使用传统配置方式');
+        }
+    }
+    
+    // 设置模型加载相关事件
+    setupModelLoadingEvents() {
+        const providerSelect = document.getElementById('provider-select');
+        const apiUrlInput = document.getElementById('global-api-url');
+        const apiKeyInput = document.getElementById('global-api-key');
+        const loadModelsBtn = document.getElementById('load-models-btn');
+        const modelSelect = document.getElementById('global-model');
+        
+        // 监听提供商变化
+        if (providerSelect) {
+            providerSelect.addEventListener('change', () => {
+                this.updateProviderConfig();
+            });
+        }
+        
+        // 监听API地址和密钥变化
+        if (apiUrlInput && apiKeyInput) {
+            const checkInputs = () => {
+                if (apiUrlInput.value.trim() && apiKeyInput.value.trim()) {
+                    loadModelsBtn.disabled = false;
+                } else {
+                    loadModelsBtn.disabled = true;
+                }
+            };
+            
+            apiUrlInput.addEventListener('input', checkInputs);
+            apiKeyInput.addEventListener('input', checkInputs);
+        }
+        
+        // 监听加载模型按钮点击
+        if (loadModelsBtn) {
+            loadModelsBtn.addEventListener('click', () => {
+                this.loadAvailableModels();
+            });
+        }
+    }
+    
+    // 更新提供商配置
+    updateProviderConfig() {
+        const providerSelect = document.getElementById('provider-select');
+        const apiUrlInput = document.getElementById('global-api-url');
+        const modelSelect = document.getElementById('global-model');
+        const providerDisplay = document.getElementById('provider-display');
+        
+        if (!providerSelect || !apiUrlInput || !modelSelect) return;
+        
+        const selectedProvider = providerSelect.value;
+        
+        // 更新显示的提供商名称
+        if (providerDisplay) {
+            providerDisplay.textContent = providerSelect.options[providerSelect.selectedIndex].text;
+        }
+        
+        // 尝试使用新的配置系统获取默认URL
+        let defaultUrl = '';
+        if (window.ConfigSystem && window.ConfigSystem.getAIConfig) {
+            const aiConfig = window.ConfigSystem.getAIConfig();
+            if (aiConfig && aiConfig.configManager) {
+                defaultUrl = aiConfig.configManager.getApiUrl(selectedProvider);
+            }
+        }
+        
+        // 如果新系统没有返回URL，使用默认值
+        if (!defaultUrl) {
+            const defaultUrls = {
+                'deepseek': 'https://api.deepseek.com/v1/chat/completions',
+                'openai': 'https://api.openai.com/v1/chat/completions',
+                'anthropic': 'https://api.anthropic.com/v1/messages',
+                'alibaba': 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation',
+                'zhipu': 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+                'custom': ''
+            };
+            defaultUrl = defaultUrls[selectedProvider] || '';
+        }
+        
+        if (defaultUrl) {
+            apiUrlInput.value = defaultUrl;
+        }
+        
+        // 根据提供商更新模型选项
+        this.updateModelOptions(selectedProvider);
+        
+        // 如果是自定义提供商，启用加载模型按钮
+        const loadModelsBtn = document.getElementById('load-models-btn');
+        if (loadModelsBtn) {
+            const apiKeyInput = document.getElementById('global-api-key');
+            if (selectedProvider === 'custom' && apiKeyInput && apiKeyInput.value.trim()) {
+                loadModelsBtn.disabled = false;
+            } else {
+                loadModelsBtn.disabled = true;
+            }
+        }
+    }
+    
+    // 更新模型选项
+    updateModelOptions(provider) {
+        const modelSelect = document.getElementById('global-model');
+        if (!modelSelect) return;
+        
+        // 清空现有选项
+        modelSelect.innerHTML = '';
+        
+        // 尝试使用新的配置系统获取模型选项
+        let modelOptions = null;
+        if (window.ConfigSystem && window.ConfigSystem.getAIConfig) {
+            const aiConfig = window.ConfigSystem.getAIConfig();
+            if (aiConfig && aiConfig.configManager) {
+                modelOptions = aiConfig.configManager.getModelOptions(provider);
+            }
+        }
+        
+        // 如果新系统没有返回模型选项，使用默认值
+        if (!modelOptions) {
+            const defaultModelOptions = {
+                'deepseek': [
+                    { value: 'deepseek-r1', text: 'DeepSeek-R1 (推荐)' },
+                    { value: 'deepseek-chat', text: 'DeepSeek-Chat' }
+                ],
+                'openai': [
+                    { value: 'gpt-4', text: 'GPT-4' },
+                    { value: 'gpt-3.5-turbo', text: 'GPT-3.5 Turbo' }
+                ],
+                'anthropic': [
+                    { value: 'claude-3-sonnet', text: 'Claude-3 Sonnet' },
+                    { value: 'claude-3-haiku', text: 'Claude-3 Haiku' }
+                ],
+                'alibaba': [
+                    { value: 'qwen-max', text: '通义千问-Max' }
+                ],
+                'zhipu': [
+                    { value: 'glm-4', text: '智谱GLM-4' }
+                ],
+                'custom': [
+                    { value: '', text: '请加载模型列表' }
+                ]
+            };
+            modelOptions = defaultModelOptions[provider] || [];
+        }
+        
+        // 添加模型选项
+        modelOptions.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option.value;
+            optionElement.textContent = option.text;
+            modelSelect.appendChild(optionElement);
+        });
+    }
+    
+    // 加载可用模型
+    async loadAvailableModels() {
+        const apiUrlInput = document.getElementById('global-api-url');
+        const apiKeyInput = document.getElementById('global-api-key');
+        const loadModelsBtn = document.getElementById('load-models-btn');
+        const modelSelect = document.getElementById('global-model');
+        
+        if (!apiUrlInput || !apiKeyInput || !loadModelsBtn || !modelSelect) return;
+        
+        const baseUrl = apiUrlInput.value.trim();
+        const apiKey = apiKeyInput.value.trim();
+        
+        if (!baseUrl || !apiKey) {
+            this.showConfigMessage('请先输入API地址和密钥', 'error');
+            return;
+        }
+        
+        // 禁用按钮，显示加载状态
+        loadModelsBtn.disabled = true;
+        loadModelsBtn.textContent = '🔄 加载中...';
+        
+        try {
+            // 尝试使用新的配置系统
+            if (window.ConfigSystem && window.ConfigSystem.getAIConfig) {
+                console.log('使用新的配置系统加载模型');
+                
+                // 获取配置系统实例
+                const aiConfig = window.ConfigSystem.getAIConfig();
+                if (!aiConfig || !aiConfig.configManager || !aiConfig.configManager.apiClient) {
+                    throw new Error('配置系统未正确初始化');
+                }
+                
+                // 获取提供商和构建模型URL
+                const provider = aiConfig.configManager.detectProviderFromUrl(baseUrl) || 'custom';
+                const modelsUrl = aiConfig.configManager.getModelsUrl(provider, baseUrl);
+                
+                console.log(`加载模型: 提供商=${provider}, URL=${modelsUrl}`);
+                
+                // 使用API客户端加载模型
+                const models = await aiConfig.configManager.apiClient.getAvailableModels(modelsUrl, apiKey);
+                
+                // 清空现有选项
+                modelSelect.innerHTML = '';
+                
+                // 添加获取到的模型
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.id;
+                    option.textContent = model.name || model.id;
+                    modelSelect.appendChild(option);
+                });
+                
+                // 选择第一个模型
+                if (models.length > 0) {
+                    modelSelect.value = models[0].id;
+                }
+                
+                this.showConfigMessage(`成功加载 ${models.length} 个模型`, 'success');
+                console.log(`成功加载 ${models.length} 个模型:`, models);
+            } else if (this.configManager && this.configManager.apiClient) {
+                // 回退到旧方法
+                console.log('使用旧配置系统加载模型');
+                
+                // 构建模型列表API URL
+                const modelsUrl = this.configManager.getModelsUrl(baseUrl);
+                const models = await this.configManager.apiClient.getAvailableModels(modelsUrl, apiKey);
+                
+                // 清空现有选项
+                modelSelect.innerHTML = '';
+                
+                // 添加获取到的模型
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.id;
+                    option.textContent = model.name || model.id;
+                    modelSelect.appendChild(option);
+                });
+                
+                // 选择第一个模型
+                if (models.length > 0) {
+                    modelSelect.value = models[0].id;
+                }
+                
+                this.showConfigMessage(`成功加载 ${models.length} 个模型`, 'success');
+            } else {
+                throw new Error('API客户端不可用');
+            }
+        } catch (error) {
+            console.error('加载模型失败:', error);
+            this.showConfigMessage(`加载模型失败: ${error.message}`, 'error');
+            
+            // 添加一个通用选项
+            modelSelect.innerHTML = '<option value="">自定义模型</option>';
+        } finally {
+            // 恢复按钮状态
+            loadModelsBtn.disabled = false;
+            loadModelsBtn.textContent = '🔄 加载模型';
+        }
+    }
+    
+    // 从新系统更新全局配置
+    updateGlobalConfigFromNewSystem(config) {
+        try {
+            // 将新系统的配置转换为全局配置格式
+            const globalConfig = {
+                apiUrl: config.apiUrl,
+                apiKey: config.apiKey,
+                model: config.model,
+                provider: config.provider,
+                savedAt: new Date().toISOString()
+            };
+            
+            // 保存到localStorage
+            localStorage.setItem('cyberFortune_globalConfig', JSON.stringify(globalConfig));
+            
+            // 更新UI状态
+            this.updateConfigStatus('✅', '已保存', '#4CAF50');
+            this.showConfigMessage('配置保存成功！', 'success');
+            
+            console.log('全局配置已从新系统更新');
+        } catch (error) {
+            console.error('更新全局配置失败:', error);
+            this.showConfigMessage('保存配置失败', 'error');
+        }
     }
 
     // 绑定全局配置事件
@@ -4576,19 +4885,73 @@ class CyberFortune {
     // 保存全局配置
     saveGlobalConfig() {
         try {
-            const apiUrl = document.getElementById('global-api-url').value.trim();
+            const baseUrl = document.getElementById('global-api-url').value.trim();
             const apiKey = document.getElementById('global-api-key').value.trim();
             const model = document.getElementById('global-model').value;
+            const provider = document.getElementById('provider-select')?.value || 'custom';
 
-            if (!apiUrl || !apiKey) {
+            if (!baseUrl || !apiKey) {
                 this.showConfigMessage('请填写完整的API配置信息', 'error');
                 return;
             }
 
+            // 优先使用新的配置系统
+            if (window.ConfigSystem && window.ConfigSystem.getAIConfig) {
+                console.log('使用新的配置系统保存配置');
+                
+                // 获取配置系统实例
+                const aiConfig = window.ConfigSystem.getAIConfig();
+                if (aiConfig && aiConfig.configManager) {
+                    // 使用新系统保存配置
+                    const detectedProvider = aiConfig.configManager.detectProviderFromUrl(baseUrl) || provider;
+                    const apiUrl = aiConfig.configManager.getApiUrl(detectedProvider, baseUrl);
+                    
+                    const config = {
+                        baseUrl, // 保存基础URL，用于后续的模型加载
+                        apiUrl,  // 保存完整的API URL
+                        apiKey,
+                        model,
+                        provider: detectedProvider,
+                        savedAt: new Date().toISOString()
+                    };
+                    
+                    // 保存到localStorage
+                    localStorage.setItem('cyberFortune_globalConfig', JSON.stringify(config));
+                    
+                    // 如果新系统有保存方法，也调用它
+                    if (typeof aiConfig.saveConfig === 'function') {
+                        aiConfig.saveConfig(config);
+                    }
+                    
+                    this.updateConfigStatus('✅', '已保存', '#4CAF50');
+                    this.showConfigMessage('配置保存成功！', 'success');
+                    
+                    // 同步到各个模块
+                    this.syncConfigToModules(config);
+                    
+                    return;
+                }
+            }
+            
+            // 回退到旧的配置管理器
+            console.log('使用旧的配置管理器保存配置');
+            
+            // 使用配置管理器构建API URL
+            let apiUrl;
+            if (this.configManager) {
+                const detectedProvider = this.configManager.detectProviderFromUrl(baseUrl) || provider;
+                apiUrl = this.configManager.getApiUrl(detectedProvider, baseUrl);
+            } else {
+                // 回退到手动构建URL
+                apiUrl = `${baseUrl.replace(/\/$/, '')}/v1/chat/completions`;
+            }
+
             const config = {
-                apiUrl,
+                baseUrl, // 保存基础URL，用于后续的模型加载
+                apiUrl,  // 保存完整的API URL
                 apiKey,
                 model,
+                provider: this.configManager ? this.configManager.detectProviderFromUrl(baseUrl) || provider : provider,
                 savedAt: new Date().toISOString()
             };
 
@@ -4607,11 +4970,11 @@ class CyberFortune {
 
     // 测试全局配置
     async testGlobalConfig() {
-        const apiUrl = document.getElementById('global-api-url').value.trim();
+        const baseUrl = document.getElementById('global-api-url').value.trim();
         const apiKey = document.getElementById('global-api-key').value.trim();
         const model = document.getElementById('global-model').value;
 
-        if (!apiUrl || !apiKey) {
+        if (!baseUrl || !apiKey) {
             this.showConfigMessage('请先填写API配置信息', 'error');
             return;
         }
@@ -4619,6 +4982,16 @@ class CyberFortune {
         this.updateConfigStatus('🔄', '测试中...', '#FFC107');
 
         try {
+            // 使用配置管理器构建API URL
+            let apiUrl;
+            if (this.configManager) {
+                const provider = this.configManager.detectProviderFromUrl(baseUrl) || 'custom';
+                apiUrl = this.configManager.getApiUrl(provider, baseUrl);
+            } else {
+                // 回退到手动构建URL
+                apiUrl = `${baseUrl.replace(/\/$/, '')}/v1/chat/completions`;
+            }
+
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
@@ -4704,12 +5077,27 @@ class CyberFortune {
     syncConfigToModules(config) {
         // 由于各模块已移除独立配置，现在直接使用全局配置
         // 各模块的AI分析函数会自动调用getGlobalConfig()获取配置
+        
+        // 如果配置管理器可用，更新其配置
+        if (this.configManager && typeof this.configManager.updateConfig === 'function') {
+            this.configManager.updateConfig(config);
+        }
+        
         console.log('全局配置已保存，各模块将自动使用全局配置');
     }
 
     // 获取全局配置
     getGlobalConfig() {
         try {
+            // 首先尝试从配置管理器获取配置
+            if (this.configManager && typeof this.configManager.getConfig === 'function') {
+                const config = this.configManager.getConfig();
+                if (config && (config.baseUrl || config.apiUrl)) {
+                    return config;
+                }
+            }
+            
+            // 回退到localStorage
             const config = localStorage.getItem('cyberFortune_globalConfig');
             return config ? JSON.parse(config) : null;
         } catch (error) {

@@ -48,14 +48,39 @@
 
             <div class="config-form">
                 <div class="config-row">
+                    <div class="config-item full-width">
+                        <label for="provider-select">API提供商:</label>
+                        <div class="provider-selection">
+                            <select id="provider-select">
+                                <option value="deepseek">DeepSeek</option>
+                                <option value="openai">OpenAI</option>
+                                <option value="anthropic">Anthropic (Claude)</option>
+                                <option value="alibaba">阿里云 (通义千问)</option>
+                                <option value="zhipu">智谱AI (GLM)</option>
+                                <option value="custom">自定义API</option>
+                            </select>
+                            <div class="provider-info">
+                                <span id="provider-display">DeepSeek</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="config-row">
                     <div class="config-item">
                         <label for="global-api-url">API地址:</label>
-                        <input type="text" id="global-api-url" placeholder="https://api.deepseek.com/v1/chat/completions"
-                               value="https://api.deepseek.com/v1/chat/completions">
+                        <div class="api-url-input">
+                            <input type="text" id="global-api-url" placeholder="https://api.deepseek.com/v1/chat/completions"
+                                   value="https://api.deepseek.com/v1/chat/completions">
+                            <button type="button" id="load-models-btn" class="load-models-button" disabled>
+                                🔄 加载模型
+                            </button>
+                        </div>
+                        <small class="input-hint">支持自定义API地址，输入有效的API地址和密钥后可加载可用模型</small>
                     </div>
                     <div class="config-item">
                         <label for="global-api-key">API密钥:</label>
                         <input type="password" id="global-api-key" placeholder="请输入您的API密钥">
+                        <small class="input-hint">您的API密钥将被安全保存在本地浏览器中</small>
                     </div>
                 </div>
                 <div class="config-row">
@@ -823,6 +848,11 @@
     <script src="js/ziwei-calculator.js?v=20250119b"></script>
     <script src="js/name-calculator.js?v=20250119b"></script>
     <script src="js/marriage-calculator.js?v=20250119b"></script>
+    <!-- 配置系统 -->
+    <script src="js/config/api-client.js?v=20250119b"></script>
+    <script src="js/config/config-manager.js?v=20250119b"></script>
+    <script src="js/config/ai-config.js?v=20250119b"></script>
+    <script src="js/config/index.js?v=20250119b"></script>
     <script src="js/main.js?v=20250119b"></script>
 </body>
 </html>

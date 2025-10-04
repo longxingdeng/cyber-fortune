@@ -226,6 +226,67 @@ body {
     gap: 8px;
 }
 
+.config-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.provider-selection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.provider-selection select {
+    flex: 1;
+}
+
+.provider-info {
+    background: rgba(0, 212, 255, 0.1);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    color: var(--primary-color);
+    font-weight: 500;
+    min-width: 100px;
+    text-align: center;
+}
+
+.api-url-input {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+}
+
+.api-url-input input {
+    flex: 1;
+}
+
+.load-models-button {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 255, 136, 0.2));
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    color: var(--primary-color);
+    cursor: pointer;
+    padding: 0 12px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+}
+
+.load-models-button:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(0, 255, 136, 0.3));
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.load-models-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .config-item label {
     color: var(--text-primary);
     font-weight: 500;

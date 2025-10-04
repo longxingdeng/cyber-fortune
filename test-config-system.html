@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配置系统测试</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-result {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .test-button {
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            border: none;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+        }
+        .config-form {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        .status-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .status-success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+            color: #4CAF50;
+        }
+        .status-error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #F44336;
+            color: #F44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>配置系统测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 配置系统初始化测试</h2>
+        <button class="test-button" onclick="testConfigSystemInit()">测试初始化</button>
+        <div id="init-result" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 模型加载测试</h2>
+        <div class="config-form">
+            <div class="form-group">
+                <label for="test-provider">提供商:</label>
+                <select id="test-provider">
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="anthropic">Anthropic</option>
+                    <option value="custom">自定义</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="test-api-url">API地址:</label>
+                <input type="text" id="test-api-url" placeholder="https://api.deepseek.com/v1/chat/completions">
+            </div>
+            <div class="form-group">
+                <label for="test-api-key">API密钥:</label>
+                <input type="password" id="test-api-key" placeholder="输入API密钥">
+            </div>
+        </div>
+        <button class="test-button" onclick="testModelLoading()">测试模型加载</button>
+        <button class="test-button" onclick="testConfigSaving()">测试配置保存</button>
+        <button class="test-button" onclick="testConfigLoading()">测试配置加载</button>
+        <div id="model-result" class="test-result"></div>
+        <div id="config-status" class="status-message" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 集成测试</h2>
+        <button class="test-button" onclick="testFullIntegration()">完整集成测试</button>
+        <div id="integration-result" class="test-result"></div>
+    </div>
+
+    <!-- 加载必要的脚本 -->
+    <script src="js/config/config-manager.js"></script>
+    <script src="js/config/api-client.js"></script>
+    <script src="js/config/ai-config.js"></script>
+    <script src="js/config/index.js"></script>
+    
+    <script>
+        // 测试结果输出函数
+        function showResult(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = isError ? '[ERROR]' : '[INFO]';
+            element.textContent += `${timestamp} ${prefix} ${message}\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+        
+        function clearResult(elementId) {
+            document.getElementById(elementId).textContent = '';
+        }
+        
+        // 显示状态消息
+        function showStatus(message, isError = false) {
+            const statusElement = document.getElementById('config-status');
+            statusElement.textContent = message;
+            statusElement.className = `status-message ${isError ? 'status-error' : 'status-success'}`;
+            statusElement.style.display = 'block';
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 测试配置系统初始化
+        function testConfigSystemInit() {
+            clearResult('init-result');
+            showResult('init-result', '开始测试配置系统初始化...');
+            
+            try {
+                // 检查必要的类是否已加载
+                if (typeof ConfigManager === 'undefined') {
+                    showResult('init-result', 'ConfigManager 类未加载', true);
+                    return;
+                }
+                
+                if (typeof ApiClient === 'undefined') {
+                    showResult('init-result', 'ApiClient 类未加载', true);
+                    return;
+                }
+                
+                if (typeof AiConfig === 'undefined') {
+                    showResult('init-result', 'AiConfig 类未加载', true);
+                    return;
+                }
+                
+                showResult('init-result', '所有必要的类已加载');
+                
+                // 尝试创建配置管理器实例
+                const configManager = new ConfigManager();
+                showResult('init-result', 'ConfigManager 实例创建成功');
+                
+                // 尝试创建API客户端实例
+                const apiClient = new ApiClient();
+                showResult('init-result', 'ApiClient 实例创建成功');
+                
+                // 尝试创建AI配置实例
+                const aiConfig = new AiConfig({
+                    onSave: (config) => {
+                        showResult('init-result', '配置保存回调触发: ' + JSON.stringify(config));
+                    },
+                    onLoad: () => {
+                        showResult('init-result', '配置加载回调触发');
+                        return {};
+                    }
+                });
+                showResult('init-result', 'AiConfig 实例创建成功');
+                
+                // 初始化AI配置
+                aiConfig.init();
+                showResult('init-result', 'AiConfig 初始化成功');
+                
+                // 检查全局配置系统
+                if (typeof window.ConfigSystem !== 'undefined') {
+                    showResult('init-result', '全局 ConfigSystem 可用');
+                } else {
+                    showResult('init-result', '全局 ConfigSystem 不可用', true);
+                }
+                
+                showResult('init-result', '配置系统初始化测试完成');
+                
+            } catch (error) {
+                showResult('init-result', '初始化测试失败: ' + error.message, true);
+            }
+        }
+        
+        // 测试模型加载
+        async function testModelLoading() {
+            clearResult('model-result');
+            showResult('model-result', '开始测试模型加载...');
+            
+            try {
+                const provider = document.getElementById('test-provider').value;
+                const apiUrl = document.getElementById('test-api-url').value.trim();
+                const apiKey = document.getElementById('test-api-key').value.trim();
+                
+                if (!apiUrl || !apiKey) {
+                    showResult('model-result', '请输入API地址和密钥', true);
+                    return;
+                }
+                
+                showResult('model-result', `提供商: ${provider}`);
+                showResult('model-result', `API地址: ${apiUrl}`);
+                showResult('model-result', `API密钥: ${apiKey.substring(0, 10)}...`);
+                
+                // 获取配置系统实例
+                let aiConfig;
+                if (window.ConfigSystem && window.ConfigSystem.getAIConfig) {
+                    aiConfig = window.ConfigSystem.getAIConfig();
+                    showResult('model-result', '使用全局配置系统');
+                } else {
+                    // 创建临时配置实例
+                    aiConfig = new AiConfig();
+                    aiConfig.init();
+                    showResult('model-result', '创建临时配置实例');
+                }
+                
+                if (!aiConfig || !aiConfig.configManager || !aiConfig.configManager.apiClient) {
+                    showResult('model-result', '配置系统未正确初始化', true);
+                    return;
+                }
+                
+                // 检测提供商
+                const detectedProvider = aiConfig.configManager.detectProviderFromUrl(apiUrl);
+                showResult('model-result', `检测到的提供商: ${detectedProvider}`);
+                
+                // 获取模型列表URL
+                const modelsUrl = aiConfig.configManager.getModelsUrl(detectedProvider, apiUrl);
+                showResult('model-result', `模型列表URL: ${modelsUrl}`);
+                
+                // 加载模型列表
+                showResult('model-result', '正在加载模型列表...');
+                const models = await aiConfig.configManager.apiClient.getAvailableModels(modelsUrl, apiKey);
+                
+                showResult('model-result', `成功加载 ${models.length} 个模型:`);
+                models.forEach((model, index) => {
+                    showResult('model-result', `  ${index + 1}. ${model.name || model.id} (${model.id})`);
+                });
+                
+                showStatus(`成功加载 ${models.length} 个模型`, false);
+                
+            } catch (error) {
+                showResult('model-result', '模型加载失败: ' + error.message, true);
+                showStatus('模型加载失败: ' + error.message, true);
+            }
+        }
+        
+        // 测试配置保存
+        function testConfigSaving() {
+            clearResult('model-result');
+            showResult('model-result', '开始测试配置保存...');
+            
+            try {
+                const provider = document.getElementById('test-provider').value;
+                const apiUrl = document.getElementById('test-api-url').value.trim();
+                const apiKey = document.getElementById('test-api-key').value.trim();
+                
+                if (!apiUrl || !apiKey) {
+                    showResult('model-result', '请输入API地址和密钥', true);
+                    return;
+                }
+                
+                const config = {
+                    provider: provider,
+                    apiUrl: apiUrl,
+                    apiKey: apiKey,
+                    model: 'test-model',
+                    savedAt: new Date().toISOString()
+                };
+                
+                // 保存到localStorage
+                localStorage.setItem('testConfig', JSON.stringify(config));
+                showResult('model-result', '配置已保存到localStorage');
+                
+                // 如果有全局配置系统，也保存到那里
+                if (window.ConfigSystem && window.ConfigSystem.getAIConfig) {
+                    const aiConfig = window.ConfigSystem.getAIConfig();
+                    if (aiConfig && typeof aiConfig.saveConfig === 'function') {
+                        aiConfig.saveConfig(config);
+                        showResult('model-result', '配置已保存到全局配置系统');
+                    }
+                }
+                
+                showStatus('配置保存成功', false);
+                
+            } catch (error) {
+                showResult('model-result', '配置保存失败: ' + error.message, true);
+                showStatus('配置保存失败: ' + error.message, true);
+            }
+        }
+        
+        // 测试配置加载
+        function testConfigLoading() {
+            clearResult('model-result');
+            showResult('model-result', '开始测试配置加载...');
+            
+            try {
+                // 从localStorage加载
+                const savedConfig = localStorage.getItem('testConfig');
+                if (savedConfig) {
+                    const config = JSON.parse(savedConfig);
+                    showResult('model-result', '从localStorage加载配置:');
+                    showResult('model-result', JSON.stringify(config, null, 2));
+                    
+                    // 填充表单
+                    document.getElementById('test-provider').value = config.provider || 'custom';
+                    document.getElementById('test-api-url').value = config.apiUrl || '';
+                    document.getElementById('test-api-key').value = config.apiKey || '';
+                    
+                    showStatus('配置加载成功', false);
+                } else {
+                    showResult('model-result', '没有找到保存的配置', true);
+                    showStatus('没有找到保存的配置', true);
+                }
+                
+                // 如果有全局配置系统，也尝试从那里加载
+                if (window.ConfigSystem && window.ConfigSystem.getAIConfig) {
+                    const aiConfig = window.ConfigSystem.getAIConfig();
+                    if (aiConfig && typeof aiConfig.loadConfig === 'function') {
+                        const globalConfig = aiConfig.loadConfig();
+                        if (globalConfig) {
+                            showResult('model-result', '从全局配置系统加载配置:');
+                            showResult('model-result', JSON.stringify(globalConfig, null, 2));
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                showResult('model-result', '配置加载失败: ' + error.message, true);
+                showStatus('配置加载失败: ' + error.message, true);
+            }
+        }
+        
+        // 完整集成测试
+        async function testFullIntegration() {
+            clearResult('integration-result');
+            showResult('integration-result', '开始完整集成测试...');
+            
+            try {
+                // 1. 初始化配置系统
+                showResult('integration-result', '步骤1: 初始化配置系统');
+                
+                if (typeof window.ConfigSystem === 'undefined') {
+                    showResult('integration-result', '全局配置系统不可用，创建临时实例', true);
+                    window.ConfigSystem = {
+                        getAIConfig: () => {
+                            const aiConfig = new AiConfig();
+                            aiConfig.init();
+                            return aiConfig;
+                        }
+                    };
+                }
+                
+                const aiConfig = window.ConfigSystem.getAIConfig();
+                showResult('integration-result', '配置系统初始化完成');
+                
+                // 2. 测试配置保存和加载
+                showResult('integration-result', '步骤2: 测试配置保存和加载');
+                
+                const testConfig = {
+                    provider: 'deepseek',
+                    apiUrl: 'https://api.deepseek.com/v1/chat/completions',
+                    apiKey: 'sk-test-key-123456',
+                    model: 'deepseek-chat',
+                    savedAt: new Date().toISOString()
+                };
+                
+                // 保存配置
+                if (typeof aiConfig.saveConfig === 'function') {
+                    aiConfig.saveConfig(testConfig);
+                    showResult('integration-result', '配置保存成功');
+                } else {
+                    showResult('integration-result', '配置保存方法不可用', true);
+                }
+                
+                // 加载配置
+                if (typeof aiConfig.loadConfig === 'function') {
+                    const loadedConfig = aiConfig.loadConfig();
+                    if (loadedConfig) {
+                        showResult('integration-result', '配置加载成功');
+                        showResult('integration-result', `加载的配置: ${JSON.stringify(loadedConfig)}`);
+                    } else {
+                        showResult('integration-result', '配置加载失败', true);
+                    }
+                } else {
+                    showResult('integration-result', '配置加载方法不可用', true);
+                }
+                
+                // 3. 测试模型列表获取（模拟）
+                showResult('integration-result', '步骤3: 测试模型列表获取');
+                
+                if (aiConfig.configManager && aiConfig.configManager.apiClient) {
+                    // 模拟模型列表
+                    const mockModels = [
+                        { id: 'deepseek-chat', name: 'DeepSeek Chat' },
+                        { id: 'deepseek-coder', name: 'DeepSeek Coder' }
+                    ];
+                    
+                    showResult('integration-result', `模拟获取到 ${mockModels.length} 个模型`);
+                    mockModels.forEach(model => {
+                        showResult('integration-result', `  - ${model.name} (${model.id})`);
+                    });
+                } else {
+                    showResult('integration-result', 'API客户端不可用', true);
+                }
+                
+                // 4. 测试提供商检测
+                showResult('integration-result', '步骤4: 测试提供商检测');
+                
+                if (aiConfig.configManager && typeof aiConfig.configManager.detectProviderFromUrl === 'function') {
+                    const testUrls = [
+                        'https://api.deepseek.com/v1/chat/completions',
+                        'https://api.openai.com/v1/chat/completions',
+                        'https://api.anthropic.com/v1/messages',
+                        'https://custom-api.example.com/v1/chat'
+                    ];
+                    
+                    testUrls.forEach(url => {
+                        const provider = aiConfig.configManager.detectProviderFromUrl(url);
+                        showResult('integration-result', `  ${url} -> ${provider}`);
+                    });
+                } else {
+                    showResult('integration-result', '提供商检测方法不可用', true);
+                }
+                
+                showResult('integration-result', '完整集成测试完成');
+                
+            } catch (error) {
+                showResult('integration-result', '集成测试失败: ' + error.message, true);
+            }
+        }
+        
+        // 页面加载完成后自动运行初始化测试
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                testConfigSystemInit();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
