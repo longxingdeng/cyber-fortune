@@ -37,11 +37,27 @@ class ZiweiCalculator {
             // 构建日期字符串
             const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
             
-            // 转换性别格式
-            const genderStr = gender === '男' ? 'male' : 'female';
+            // 转换性别格式 - iztro使用1表示男性,0表示女性
+            const genderNum = gender === '男' ? 1 : 0;
             
-            // 使用iztro库计算星盘
-            const astrolabe = iztro.astro.bySolar(dateStr, hour, genderStr);
+            // 转换时辰 - iztro需要0-23的小时数
+            const timeNum = parseInt(hour);
+            
+            console.log('iztro调用参数:', {
+                solarDate: dateStr,
+                time: timeNum,
+                gender: genderNum
+            });
+            
+            // 使用iztro库计算星盘 - 使用正确的API
+            const astrolabe = iztro.astrolabe({
+                solarDate: dateStr,
+                time: timeNum,
+                gender: genderNum,
+                fixLeap: true  // 修正闰月
+            });
+            
+            console.log('iztro返回的星盘数据:', astrolabe);
             
             // 解析星盘数据
             const result = this.parseAstrolabe(astrolabe);
@@ -51,6 +67,7 @@ class ZiweiCalculator {
             
         } catch (error) {
             console.error('iztro计算错误:', error);
+            console.error('错误详情:', error.stack);
             return this.getFallbackResult(birthData);
         }
     }
