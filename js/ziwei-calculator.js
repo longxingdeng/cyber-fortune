@@ -40,8 +40,16 @@ class ZiweiCalculator {
             // 转换性别格式 - iztro使用1表示男性,0表示女性
             const genderNum = gender === '男' ? 1 : 0;
             
-            // 转换时辰 - iztro需要0-23的小时数
-            const timeNum = parseInt(hour);
+            // 转换时辰 - iztro需要时辰索引(0-11),而非小时数(0-23)
+            // 时辰对照: 子(23-1)=0, 丑(1-3)=1, 寅(3-5)=2, 卯(5-7)=3, 辰(7-9)=4, 巳(9-11)=5
+            //          午(11-13)=6, 未(13-15)=7, 申(15-17)=8, 酉(17-19)=9, 戌(19-21)=10, 亥(21-23)=11
+            const hourNum = parseInt(hour);
+            let timeNum;
+            if (hourNum === 23) {
+                timeNum = 0; // 子时(23:00-00:59)
+            } else {
+                timeNum = Math.floor((hourNum + 1) / 2); // 将小时数转换为时辰索引
+            }
             
             console.log('iztro调用参数:', {
                 solarDate: dateStr,
