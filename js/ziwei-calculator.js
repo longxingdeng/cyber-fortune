@@ -43,21 +43,37 @@ class ZiweiCalculator {
             // 转换时辰 - iztro需要时辰索引(0-11),而非小时数(0-23)
             // 时辰对照: 子(23-1)=0, 丑(1-3)=1, 寅(3-5)=2, 卯(5-7)=3, 辰(7-9)=4, 巳(9-11)=5
             //          午(11-13)=6, 未(13-15)=7, 申(15-17)=8, 酉(17-19)=9, 戌(19-21)=10, 亥(21-23)=11
+            console.log('🔍 [时辰转换调试] 原始hour值:', hour, '类型:', typeof hour);
             const hourNum = parseInt(hour);
+            console.log('🔍 [时辰转换调试] 转换后hourNum:', hourNum);
+            
             let timeNum;
             if (hourNum === 23) {
                 timeNum = 0; // 子时(23:00-00:59)
+                console.log('🔍 [时辰转换调试] 特殊处理23点 -> timeNum=0');
             } else {
                 timeNum = Math.floor((hourNum + 1) / 2); // 将小时数转换为时辰索引
+                console.log('🔍 [时辰转换调试] 计算公式: Math.floor((', hourNum, '+ 1) / 2) =', timeNum);
             }
             
-            console.log('iztro调用参数:', {
-                solarDate: dateStr,
-                time: timeNum,
-                gender: genderNum
+            console.log('📊 [iztro调用参数]', {
+                原始birthData: {
+                    year: birthData.year,
+                    month: birthData.month,
+                    day: birthData.day,
+                    hour: birthData.hour,
+                    gender: birthData.gender
+                },
+                转换后参数: {
+                    solarDate: dateStr,
+                    time: timeNum,
+                    gender: genderNum,
+                    fixLeap: true
+                }
             });
             
             // 使用iztro库计算星盘 - 使用正确的API
+            console.log('🚀 [开始调用iztro.astrolabe]');
             const astrolabe = iztro.astrolabe({
                 solarDate: dateStr,
                 time: timeNum,
@@ -65,7 +81,12 @@ class ZiweiCalculator {
                 fixLeap: true  // 修正闰月
             });
             
-            console.log('iztro返回的星盘数据:', astrolabe);
+            console.log('✅ [iztro计算成功]', {
+                命宫: astrolabe.palaces?.find(p => p.name === '命宫'),
+                计算方法: 'iztro专业算法',
+                时辰: astrolabe.time,
+                时间范围: astrolabe.timeRange
+            });
             
             // 解析星盘数据
             const result = this.parseAstrolabe(astrolabe);
@@ -74,8 +95,17 @@ class ZiweiCalculator {
             return result;
             
         } catch (error) {
-            console.error('iztro计算错误:', error);
-            console.error('错误详情:', error.stack);
+            console.error('❌ [iztro计算失败]');
+            console.error('错误类型:', error.name);
+            console.error('错误信息:', error.message);
+            console.error('错误堆栈:', error.stack);
+            console.error('失败时的参数:', {
+                dateStr,
+                timeNum,
+                genderNum,
+                birthData
+            });
+            console.warn('⚠️ 降级使用简化算法');
             return this.getFallbackResult(birthData);
         }
     }
@@ -130,6 +160,8 @@ class ZiweiCalculator {
 
     // 备用计算方法（当iztro库不可用时）
     getFallbackResult(birthData) {
+        console.warn('⚠️ [降级警告] 使用简化紫薇斗数计算');
+        console.warn('原因: iztro库调用失败或不可用');
         const { year, month, day, hour, gender } = birthData;
         
         // 简化的紫薇斗数信息
